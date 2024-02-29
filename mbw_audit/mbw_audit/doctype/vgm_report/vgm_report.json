@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-02-29 14:40:19.773056",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "retail_code",
+  "campaign_code",
+  "employee_code",
+  "date_check_in",
+  "date_check_out",
+  "longitude_check_in",
+  "latitude_check_in",
+  "longitude_check_out",
+  "latitude_check_out",
+  "report_sku",
+  "categories",
+  "images",
+  "images_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "retail_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Retail Code"
+  },
+  {
+   "fieldname": "campaign_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Campaign Code",
+   "options": "VGM_Campaign"
+  },
+  {
+   "fieldname": "employee_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Code"
+  },
+  {
+   "fieldname": "date_check_in",
+   "fieldtype": "Datetime",
+   "label": "Date Check In"
+  },
+  {
+   "fieldname": "date_check_out",
+   "fieldtype": "Datetime",
+   "label": "Date Check Out"
+  },
+  {
+   "fieldname": "longitude_check_in",
+   "fieldtype": "Data",
+   "label": "Longitude Check In"
+  },
+  {
+   "fieldname": "latitude_check_in",
+   "fieldtype": "Data",
+   "label": "Latitude Check In"
+  },
+  {
+   "fieldname": "longitude_check_out",
+   "fieldtype": "Data",
+   "label": "Longitude Check Out"
+  },
+  {
+   "fieldname": "latitude_check_out",
+   "fieldtype": "Data",
+   "label": "Latitude Check Out"
+  },
+  {
+   "fieldname": "report_sku",
+   "fieldtype": "Table",
+   "label": "Report SKU",
+   "options": "VGM_ReportDetailSKU"
+  },
+  {
+   "fieldname": "categories",
+   "fieldtype": "JSON",
+   "label": "Categories"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "Attach Image",
+   "label": "Images"
+  },
+  {
+   "fieldname": "images_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Images Time"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-02-29 14:49:17.617475",
+ "modified_by": "Administrator",
+ "module": "mbw audit",
+ "name": "VGM_Report",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

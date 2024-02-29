@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-02-29 14:35:23.109893",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "campaign_name",
+  "campaign_description",
+  "start_date",
+  "end_date",
+  "campaign_status",
+  "categories",
+  "employees",
+  "retails"
+ ],
+ "fields": [
+  {
+   "fieldname": "campaign_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Campaign Name"
+  },
+  {
+   "fieldname": "campaign_description",
+   "fieldtype": "Text",
+   "label": "Campaign Description"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "End Date"
+  },
+  {
+   "fieldname": "campaign_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Campaign Status",
+   "options": "Open\nClose"
+  },
+  {
+   "fieldname": "categories",
+   "fieldtype": "JSON",
+   "label": "Categories"
+  },
+  {
+   "fieldname": "employees",
+   "fieldtype": "JSON",
+   "label": "Employees"
+  },
+  {
+   "fieldname": "retails",
+   "fieldtype": "JSON",
+   "label": "Retails"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-02-29 14:39:46.411155",
+ "modified_by": "Administrator",
+ "module": "mbw audit",
+ "name": "VGM_Campaign",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "campaign_name"
+}

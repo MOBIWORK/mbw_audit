@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ant-input-affix-wrapper{
+    background: #F5F7FA;
+}

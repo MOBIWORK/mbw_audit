@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-02-29 14:31:01.051642",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "barcode",
+  "product_code",
+  "product_name",
+  "product_description",
+  "category",
+  "images",
+  "custom_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Barcode",
+   "label": "Barcode"
+  },
+  {
+   "fieldname": "product_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Code"
+  },
+  {
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Name"
+  },
+  {
+   "fieldname": "product_description",
+   "fieldtype": "Text",
+   "label": "Product Description"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "VGM_Category"
+  },
+  {
+   "fieldname": "images",
+   "fieldtype": "JSON",
+   "label": "Images"
+  },
+  {
+   "fieldname": "custom_field",
+   "fieldtype": "JSON",
+   "label": "CustomField"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-02-29 14:34:37.065813",
+ "modified_by": "Administrator",
+ "module": "mbw audit",
+ "name": "VGM_Product",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "product_name"
+}

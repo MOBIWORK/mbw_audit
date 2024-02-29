@@ -1,0 +1,27 @@
+.custom-scroll .ant-table-scrollbar {
+    width: 6px; /* Đặt chiều rộng thanh cuộn */
+  }
+  
+  .custom-scroll .ant-table-scrollbar-thumb {
+    width: 6px; /* Đặt chiều rộng cảm ứng thanh cuộn */
+  }
+
+  .item_category{
+    padding: 0 5px 0 5px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    cursor:pointer;
+  }
+  .icon_hidden{
+    display: none;
+  }
+  .icon_show{
+    display: flex;
+  }
+ .selected {
+    border-radius: 5px;
+    border: 1px solid #4096ff!important;
+    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
+    /* Shadow màu xanh dương và màu đen */
+  }

@@ -1,0 +1,18 @@
+.dot-tag-green {
+    display: inline-block;
+    padding: 4px 4px;
+    margin-right: 2px;
+    border-radius: 50%;
+    background-color: green;
+    width: 5px;
+    height: 5px;
+}
+.dot-tag-red{
+    display: inline-block;
+    padding: 4px 4px;
+    margin-right: 2px;
+    border-radius: 50%;
+    background-color: red;
+    width: 5px;
+    height: 5px;
+}
