@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: `../mbw_audit/public/frontend`,
+    outDir: `../mbw_audit/public/mbw_audit`,
     emptyOutDir: true,
     target: 'es2021',
     rollupOptions: {
