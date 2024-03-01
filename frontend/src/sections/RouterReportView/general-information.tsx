@@ -30,7 +30,7 @@ export default function GeneralInformation({ form,recordData }) {
         campaign_name: recordData.campaign_name,
         date_check_in: recordData.date_check_in,
         date_check_out: recordData.date_check_out,
-        employee_code: recordData.employee_code,
+        employee_code: recordData.employee_name,
         quatity: recordData.quantity_cate,
        
         // Gán giá trị cho các trường khác nếu cần

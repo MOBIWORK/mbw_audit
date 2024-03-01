@@ -23,9 +23,10 @@
  "fields": [
   {
    "fieldname": "retail_code",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Retail Code"
+   "label": "Retail Code",
+   "options": "Customer"
   },
   {
    "fieldname": "campaign_code",
@@ -36,9 +37,10 @@
   },
   {
    "fieldname": "employee_code",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Employee Code"
+   "label": "Employee Code",
+   "options": "Employee"
   },
   {
    "fieldname": "date_check_in",
@@ -95,7 +97,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-29 14:49:17.617475",
+ "modified": "2024-03-01 15:53:50.740407",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Report",
