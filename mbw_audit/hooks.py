@@ -1,5 +1,5 @@
 app_name = "mbw_audit"
-app_title = "mbw audit"
+app_title = "MBW Audit"
 app_publisher = "mbw"
 app_description = "mbw audit"
 app_email = "ekgis@gmail.com"
