@@ -134,18 +134,20 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
-        print("Dòng 138", frappe.get_all("VGM_Product"))
-        process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe))
-        process_report_sku_thread.start()
+        process_report_sku(doc.name, kwargs.get("images"), category)
+        #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
+        #process_report_sku_thread.start()
         return {'status': 'success', "result" : doc.name}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
 
-def process_report_sku(name, report_images, category, frappe):
+def process_report_sku(name, report_images, category):
     try:
         products_by_category = []
         print("Dòng 148", category)
-        print("Dòng 150", frappe.get_all("VGM_Product"))
+        print(frappe)
+        print("Dòng 149 ")
+        print("Dòng 150", frappe.get_all('VGM_Product'))
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
             print("Dòng 151", category_id)
@@ -178,7 +180,11 @@ def process_report_sku(name, report_images, category, frappe):
                         image_path = [base_url + image_ai]
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
+                        print("Dòng 183 ", collection_name)
+                        print("Dòng 184 ", image_path)
                         response = recognition.count(collection_name, image_path)
+                        print("response", response)
+                        print("Dòng 185 ", get_product_name)
                         if response.get('status') == 'completed':
                             count_value = response.get('result', {}).get('count', {}).get(get_product_name)
                         else:
@@ -198,6 +204,7 @@ def process_report_sku(name, report_images, category, frappe):
         else:
             print({'status': 'fail', 'message': _("No data provided for report_sku")})
     except Exception as e:
+        print(e)
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
