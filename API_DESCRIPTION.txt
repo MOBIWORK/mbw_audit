@@ -3,7 +3,7 @@
 	Url: {{domain}}/api/method/mbw_audit.api.api.get_campaign_info
 	Method: POST
 	DataPost: 
-		{'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}
+		{'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}   //customer_code: Id của khách hàng trong frappe; e_name: Id của nhân viên trong frappe
 
 ** API upload file ảnh trưng bày gian hàng
 	Url: {{domain}}/api/method/upload_file
