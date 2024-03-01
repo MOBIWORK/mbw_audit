@@ -1,6 +1,6 @@
 * API cho ứng dụng mobile
 ** API lấy thông tin chi tiết chiến dịch theo nhân viên và khách hàng
-	Url: {{domain}}/api/method/vgm_audit.api.api.get_campaign_info
+	Url: {{domain}}/api/method/mbw_audit.api.api.get_campaign_info
 	Method: POST
 	DataPost: 
 		{'customer_code' : "BH0123111122" , "e_name": "HR-EMP-00014"}
@@ -16,7 +16,7 @@
 		}
 
 ** API tạo báo cáo bằng chụp ảnh gian hàng
-	Url: {{domain}}/api/method/vgm_audit.api.api.record_report_data
+	Url: {{domain}}/api/method/mbw_audit.api.api.record_report_data
 	Method: POST
 	DataPost: 
 		{
@@ -31,19 +31,19 @@
 	
 * API cho ứng dụng web
 ** API Xóa nhiều sản phẩm
-	Url: {{domain}}/api/method/vgm_audit.api.api.deleteListByDoctype
+	Url: {{domain}}/api/method/mbw_audit.api.api.deleteListByDoctype
 	Method: POST
 	DataPost: 
 		{'doctype': 'name_doctype', items : stringtify(['1','2'])}
 
 ** API Thêm sản phẩm theo danh sách
-	Url: {{domain}}/api/method/vgm_audit.api.api.import_product
+	Url: {{domain}}/api/method/mbw_audit.api.api.import_product
 	Method: POST
 	DataPost: 
 		{ listproduct: stringtify([{product_code:"",barcode:"",product_name:"",product_description:"",url_images:["https://dmsimages.mobiwork.vn/viewimage?url=Files/578c51a637bb7e7c121fcb50/Images/1653037721225.jpg",...]}]), "category" : "5439ebcea2"}
 	
 ** API Kiểm tra sản phẩm
-	Url: {{domain}}/api/method/vgm_audit.api.api.checkImageProductExist
+	Url: {{domain}}/api/method/mbw_audit.api.api.checkImageProductExist
 	Method: POST
 	DataPost: 
 		{
@@ -52,13 +52,13 @@
 		}
 	
 ** API Xóa danh mục
-	Url: {{domain}}/api/method/vgm_audit.api.api.deleteCategory
+	Url: {{domain}}/api/method/mbw_audit.api.api.deleteCategory
 	Method: POST
 	DataPost: 
 		{'collection_name' : "5439ebcea2"}
 
 ** API Lấy danh sách báo cáo theo điều kiện
-	Url: {{domain}}/api/method/vgm_audit.api.api.search_vgm_reports
+	Url: {{domain}}/api/method/mbw_audit.api.api.search_vgm_reports
 	Method: POST
 	DataPost: 
 		{
