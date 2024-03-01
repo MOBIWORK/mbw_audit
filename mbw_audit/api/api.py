@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
 from datetime import datetime
-from vgm_audit.api.common import (post_images,post_images_check)
+from mbw_audit.api.common import (post_images,post_images_check)
 from frappe.utils.file_manager import (
     save_file
 )
@@ -88,7 +88,6 @@ def get_campaign_info(*args,**kwargs):
     :param e_name: Mã nhân viên.
     :return: Danh sách các bản ghi chiến dịch (campaign).
     """
-
     # Lấy thông tin chiến dịch dựa trên điều kiện
     campaign_records = frappe.get_all(
         "VGM_Campaign",
@@ -138,7 +137,7 @@ def record_report_data(*args, **kwargs):
         print("Dòng 138", frappe.get_all("VGM_Product"))
         process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe))
         process_report_sku_thread.start()
-        return {'status': 'success', "result" : doc}
+        return {'status': 'success', "result" : doc.name}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
 
