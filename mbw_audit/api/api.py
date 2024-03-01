@@ -14,6 +14,7 @@ from mbw_audit.api.common import (post_images,post_images_check)
 from frappe.utils.file_manager import (
     save_file
 )
+from frappe.utils import get_site_path
 import base64
 import threading
 
@@ -50,9 +51,9 @@ def checkImageProductExist(*args,**kwargs):
     recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
     base_url = frappe.utils.get_request_site_address()
     collection_name = kwargs.get('collection_name')
-    image_base64 = kwargs.get('linkimages')
+    link_image = kwargs.get('linkimages')
     # url_images = post_images_check(image_base64)
-    image_path = [base_url + linkimages]
+    image_path = [base_url + link_image]
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
@@ -166,7 +167,7 @@ def process_report_sku(name, report_images, category):
                         base_url = frappe.utils.get_request_site_address()
                         collection_name = category_id
                         image_ai = report_images
-                        image_path = [base_url + image_ai]
+                        image_path = [image_ai]
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                         response = recognition.count(collection_name, image_path)
@@ -284,3 +285,47 @@ def import_product(*args, **kwargs):
         return {'status': 'success', 'message': 'Products imported successfully'}
     except Exception as e:
         return {'status': 'failed', 'message': str(e)}
+    
+@frappe.whitelist(methods="POST")
+def upload_file():
+    try:
+        if "file" not in frappe.request.files:
+            raise ValueError("No file found in form data")
+
+        # Lấy dữ liệu từ form data
+        file_info = frappe.request.files["file"]
+        
+        # Kiểm tra loại dữ liệu của file_info
+        if isinstance(file_info, str):
+            raise ValueError("Invalid file data")
+
+        filename = file_info.filename
+        filedata = file_info.stream.read()
+
+        # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
+        fileInfo = save_file(filename, filedata, "File", "Home")
+
+
+        return {
+            "status": "success",
+            "file_url": frappe.utils.get_request_site_address() + fileInfo.file_url
+        }
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
+        return {
+            "status": "failed",
+            "message": _("Failed to upload file: {0}").format(str(e))
+        }
+
+def save_tmp_file(filename, filedata):
+    site_path = get_site_path()
+    tmp_dir = os.path.join(site_path, "private", "tmp")
+    
+    # Tạo thư mục tạm nếu nó không tồn tại
+    if not os.path.exists(tmp_dir):
+        os.makedirs(tmp_dir)
+    
+    tmp_file_path = os.path.join(tmp_dir, filename)
+    with open(tmp_file_path, 'wb') as f:
+        f.write(filedata)
+    return tmp_file_path
