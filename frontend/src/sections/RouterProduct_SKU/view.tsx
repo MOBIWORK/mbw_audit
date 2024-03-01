@@ -602,7 +602,7 @@ export default function Product_SKU() {
   }
 
   const handleDeleteListOkProduct = async () => {
-    let urlDeleteByList = "/api/method/vgm_audit.api.api.deleteListByDoctype";
+    let urlDeleteByList = "/api/method/mbw_audit.api.api.deleteListByDoctype";
     let arrIdDelete = [];
     for(let i = 0; i < productSelected.length; i++) arrIdDelete.push(productSelected[i].name);
     let dataDeletePost = {
@@ -630,7 +630,7 @@ export default function Product_SKU() {
   };
   
   const handleOkCheckProduct = async () => {
-    let urlCheckProduct = "/api/method/vgm_audit.api.api.checkImageProductExist";
+    let urlCheckProduct = "/api/method/mbw_audit.api.api.checkImageProductExist";
     let objCheckProduct = {
       'collection_name': categorySelected.name,
       'linkimages': fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : ""
@@ -754,7 +754,7 @@ export default function Product_SKU() {
       'listproduct': JSON.stringify(arrProductPost),
       'category': categorySelected.name
     }
-    let urlPostData = "/api/method/vgm_audit.api.api.import_product";
+    let urlPostData = "/api/method/mbw_audit.api.api.import_product";
     let res = await AxiosService.post(urlPostData, dataPost);
     if(res != null && res.message != null && res.message.status == "success"){
       message.success("Thêm mới thành công");

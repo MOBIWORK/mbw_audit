@@ -210,7 +210,7 @@ export default function ReportDetail() {
   const fetchDataReport= async () => {
     try {
       //setLoading(true);
-      let urlReport = '/api/method/vgm_audit.api.api.get_list_reports';
+      let urlReport = '/api/method/mbw_audit.api.api.get_list_reports';
       const response = await AxiosService.get(urlReport);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
       if (response && response.message.data) {

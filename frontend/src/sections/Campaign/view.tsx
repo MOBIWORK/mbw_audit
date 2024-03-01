@@ -152,7 +152,7 @@ export default function Campaign() {
   }
 
   const handleOkDeleteListCampaign = async () => {
-    let urlDeleteByList = "/api/method/vgm_audit.api.api.deleteListByDoctype";
+    let urlDeleteByList = "/api/method/mbw_audit.api.api.deleteListByDoctype";
     let arrIdDelete = [];
     for(let i = 0; i < campaignsSelected.length; i++) arrIdDelete.push(campaignsSelected[i].name);
     let dataDeletePost = {
