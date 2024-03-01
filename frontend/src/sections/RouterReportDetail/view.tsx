@@ -11,6 +11,7 @@ import {
 import { Input, Space, Table, TableColumnsType,DatePicker,Select } from "antd";
 import { useState,useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import paths from "../AppConst/path.js";
 interface DataType {
   key: React.Key;
   stt: string;
@@ -61,7 +62,7 @@ const rowSelection = {
     );
   },
 };
-
+const apiUrl = paths.apiUrl;
 export default function ReportDetail() {
   const [searchCampaign, setSearchCampaign] = useState('');
   const [searchTime, setSearchTime] = useState(null); // Sử dụng state để lưu giá trị thời gian thực hiện
@@ -210,7 +211,7 @@ export default function ReportDetail() {
   const fetchDataReport= async () => {
     try {
       //setLoading(true);
-      let urlReport = '/api/method/mbw_audit.api.api.get_list_reports';
+      let urlReport = apiUrl + '.api.get_list_reports';
       const response = await AxiosService.get(urlReport);
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
       if (response && response.message.data) {

@@ -41,7 +41,7 @@ export default function CampaignEdit() {
              campaign_status: res.data.campaign_status
         })
         setStatusCampaignEdit(res.data.campaign_status);
-        setCategoryEdit(JSON.parse(res.data.products));
+        setCategoryEdit(JSON.parse(res.data.categories));
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
     }
@@ -65,7 +65,7 @@ export default function CampaignEdit() {
       'start_date': convertDate(objFrm.campaign_start),
       'end_date': convertDate(objFrm.campaign_end),
       'campaign_status': campaignStatus,
-      'products': JSON.stringify(arrCategory),
+      'categories': JSON.stringify(arrCategory),
       'employees': JSON.stringify(arrEmployee),
       'retails': JSON.stringify(arrCustomer)
     }

@@ -30,7 +30,7 @@ export default function  CampaignCreate() {
       'start_date': convertDate(objFrm.campaign_start),
       'end_date': convertDate(objFrm.campaign_end),
       'campaign_status': campaignStatus,
-      'products': JSON.stringify(arrCategory),
+      'categories': JSON.stringify(arrCategory),
       'employees': JSON.stringify(arrEmployee),
       'retails': JSON.stringify(arrCustomer)
     }
