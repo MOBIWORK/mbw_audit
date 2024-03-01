@@ -25,3 +25,20 @@
     box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
     /* Shadow màu xanh dương và màu đen */
   }
+  .icon-container {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+.icon {
+    margin-right: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.icon-container:hover .icon {
+    opacity: 1;
+}

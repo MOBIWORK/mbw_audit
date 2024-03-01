@@ -24,6 +24,7 @@ import {
   UploadProps,
   message
 } from "antd";
+import paths from "../AppConst/path.js";
 import { useState, useEffect } from "react";
 import Dragger from "antd/es/upload/Dragger";
 import { useForm } from "antd/es/form/Form";
@@ -71,7 +72,7 @@ interface TypeProductFromERP{
 import type { GetProp } from "antd";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
+const apiUrl = paths.apiUrl;
 export default function Product_SKU() {
   
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
@@ -602,7 +603,7 @@ export default function Product_SKU() {
   }
 
   const handleDeleteListOkProduct = async () => {
-    let urlDeleteByList = "/api/method/mbw_audit.api.api.deleteListByDoctype";
+    let urlDeleteByList =apiUrl + ".api.deleteListByDoctype";
     let arrIdDelete = [];
     for(let i = 0; i < productSelected.length; i++) arrIdDelete.push(productSelected[i].name);
     let dataDeletePost = {
@@ -630,7 +631,7 @@ export default function Product_SKU() {
   };
   
   const handleOkCheckProduct = async () => {
-    let urlCheckProduct = "/api/method/mbw_audit.api.api.checkImageProductExist";
+    let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
     let objCheckProduct = {
       'collection_name': categorySelected.name,
       'linkimages': fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : ""
@@ -754,7 +755,7 @@ export default function Product_SKU() {
       'listproduct': JSON.stringify(arrProductPost),
       'category': categorySelected.name
     }
-    let urlPostData = "/api/method/mbw_audit.api.api.import_product";
+    let urlPostData = apiUrl + "api.import_product";
     let res = await AxiosService.post(urlPostData, dataPost);
     if(res != null && res.message != null && res.message.status == "success"){
       message.success("Thêm mới thành công");
@@ -849,7 +850,8 @@ export default function Product_SKU() {
                 />
               </FormItemCustom>
             </div>
-            <List
+            <List 
+              style={{maxHeight: 'calc(100vh - 500px)', overflow: 'auto', paddingRight:'10px'}}
               header={false}
               footer={false}
               bordered={false}
@@ -864,11 +866,18 @@ export default function Product_SKU() {
                     <span>
                       <Typography.Text></Typography.Text> {item.category_name}
                     </span>
-                    <span style={{display: item.hidden? 'none' : 'block'}}>
-                      <span style={{marginRight: "10px"}}>
+                    <span  style={{display: item.hidden? 'none' : 'block'}}>
+                    <a>
+                    <span  style={{marginRight: "10px"}}>
                         <EditOutlined key="edit" onClick={() => handleEditCategoryClick(item)}/>
                       </span>
-                      <DeleteOutlined key="delete" onClick={() => handleDeleteCategoryClick(item)}/>
+                    </a>
+                    <a>
+                    <span onClick={() => handleDeleteCategoryClick(item)}>
+                <DeleteOutlined key="delete" />
+            </span>
+                    </a>
+              
                     </span>
                   </div>
                 </List.Item>
@@ -1101,7 +1110,7 @@ export default function Product_SKU() {
                 onChange={onChangeImageFormEditProduct}
                 onPreview={onPreview}
               >
-                {fileListEdit.length < 5 && "+ Upload"}
+                 {"+ Upload"}
               </Upload>
             </FormItemCustom>
           </Form>

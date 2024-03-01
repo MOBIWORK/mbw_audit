@@ -12,7 +12,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AxiosService } from "../../services/server";
 import moment from 'moment';
 import "./campaign.css";
-
+import paths from "../AppConst/path.js";
 interface TypeCampaign {
   key: React.Key;
   name: string;
@@ -26,7 +26,7 @@ interface TypeCampaign {
   end_date: string;
 }
 
-
+const apiUrl = paths.apiUrl;
 export default function Campaign() {
   const navigate = useNavigate();
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
@@ -152,7 +152,7 @@ export default function Campaign() {
   }
 
   const handleOkDeleteListCampaign = async () => {
-    let urlDeleteByList = "/api/method/mbw_audit.api.api.deleteListByDoctype";
+    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
     let arrIdDelete = [];
     for(let i = 0; i < campaignsSelected.length; i++) arrIdDelete.push(campaignsSelected[i].name);
     let dataDeletePost = {
