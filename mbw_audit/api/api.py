@@ -135,6 +135,7 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
+        #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
         process_report_sku(doc.name, kwargs.get("images"), category)
         #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
         #process_report_sku_thread.start()

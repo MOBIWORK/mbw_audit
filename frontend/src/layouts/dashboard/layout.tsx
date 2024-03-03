@@ -4,24 +4,19 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useCookie from "../../hooks/useCookie";
 import "./layout.css";
-import { Dropdown, Avatar, Tooltip, Row, Col } from "antd";
+import { Dropdown, Avatar, Row, Col } from "antd";
 import {
-  BarsOutlined,
-  EnvironmentOutlined,
-  PieChartOutlined,
-  TeamOutlined,
   UserOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   LogoutOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme, Button } from "antd";
+import { Layout, Menu, theme, Button } from "antd";
 import MenuLeft from "./menu";
-import HeaderItem from "./header-item";
+import logo from "../../../public/mbw_audit/assets/logo.png";
 
-const { Header, Content, Sider } = Layout;
+const { Header, Sider } = Layout;
 type Props = {
   children: React.ReactNode;
 };
@@ -62,7 +57,7 @@ export default function DashboardLayout({ children }: Props) {
   const UserProfileMenu = (
     <Menu>
       <Menu.Item key="profile" icon={<UserOutlined />}>
-        <a href="/">Thông tin cá nhân</a>
+        <a href="/app/user-profile">Thông tin cá nhân</a>
       </Menu.Item>
       <Menu.Item key="setting" icon={<SettingOutlined />}>
         <a href="/">Cài đặt</a>
@@ -81,7 +76,7 @@ export default function DashboardLayout({ children }: Props) {
         collapsed={collapsed}
       >
         <div className="container_logo">
-          <img src="./vgm_project/logo.png" className="icon_logo"/>
+          <img src={logo} className="icon_logo"/>
           <div className="icon_text">
             <div className="title_text">NEXT GEN</div>
             <div className="description_text">MOBIWORK</div>

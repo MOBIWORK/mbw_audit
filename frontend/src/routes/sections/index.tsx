@@ -1,5 +1,5 @@
 import { Navigate, useRoutes } from 'react-router-dom';
-import {dashboardRoutes} from './dashboard'
+import {dashboardRoutes, ProtectedRoute} from './dashboard'
 import { paths } from '../path';
 // ----------------------------------------------------------------------
 

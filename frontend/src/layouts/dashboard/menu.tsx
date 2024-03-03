@@ -1,14 +1,24 @@
 import { BarsOutlined, FileDoneOutlined, FileTextOutlined, PieChartOutlined } from "@ant-design/icons";
 import { Menu } from "antd";
 import { MenuProps } from "antd/lib";
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, NavLink } from "react-router-dom";
 
 export default function MenuLeft() {
-  const [current, setCurrent] = useState(localStorage.getItem('selectedKey') || "1");
+  const [current, setCurrent] = useState("1");
+  const location = useLocation();
+  useEffect(() => {
+    if(location.pathname == "/"){
+      setCurrent("1");
+    }else if(location.pathname == "/product_sku"){
+      setCurrent("2");
+    }else if(location.pathname == "/campaign"){
+      setCurrent("3");
+    }
+  }, [location])
+  console.log(location);
   const onClick: MenuProps["onClick"] = (e) => {
     setCurrent(e.key);
-    localStorage.setItem('selectedKey', e.key);
   };
 
   function getItem(
@@ -43,7 +53,7 @@ export default function MenuLeft() {
         className={({ isActive, isPending }) =>
           isPending ? "pending" : isActive ? "active" : ""
         }
-        to="/router-product_sku"
+        to="/product_sku"
       >
         Sản phẩm
       </NavLink>,
