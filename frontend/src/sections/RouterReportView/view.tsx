@@ -14,7 +14,6 @@ export default function  ReportView() {
   const [recordData, setRecordData] = useState(null);
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
-    console.log(key);
   };
   const [form] = Form.useForm();
   const items: CollapseProps['items'] = [

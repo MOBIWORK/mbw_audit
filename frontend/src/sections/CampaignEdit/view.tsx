@@ -44,6 +44,7 @@ export default function CampaignEdit() {
         setCategoryEdit(JSON.parse(res.data.categories));
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
+
     }
   }
 
@@ -54,10 +55,9 @@ export default function CampaignEdit() {
 
   const handleEditCampaign = async () => {
     let objFrm = form.getFieldsValue();
-    let arrCategory = categoriesSelected.map(x => x.name);
-    let arrEmployee = employeesSelected.map(x => x.name);
-    let arrCustomer = customersSelected.map(x => x.name);
-
+    let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
+    let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
+    let arrCustomer = (customersSelected && customersSelected.length > 0) ? customersSelected.map(x => x.name) : customerEdit;
     let urlPutData = `/api/resource/VGM_Campaign/${name}`;
     let dataPut = {
       'campaign_name': objFrm.campaign_name,

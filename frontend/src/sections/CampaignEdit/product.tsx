@@ -51,7 +51,6 @@ import {
     const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
   
     useEffect(() => {
-      console.log(categoryEdit);
         initDataCategoriesWithOutFilter();
     }, []);
 

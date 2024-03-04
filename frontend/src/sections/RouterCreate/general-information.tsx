@@ -13,8 +13,6 @@ let timeout: ReturnType<typeof setTimeout> | null;
 let currentValue: string;
 
 const fetch = (value: string, callback: Function) => {
-  console.log(value);
-  
   if (timeout) {
     clearTimeout(timeout);
     timeout = null;

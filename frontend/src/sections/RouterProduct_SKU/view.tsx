@@ -318,17 +318,35 @@ export default function Product_SKU() {
   }
 
   const handleDeleteOkCategory = async () => {
-    if(deleteItemCategory != null && deleteItemCategory.item != null){
-      let urlDelete = `/api/resource/VGM_Category/${deleteItemCategory.item.name}`;
-      let res = await AxiosService.delete(urlDelete);
-      if(res != null && res.message == "ok"){
-        message.success("Xóa thành công");
-        fetchDataCategories();
-        handleDeleteCancelCategory();
-      }else{
-        message.error("Xóa thất bại");
-      }
+    // if(deleteItemCategory != null && deleteItemCategory.item != null){
+    //   let urlDelete = `/api/resource/VGM_Category/${deleteItemCategory.item.name}`;
+    //   let res = await AxiosService.delete(urlDelete);
+    //   if(res != null && res.message == "ok"){
+    //     message.success("Xóa thành công");
+    //     fetchDataCategories();
+    //     handleDeleteCancelCategory();
+    //   }else{
+    //     message.error("Xóa thất bại");
+    //   }
+    // }
+      if(deleteItemCategory != null && deleteItemCategory.item != null){
+        let arrIdDelete = []
+        arrIdDelete = [deleteItemCategory.item.name]
+        let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+         let dataDeletePost = {
+      'doctype': "VGM_Category",
+      'items': JSON.stringify(arrIdDelete)
     }
+     let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+    if(res != null && res.message != null && res.message.status == "success"){
+      message.success("Xóa thành công");
+      fetchDataCategories();
+      handleDeleteCancelCategory();
+    }else{
+      message.error("Xóa thất bại, Danh mục này đang được sử dụng");
+    }
+      }
+   
   }
 
   const handleDeleteCancelCategory = () => {
@@ -582,15 +600,31 @@ export default function Product_SKU() {
   };
 
   const handleDeleteOkProduct = async () => {
-    let urlDeleteProduct = `/api/resource/VGM_Product/${deleteItemProduct.item.name}`;
-    let res = await AxiosService.delete(urlDeleteProduct);
-    if(res != null && res.message != null && res.message == "ok"){
+    // let urlDeleteProduct = `/api/resource/VGM_Product/${deleteItemProduct.item.name}`;
+    // let res = await AxiosService.delete(urlDeleteProduct);
+    // if(res != null && res.message != null && res.message == "ok"){
+    //   message.success("Xóa thành công");
+    //   setDeleteItemProduct({});
+    //   initDataProductByCategory();
+    //   handleDeleteCancelProduct();
+    // }else{
+    //   message.error("Xóa thất bại");
+    // }
+    let arrIdDelete = []
+    arrIdDelete = [deleteItemProduct.item.name]
+    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+    let dataDeletePost = {
+      'doctype': "VGM_Product",
+      'items': JSON.stringify(arrIdDelete)
+    }
+    let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+    if(res != null && res.message != null && res.message.status == "success"){
       message.success("Xóa thành công");
       setDeleteItemProduct({});
       initDataProductByCategory();
       handleDeleteCancelProduct();
     }else{
-      message.error("Xóa thất bại");
+      message.error("Xóa thất bại , Sản phẩm đang được sử dụng");
     }
   }
 

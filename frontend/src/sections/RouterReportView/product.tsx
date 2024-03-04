@@ -31,7 +31,6 @@ const items = [
 ];
 
 export default function Product(props) {
-  console.log(props.recordData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 

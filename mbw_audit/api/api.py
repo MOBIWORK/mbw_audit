@@ -42,7 +42,7 @@ def deleteListByDoctype(*args,**kwargs):
                 frappe.delete_doc(kwargs.get('doctype'), id)
         return {"status": "success"}
     except Exception as e:
-        return {"status": "error"}
+        return {'status': 'fail', 'message': _("Failed to delete Product: {0}").format(str(e))}
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
