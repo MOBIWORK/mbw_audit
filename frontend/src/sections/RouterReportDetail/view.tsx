@@ -55,7 +55,7 @@ const columns: TableColumnsType<DataType> = [
     title: "Hình ảnh",
     dataIndex: "images",
     render: (img: string) => (
-      <img src={`${import.meta.env.VITE_BASE_URL}${img}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} />
+      <img src={`${img}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} /> //${import.meta.env.VITE_BASE_URL}
   ),
   
   },
