@@ -5,14 +5,18 @@ import {
   DeleteOutlined,
   EditOutlined,
   SearchOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType, Tag, Modal, message } from "antd";
+import { Input, Space, Table, TableColumnsType, Tag, Modal, message, Button, UploadProps } from "antd";
+import Dragger from "antd/es/upload/Dragger";
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AxiosService } from "../../services/server";
 import moment from 'moment';
 import "./campaign.css";
 import paths from "../AppConst/path.js";
+import * as XLSX from "xlsx";
+
 interface TypeCampaign {
   key: React.Key;
   name: string;
@@ -81,6 +85,43 @@ export default function Campaign() {
       else setShowDeleteListCampaign(false);
     },
   };
+
+  const propUploadImportFileExcel: UploadProps = {
+    action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
+    multiple: false,
+    beforeUpload: async (file) => {
+      console.log(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const bufferArray = event.target.result;
+        const wb = XLSX.read(bufferArray, { type: "buffer" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        let dataImport = [];
+        if(data.length >= 2){
+          for(let i = 1; i < data.length; i++){
+            let objDataImport = {
+              'campaign_name': data[i][0],
+              'campaign_description': data[i][1],
+              'campaign_start': typeof(data[i][2]) == "string" && data[i][2] != ""?  data[i][2] : null,
+              'campaign_end': typeof(data[i][3]) == "string" && data[i][3] != ""?  data[i][3] : null,
+              'campaign_status': data[i][4] != ""? data[i][4] : "Open",
+              'campaign_categories': data[i][5],
+              'campaign_employees': data[i][6],
+              'campaign_customers': data[i][7]
+            }
+            dataImport.push(objDataImport);
+          }
+        }
+        setLstCampaignImport(dataImport);
+        console.log(dataImport);
+      };
+      reader.readAsArrayBuffer(file);
+      return false;
+    }
+  }
+
   const [campaigns, setCampaigns] = useState<TypeCampaign[]>([]);
   const [searchCampaign, setSearchCampaign] = useState("");
   const [itemCampaignDelete, setItemCampaignDelete] = useState({});
@@ -88,6 +129,8 @@ export default function Campaign() {
   const [campaignsSelected, setCampaignsSelected] = useState<TypeCampaign[]>([]);
   const [showDeleteListCampaign, setShowDeleteListCampaign] = useState(false);
   const [isModalOpenDeleteListCampaign, setIsModalOpenDeleteListCampaign] = useState(false);
+  const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] = useState(false);
+  const [lstCampaignImport, setLstCampaignImport] = useState([]);
 
   useEffect(() => {
     initDataCampaigns();
@@ -191,6 +234,19 @@ export default function Campaign() {
     setIsModalOpenDeleteListCampaign(false);
   }
 
+  const handleImportFileCampaign = () => {
+    setIsModalOpenImportFileExcel(true);
+  }
+
+  const handleOkImportExcel = () => {
+
+  }
+
+  const handleCancelImportExcel = () => {
+    setIsModalOpenImportFileExcel(false);
+  }
+
+
   return (
     <>
       <HeaderPage
@@ -210,6 +266,7 @@ export default function Campaign() {
             icon: <LuUploadCloud className="text-xl" />,
             size: "20px",
             className: "flex items-center mr-2",
+            action: handleImportFileCampaign
           },
           {
             label: "Thêm mới",
@@ -261,7 +318,32 @@ export default function Campaign() {
         <div>Bạn có chắc muốn xóa {campaignsSelected.length} chiến dịch ra khỏi hệ thống không?</div>
         <div>Khi thực hiện hành động này, sẽ không thể hoàn tác.</div>
       </Modal>
-        
+      
+      <Modal
+        title="Nhập dữ liệu từ tệp excel"
+        open={isModalOpenImportFileExcel}
+        width={777}
+        onOk={handleOkImportExcel}
+        onCancel={handleCancelImportExcel}
+        footer={[
+          <Button key="back" onClick={handleCancelImportExcel}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleOkImportExcel}>
+            Lưu lại
+          </Button>,
+        ]}
+      >
+        <p className="text-[#637381] font-normal text-sm">
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
+        </p>
+        <Dragger {...propUploadImportFileExcel}>
+          <p className="ant-upload-drag-icon">
+            <PlusOutlined />
+          </p>
+          <p className="ant-upload-text">Kéo, thả hoặc chọn tệp để tải lên</p>
+        </Dragger>
+      </Modal>
     </>
   );
 }

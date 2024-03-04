@@ -13,8 +13,9 @@ body {
     margin-left: 10px;
 }
 .icon_logo{
-    width: 55px;
-    height: 55px;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 5px;
 }
 .icon_text{
     margin-left: 0px;

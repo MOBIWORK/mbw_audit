@@ -77,10 +77,6 @@ export default function DashboardLayout({ children }: Props) {
       >
         <div className="container_logo">
           <img src={logo} className="icon_logo"/>
-          <div className="icon_text">
-            <div className="title_text">NEXT GEN</div>
-            <div className="description_text">MOBIWORK</div>
-          </div>
         </div>
        <MenuLeft/>
       </Sider>
