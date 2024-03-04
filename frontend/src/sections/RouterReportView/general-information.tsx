@@ -61,18 +61,7 @@ export default function GeneralInformation({ form,recordData }) {
             </FormItemCustom>
           </Col>
         </RowCustom>
-        <RowCustom className="pt-2">
-        <Col span={12}>
-            <FormItemCustom label="Thời gian vào" name="date_check_in" required>
-              <Input />
-            </FormItemCustom>
-          </Col>
-          <Col span={12}>
-            <FormItemCustom label="Thời gian ra" name="date_check_out" required>
-              <Input />
-            </FormItemCustom>
-          </Col>
-        </RowCustom>
+     
         <RowCustom className="pt-2">
         <Col span={12}>
             <FormItemCustom label="Nhân viên thực hiện"  name="employee_code" required>

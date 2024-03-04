@@ -58,7 +58,7 @@ def checkImageProductExist(*args,**kwargs):
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
     if response.get('status') == 'completed':
-        count_value = response.get('result', {}).get('count', {})
+        count_value = response.get('results', {}).get('count', {})
         return count_value
         # self.set('sum', count_value)
     else:
@@ -173,7 +173,7 @@ def process_report_sku(name, report_images, category):
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                         response = recognition.count(collection_name, image_path)
                         if response.get('status') == 'completed':
-                            count_value = response.get('result', {}).get('count', {}).get(get_product_name)
+                            count_value = response.get('results', {}).get('count', {}).get(get_product_name)
                         else:
                             count_value = 0
                         child_doc.update({
