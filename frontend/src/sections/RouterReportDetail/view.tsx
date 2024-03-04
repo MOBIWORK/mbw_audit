@@ -8,7 +8,7 @@ import {
   EditOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType,DatePicker,Select } from "antd";
+import { Input, Space, Table, TableColumnsType,DatePicker,Select,Upload } from "antd";
 import { useState,useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
@@ -39,17 +39,25 @@ const columns: TableColumnsType<DataType> = [
     title: "Nhân viên thực hiện",
     dataIndex: "employee_name",
   },
+  // {
+  //   title: "Thời gian vào",
+  //   dataIndex: "date_check_in",
+  // },
+  // {
+  //   title: "Thời gian ra",
+  //   dataIndex: "date_check_out",
+  // },
   {
-    title: "Thời gian vào",
-    dataIndex: "date_check_in",
-  },
-  {
-    title: "Thời gian ra",
-    dataIndex: "date_check_out",
-  },
-  {
-    title: "Số lượng",
+    title: "Số lượng danh mục sản phẩm",
     dataIndex: "quantity_cate",
+  },
+  {
+    title: "Hình ảnh",
+    dataIndex: "images",
+    render: (img: string) => (
+      <img src={`${import.meta.env.VITE_BASE_URL}${img}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} />
+  ),
+  
   },
 ];
 // rowSelection object indicates the need for row selection
@@ -93,11 +101,13 @@ const fetchDataReport = async () => {
 
         if (response && response.message && response.message.data) {
             let dataReport: DataType[] = response.message.data.map((item: DataType, index: number) => {
+              let stt: string = (index + 1).toString().padStart(2, '0'); // Chuyển stt thành chuỗi và thêm số 0 nếu nhỏ hơn 10
+              let quantity_cate: string = JSON.parse(item.categories).length.toString().padStart(2, '0'); // Số lượng danh mục với số 0 nếu nhỏ hơn 10
                 return {
                     ...item,
                     key: item.name,
-                    stt: index + 1,
-                    quantity_cate: JSON.parse(item.categories).length.toString(),
+                    stt: stt,
+                    quantity_cate: quantity_cate,
                     employee_name: findEmployeeName(arr,item.employee_code)
                 };
             });
