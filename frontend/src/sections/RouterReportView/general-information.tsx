@@ -39,7 +39,7 @@ export default function GeneralInformation({ form,recordData }) {
           uid : -1,
           name: 'image.png',
           status: 'done',
-          url: import.meta.env.VITE_BASE_URL + recordData.images
+          url: recordData.images //import.meta.env.VITE_BASE_URL
         }
         arrimage.push(obj)
       

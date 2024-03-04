@@ -210,7 +210,7 @@ export default function Campaign() {
           <Input value={searchCampaign} onChange={onChangeFilterCampaign} 
             placeholder="Tìm kiếm chiến dịch" prefix={<SearchOutlined />} />
         </FormItemCustom>
-        <div className="p-4">
+        <div>
           <TableCustom
             rowSelection={{
               type: selectionType,

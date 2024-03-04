@@ -821,8 +821,8 @@ export default function Product_SKU() {
                 prefix={<SearchOutlined />}
               />
             </FormItemCustom>
-            <div className="pt-4 p-4">
-              <Table
+            <div className="pt-3">
+              <TableCustom
                 rowSelection={{
                   type: selectionType,
                   ...rowSelectionProduct,
@@ -858,12 +858,12 @@ export default function Product_SKU() {
               dataSource={categories}
               renderItem={(item: any) => (
                 <List.Item 
-                className={`${item.selected ? 'selected' : ''}`}
+                
                  onMouseEnter={(event) => handleMouseEnterCategory(event, item)}
                  onMouseLeave={(event) => handleMouseLeaveCategory(event, item)}
                  onClick={() => handleSelectedCategory(item)}>
                   <div className={"item_category"}>
-                    <span>
+                    <span className={`${item.selected ? 'selected' : ''}`}>
                       <Typography.Text></Typography.Text> {item.category_name}
                     </span>
                     <span  style={{display: item.hidden? 'none' : 'block'}}>

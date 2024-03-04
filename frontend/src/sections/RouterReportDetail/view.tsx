@@ -114,9 +114,8 @@ const initDataEmployee = async () => {
     try {
         let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
         const res = await AxiosService.get(urlEmployee);
-        console.log(res);
-        console.log("1")
         if (res && res.result && res.result.data) {
+            setDataEmployee(res.result.data)
             return (res.result.data);
         }
     } catch (error) {
@@ -175,7 +174,7 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
 </div>
 
     </div>
-        <div className="p-4">
+        <div>
           <TableCustom
             columns={columns}
             dataSource={filteredDataReport}
