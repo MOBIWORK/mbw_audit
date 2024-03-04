@@ -131,15 +131,31 @@ export default function Campaign() {
   }
 
   const handleDeleteOkCampaign = async () => {
-    let urlDelete = `/api/resource/VGM_Campaign/${itemCampaignDelete.name}`;
-    let res = await AxiosService.delete(urlDelete);
-    if(res != null && res.message != null && res.message == "ok"){
+    // let urlDelete = `/api/resource/VGM_Campaign/${itemCampaignDelete.name}`;
+    // let res = await AxiosService.delete(urlDelete);
+    // if(res != null && res.message != null && res.message == "ok"){
+    //   message.success("Xóa thành công");
+    //   initDataCampaigns();
+    //   setItemCampaignDelete({});
+    //   handleDeleteCancelCampaign();
+    // }else{
+    //   message.error("Xóa thất bại");
+    // }
+    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+    let arrIdDelete = [itemCampaignDelete.name];
+    for(let i = 0; i < campaignsSelected.length; i++) arrIdDelete.push(campaignsSelected[i].name);
+    let dataDeletePost = {
+      'doctype': "VGM_Campaign",
+      'items': JSON.stringify(arrIdDelete)
+    }
+    let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+    if(res != null && res.message != null && res.message.status == "success"){
       message.success("Xóa thành công");
       initDataCampaigns();
       setItemCampaignDelete({});
       handleDeleteCancelCampaign();
     }else{
-      message.error("Xóa thất bại");
+      message.error("Xóa thất bại, Chiến dịch đã tồn tại ở báo cáo");
     }
   }
 
