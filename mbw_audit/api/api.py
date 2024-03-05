@@ -57,6 +57,7 @@ def checkImageProductExist(*args,**kwargs):
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
+    return response
     if response.get('status') == 'completed':
         count_value = response.get('results', {}).get('count', {})
         return count_value
@@ -140,9 +141,9 @@ def record_report_data(*args, **kwargs):
         process_report_sku(doc.name, kwargs.get("images"), category)
         #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
         #process_report_sku_thread.start()
-        return {'status': 'success', "result" : doc.name}
+        return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
-        return {'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))}
+        return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
 
 def process_report_sku(name, report_images, category):
     try:
@@ -306,18 +307,10 @@ def upload_file():
 
         # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
         fileInfo = save_file(filename, filedata, "File", "Home")
-
-
-        return {
-            "status": "success",
-            "file_url": frappe.utils.get_request_site_address() + fileInfo.file_url
-        }
+        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url})
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
-        return {
-            "status": "failed",
-            "message": _("Failed to upload file: {0}").format(str(e))
-        }
+        return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
 
 def save_tmp_file(filename, filedata):
     site_path = get_site_path()
@@ -336,18 +329,29 @@ def save_tmp_file(filename, filedata):
 def import_campaign(*args, **kwargs):
     try:
         list_campaigns = json.loads(kwargs.get('listcampaign'))
+        date_format_with_time = '%Y/%m/%d %H:%M:%S'
 
-        for product_data in list_products:
-            new_product = frappe.new_doc('VGM_Product')
-            new_product.product_name = product_data.get('product_name', '')
-            new_product.product_code = product_data.get('product_code', '')
-            new_product.barcode = product_data.get('barcode', '')
-            new_product.product_description = product_data.get('product_description', '')
-            new_product.category = kwargs.get('category')
-            url_images = product_data.get('url_images', [])
-            new_product.images = json.dumps(url_images)
+        for data in list_campaigns:
+            
+            new_campaign = frappe.new_doc('VGM_Campaign')
+            new_campaign.campaign_name = data.get('campaign_name', '')
+            new_campaign.campaign_description = data.get('campaign_description', '')
+            start_date = int(data.get('campaign_start'))
+            start_date = datetime.fromtimestamp(start_date).strftime(date_format_with_time)
+            end_date = int(data.get('campaign_end'))
+            end_date = datetime.fromtimestamp(end_date).strftime(date_format_with_time)
+            new_campaign.start_date = start_date
+            new_campaign.end_date = end_date
+            categories = json.loads(data.get('campaign_categories'))
+            employees = json.loads(data.get('campaign_employees'))
+            retails = json.loads(data.get('campaign_customers'))
+            new_campaign.campaign_status = data.get("campaign_status")
+            new_campaign.categories = json.dumps(categories)
+            new_campaign.employees = json.dumps(employees)
+            new_campaign.retails = json.dumps(retails)
+            
 
-            new_product.insert()
+            new_campaign.insert()
 
         return {'status': 'success', 'message': 'Campaigns imported successfully'}
     except Exception as e:

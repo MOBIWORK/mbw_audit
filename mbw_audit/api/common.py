@@ -1,4 +1,5 @@
 import json
+from bs4 import BeautifulSoup
 import frappe
 from frappe import _
 from frappe.utils import cstr

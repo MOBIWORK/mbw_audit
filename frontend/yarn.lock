@@ -766,6 +766,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-reconciler@^0.28.0", "@types/react-reconciler@^0.28.2":
+  version "0.28.8"
+  resolved "https://registry.npmjs.org/@types/react-reconciler/-/react-reconciler-0.28.8.tgz"
+  integrity sha512-SN9c4kxXZonFhbX4hJrZy37yw9e7EIxcpHCxQv5JUS18wDE5ovkQKlqQEkufdJCCMfuI9BnjUJvhYeJ9x5Ra7g==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react@*", "@types/react@^18.2.43":
   version "18.2.47"
   resolved "https://registry.npmjs.org/@types/react/-/react-18.2.47.tgz"
@@ -2397,6 +2404,13 @@ isobject@^3.0.1:
   resolved "https://registry.npmjs.org/isobject/-/isobject-3.0.1.tgz"
   integrity sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==
 
+its-fine@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/its-fine/-/its-fine-1.1.1.tgz"
+  integrity sha512-v1Ia1xl20KbuSGlwoaGsW0oxsw8Be+TrXweidxD9oT/1lAh6O3K3/GIM95Tt6WCiv6W+h2M7RB1TwdoAjQyyKw==
+  dependencies:
+    "@types/react-reconciler" "^0.28.0"
+
 jackspeak@^2.3.5:
   version "2.3.6"
   resolved "https://registry.npmjs.org/jackspeak/-/jackspeak-2.3.6.tgz"
@@ -2496,6 +2510,11 @@ kind-of@^6.0.2, kind-of@^6.0.3:
   version "6.0.3"
   resolved "https://registry.npmjs.org/kind-of/-/kind-of-6.0.3.tgz"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
+
+"konva@^8.0.1 || ^7.2.5 || ^9.0.0":
+  version "9.3.5"
+  resolved "https://registry.npmjs.org/konva/-/konva-9.3.5.tgz"
+  integrity sha512-mMs9TAlz5709m41F2dc8Q8vMtN09wJ1se0x72v9jwSnIAiaXWAr5OP4/8qQPtV7/VADYwCMv6NN3+qn6lTJacg==
 
 levn@^0.4.1:
   version "0.4.1"
@@ -3676,7 +3695,7 @@ react-barcode@^1.4.6:
     jsbarcode "^3.8.0"
     prop-types "^15.6.2"
 
-react-dom@*, "react-dom@^16.0.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.6.0 || ^17.0.0 || ^18.0.0", react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.3.0, react-dom@>=16.8, react-dom@>=16.9.0:
+react-dom@*, "react-dom@^16.0.0 || ^17.0.0 || ^18.0.0", "react-dom@^16.6.0 || ^17.0.0 || ^18.0.0", react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.3.0, react-dom@>=16.8, react-dom@>=16.9.0, react-dom@>=18.0.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -3713,6 +3732,16 @@ react-is@^18.2.0:
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
+react-konva@^18.2.10:
+  version "18.2.10"
+  resolved "https://registry.npmjs.org/react-konva/-/react-konva-18.2.10.tgz"
+  integrity sha512-ohcX1BJINL43m4ynjZ24MxFI1syjBdrXhqVxYVDw2rKgr3yuS0x/6m1Y2Z4sl4T/gKhfreBx8KHisd0XC6OT1g==
+  dependencies:
+    "@types/react-reconciler" "^0.28.2"
+    its-fine "^1.1.1"
+    react-reconciler "~0.29.0"
+    scheduler "^0.23.0"
+
 react-map-gl@^7.1.7:
   version "7.1.7"
   resolved "https://registry.npmjs.org/react-map-gl/-/react-map-gl-7.1.7.tgz"
@@ -3720,6 +3749,14 @@ react-map-gl@^7.1.7:
   dependencies:
     "@maplibre/maplibre-gl-style-spec" "^19.2.1"
     "@types/mapbox-gl" ">=1.0.0"
+
+react-reconciler@~0.29.0:
+  version "0.29.0"
+  resolved "https://registry.npmjs.org/react-reconciler/-/react-reconciler-0.29.0.tgz"
+  integrity sha512-wa0fGj7Zht1EYMRhKWwoo1H9GApxYLBuhoAuXN0TlltESAjDssB+Apf0T/DngVqaMyPypDmabL37vw/2aRM98Q==
+  dependencies:
+    loose-envify "^1.1.0"
+    scheduler "^0.23.0"
 
 react-refresh@^0.14.0:
   version "0.14.0"
@@ -3741,7 +3778,7 @@ react-router@6.21.1:
   dependencies:
     "@remix-run/router" "1.14.1"
 
-react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.11.0 || ^17.0.0 || ^18.0.0", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17 || ^18", react@^18.2.0, "react@>= 16.8.0", react@>=16.0.0, react@>=16.11.0, react@>=16.3.0, react@>=16.8, react@>=16.9.0, react@>=17.x:
+react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.11.0 || ^17.0.0 || ^18.0.0", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17 || ^18", react@^18.2.0, "react@>= 16.8.0", react@>=16.0.0, react@>=16.11.0, react@>=16.3.0, react@>=16.8, react@>=16.9.0, react@>=17.x, react@>=18.0, react@>=18.0.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
