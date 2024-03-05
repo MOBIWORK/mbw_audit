@@ -696,10 +696,12 @@ export default function Product_SKU() {
       );
     }
     if(res != null && res.message != null){
+      console.log(res.message);
       arrProductDetect.forEach(item => {
-        if(res.message[item.product_name] != null) item.product_count = res.message[item.product_name];
+        if(res.message.results.count[item.product_name] != null) item.product_count = res.message.results.count[item.product_name];
       })
     }
+    console.log(arrProductDetect);
     console.log(fileUploadCheckProduct);
     setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
