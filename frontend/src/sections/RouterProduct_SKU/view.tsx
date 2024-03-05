@@ -120,10 +120,12 @@ export default function Product_SKU() {
   const [productFromERPSelected, setProductFromERPSelected] = useState<any[]>([]);
   const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
+  const [fileListImage , setFileListImage] = useState<any[]>([]);
 
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
+    
       const formData = new FormData();
       const fields = {
         file,
@@ -151,6 +153,7 @@ export default function Product_SKU() {
   const propUploadEditProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
+     
       const formData = new FormData();
       const fields = {
         file,
@@ -178,6 +181,7 @@ export default function Product_SKU() {
   const propUploadCheckProducts: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     beforeUpload: async (file) => {
+      
       const formData = new FormData();
       const fields = {
         file,
@@ -194,6 +198,15 @@ export default function Product_SKU() {
       );
       if (response.message) {
         //fileListUpload.push(response.message);
+        let listFile = []
+        let obj = {
+          uid: '-1',
+          name: response.message.file_name,
+          status: 'done',
+          url: response.message.file_url,
+        }
+        listFile.push(obj)
+        setFileListImage(listFile)
         setFileUploadCheckProduct(prevFileUpload => [...prevFileUpload, response.message]);
         message.success("Tải ảnh thành công");
       } else {
@@ -668,7 +681,7 @@ export default function Product_SKU() {
     let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
     let objCheckProduct = {
       'collection_name': categorySelected.name,
-      'linkimages': fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : ""
+      'linkimages': fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : ""
     }
     let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
     let arrProductDetect = [];
@@ -687,13 +700,15 @@ export default function Product_SKU() {
         if(res.message[item.product_name] != null) item.product_count = res.message[item.product_name];
       })
     }
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[0].file_url : "");  //import.meta.env.VITE_BASE_URL+
+    console.log(fileUploadCheckProduct);
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL + fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
   };
 
   const handleCancelCheckProduct = () => {
+    setFileListImage([])
     setIsModalOpenCheckProduct(false);
   };
 
@@ -925,6 +940,7 @@ export default function Product_SKU() {
         title="Kiểm tra ảnh sản phẩm"
         open={isModalOpenCheckProduct}
         width={777}
+        afterClose = {handleCancelCheckProduct}
         onOk={handleOkCheckProduct}
         onCancel={handleCancelCheckProduct}
         footer={[
@@ -939,7 +955,7 @@ export default function Product_SKU() {
         <p className="text-[#637381] font-normal text-sm">
           Chọn ảnh sản phẩm bất kì để kiểm tra nhận diện sản phẩm
         </p>
-        <Dragger {...propUploadCheckProducts}>
+        <Dragger {...propUploadCheckProducts} fileList={fileListImage}>
           <p className="ant-upload-drag-icon">
             <PlusOutlined />
           </p>

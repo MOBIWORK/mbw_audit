@@ -52,6 +52,10 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: "quantity_cate",
   },
   {
+    title: "Thời gian thực hiện",
+    dataIndex: "images_time",
+  },
+  {
     title: "Hình ảnh",
     dataIndex: "images",
     render: (img: string) => (
@@ -146,8 +150,18 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
       // Xử lý lọc theo thời gian nếu cần
       // const matchTime = true; // Đặt điều kiện mặc định
       // Xử lý lọc theo nhân viên
-      const matchTime = searchTime && searchTime[0] && searchTime[1] ?
-      new Date(record.date_check_in) >= searchTime[0] && new Date(record.date_check_in) <= searchTime[1] : true;
+      // const matchTime = searchTime && searchTime[0] && searchTime[1] ?
+      // new Date(record.date_check_in) >= searchTime[0] && new Date(record.date_check_in) <= searchTime[1] : true;
+      const startOfDay = searchTime && searchTime[0] ? new Date(searchTime[0]) : null;
+      const endOfDay = searchTime && searchTime[1] ? new Date(searchTime[1]) : null;
+      
+      const matchTime =
+          startOfDay && endOfDay
+              ? (
+                  new Date(record.images_time) >= new Date(startOfDay.setHours(0, 0, 0, 0)) &&
+                  new Date(record.images_time) <= new Date(endOfDay.setHours(23, 59, 59, 999))
+                )
+              : true;
       const matchEmployee = searchEmployee === 'all' || record.employee_code === searchEmployee;
       return matchCampaign && matchEmployee && matchTime; // && matchTime nếu cần thêm điều kiện thời gian
     });
