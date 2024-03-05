@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Stage, Layer, Image, Rect, Text } from 'react-konva';
-import './css/canvas.css'
+// import './css/canvas.css'
 
 
 const ObjectDetectionResult = ({ imageSrc, objectBoxes, labelColors }) => {
   // Đối tượng để ánh xạ các nhãn với màu viền tương ứng
 
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 540 })
+  const [canvasSize, setCanvasSize] = useState({ width: 450, height: 450 })
 
   const [image, setImage] = useState(new window.Image());
 

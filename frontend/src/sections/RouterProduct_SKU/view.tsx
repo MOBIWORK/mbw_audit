@@ -1,6 +1,7 @@
 import { LuUploadCloud } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import ObjectDetectionResult from './ObjectDetectionResult';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -121,6 +122,10 @@ export default function Product_SKU() {
   const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
   const [fileListImage , setFileListImage] = useState<any[]>([]);
+  const [urlImageAI , setUrlImageAI] = useState("");
+  const [objectBoxes , setObjectBoxes] = useState<any[]>([])
+  let labelColors = {}
+  
 
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
@@ -696,19 +701,51 @@ export default function Product_SKU() {
       );
     }
     if(res != null && res.message != null){
-      console.log(res.message);
+      setUrlImageAI("data:image/png;base64,"+res.message.results.verbose[0].base64_image);
+      let arrBoxes = [];
       arrProductDetect.forEach(item => {
         if(res.message.results.count[item.product_name] != null) item.product_count = res.message.results.count[item.product_name];
+        let locates = res.message.results.verbose[0].locates;
+        
+        // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+        let locatesWithLabel = locates.filter(function (obj) {
+            return obj.label === item.product_name;
+        });
+        let newObjectBoxes = locatesWithLabel.map(function(box) {
+          let bbox = box.bbox;
+          return {
+              x: bbox[0],
+              y: bbox[1],
+              width: bbox[2] - bbox[0],
+              height: bbox[3] - bbox[1],
+              label: box.label
+          };
+      });
+      arrBoxes = arrBoxes.concat(newObjectBoxes);
       })
+      setObjectBoxes(arrBoxes);
     }
-    console.log(arrProductDetect);
-    console.log(fileUploadCheckProduct);
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
+    
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL+fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
   };
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
 
+// Xác định màu viền cho các nhãn và lưu vào đối tượng labelColors
+objectBoxes.forEach((box) => {
+    if (!labelColors[box.label]) {
+        labelColors[box.label] = getRandomColor();
+    }
+});
   const handleCancelCheckProduct = () => {
     setFileListImage([])
     setIsModalOpenCheckProduct(false);
@@ -968,13 +1005,18 @@ export default function Product_SKU() {
       <Modal
         title="Kiểm tra ảnh sản phẩm"
         open={isModelResultProduct}
-        width={777}
+        width={920}
         onCancel={handleCancelResultCheckProduct}
         footer={null}
       >
-        <div style={{marginBottom: "20px"}}>
-          <img src={urlImageCheckProductResult} style={{ maxWidth: '100%', height: 'auto' }} />
+        <div style={{marginBottom: "20px",display:'flex'}}>
+          <img src={urlImageCheckProductResult} style={{ width: '450px', height: '450px', marginRight: '20px' }} />
+          <ObjectDetectionResult
+                            imageSrc={urlImageAI}
+                            objectBoxes={objectBoxes}
+                            labelColors={labelColors} />
         </div>
+        
         <div>
           <div>Kết quả kiểm tra hình ảnh:</div>
           <Table dataSource={resultProductCheck} columns={[
