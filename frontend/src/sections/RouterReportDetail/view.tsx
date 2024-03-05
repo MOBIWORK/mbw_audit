@@ -28,7 +28,7 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: "stt",
   },
   {
-    title: "Cửa hàng",
+    title: "Khách hàng",
     dataIndex: "retail_code",
   },
   {

@@ -26,7 +26,7 @@ export default function GeneralInformation({ form,recordData }) {
     if (recordData) {
       let arrimage = []
       form.setFieldsValue({
-        store: recordData.campaign_code,
+        store: recordData.retail_code,
         campaign_name: recordData.campaign_name,
         date_check_in: recordData.date_check_in,
         date_check_out: recordData.date_check_out,
@@ -51,7 +51,7 @@ export default function GeneralInformation({ form,recordData }) {
       <div className="p-4 pt-6 pb-[58px]">
         <RowCustom>
           <Col span={12}>
-            <FormItemCustom label="Cửa hàng" name="store" required>
+            <FormItemCustom label="Khách hàng" name="store" required>
               <Input />
             </FormItemCustom>
           </Col>

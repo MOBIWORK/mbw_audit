@@ -116,7 +116,7 @@ const expandedRowData = props.recordData?.category_names.map((category, index) =
   const details = props.recordData?.detail.filter(item => item.category === categoryCode);
   return details.map((detailItem, detailIndex) => ({
       key: `${index}-${detailIndex}`,
-      stt: `${index+1}`,
+      stt: `${(detailIndex + 1).toString().padStart(2, '0')}`,
       name_product: detailItem.product_name,
       sum_product: detailItem.sum_product.toString(),
       image: detailItem.images,
