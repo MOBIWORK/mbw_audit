@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
 from datetime import datetime
-from mbw_audit.api.common import (post_images,post_images_check)
+from mbw_audit.api.common import (post_images,post_images_check,gen_response)
 from frappe.utils.file_manager import (
     save_file
 )
@@ -108,8 +108,9 @@ def get_campaign_info(*args,**kwargs):
         # và e_name có trong danh sách retails không
         if kwargs.get('customer_code') in retails_list and kwargs.get('e_name') in employees_list:
             valid_campaigns.append(campaign_record)
+    return gen_response(200, "ok", {"data" : valid_campaigns})
 
-    return valid_campaigns
+
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'

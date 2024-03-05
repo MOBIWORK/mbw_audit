@@ -34,3 +34,13 @@ def post_images_check(images):
     doc_file = save_file(file_name, imgdata,'File','',folder=None, decode=False, is_private=0, df=None)
     file_url = doc_file.get('file_url')
     return file_url
+# return definition
+def gen_response(status, message, result=[]):
+    frappe.response["http_status_code"] = status
+    if status == 500:
+        frappe.response["message"] = BeautifulSoup(
+            str(message), features="lxml").get_text()
+    else:
+        frappe.response["message"] = message
+    frappe.response["result"] = result
+
