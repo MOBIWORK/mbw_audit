@@ -18,15 +18,15 @@
   "report_sku",
   "categories",
   "images",
-  "images_time"
+  "images_time",
+  "scoring_machine"
  ],
  "fields": [
   {
    "fieldname": "retail_code",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Retail Code",
-   "options": "Customer"
+   "label": "Retail Code"
   },
   {
    "fieldname": "campaign_code",
@@ -37,10 +37,9 @@
   },
   {
    "fieldname": "employee_code",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Employee Code",
-   "options": "Employee"
+   "label": "Employee Code"
   },
   {
    "fieldname": "date_check_in",
@@ -85,7 +84,7 @@
   },
   {
    "fieldname": "images",
-   "fieldtype": "Attach Image",
+   "fieldtype": "JSON",
    "label": "Images"
   },
   {
@@ -93,11 +92,16 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Images Time"
+  },
+  {
+   "fieldname": "scoring_machine",
+   "fieldtype": "Int",
+   "label": "Scoring Machine"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-01 15:53:50.740407",
+ "modified": "2024-03-06 06:47:16.700198",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Report",

@@ -58,8 +58,8 @@ const columns: TableColumnsType<DataType> = [
   {
     title: "Hình ảnh",
     dataIndex: "images",
-    render: (img: string) => (
-      <img src={`${img}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} /> //${import.meta.env.VITE_BASE_URL}
+    render: (imgs: Array<string>) => (
+      <img src={`${imgs != null && typeof(imgs) != "string" && imgs.length > 0? imgs[0] : ""}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} /> //${import.meta.env.VITE_BASE_URL}
   ),
   
   },

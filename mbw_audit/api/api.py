@@ -120,7 +120,9 @@ def record_report_data(*args, **kwargs):
     images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
-    
+    images = json.loads(kwargs.get('images'))
+    images_str = json.dumps(images)
+    setting_score_audit = json.loads(kwargs.get('setting_score_audit'))
     try:
         data = {
             'doctype': 'VGM_Report',
@@ -129,7 +131,7 @@ def record_report_data(*args, **kwargs):
             'campaign_code': kwargs.get('campaign_code'),
             'categories': categories_str,
             'images_time': images_time,
-            'images': kwargs.get("images"),
+            'images': images_str,
             'latitude_check_in': '',
             'latitude_check_out': '',
             'longitude_check_in': '',
@@ -138,16 +140,17 @@ def record_report_data(*args, **kwargs):
         doc = frappe.get_doc(data)
         doc.insert()
         #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
-        process_report_sku(doc.name, kwargs.get("images"), category)
+        process_report_sku(doc.name, images, category, setting_score_audit)
         #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
         #process_report_sku_thread.start()
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
 
-def process_report_sku(name, report_images, category):
+def process_report_sku(name, report_images, category, setting_score_audit):
     try:
         products_by_category = []
+        arr_score_audit = []
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
             products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["name"])
@@ -169,25 +172,47 @@ def process_report_sku(name, report_images, category):
                         recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
                         base_url = frappe.utils.get_request_site_address()
                         collection_name = category_id
-                        image_ai = report_images
-                        image_path = [image_ai]
+                        image_path = report_images
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                         response = recognition.count(collection_name, image_path)
                         if response.get('status') == 'completed':
                             count_value = response.get('results', {}).get('count', {}).get(get_product_name)
+                            if count_value is None:
+                                count_value = 0
                         else:
                             count_value = 0
-                        child_doc.update({
-                            'parent': name, 
-                            'parentfield': 'report_sku',
-                            'parenttype': 'VGM_Report',
-                            'category': category_id,
-                            'sum_product': count_value,
-                            # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                            'product': product_id
-                        })
-                        child_doc.insert() 
+                        if setting_score_audit is None:
+                            child_doc.update({
+                                'parent': name, 
+                                'parentfield': 'report_sku',
+                                'parenttype': 'VGM_Report',
+                                'category': category_id,
+                                'sum_product': count_value,
+                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                                'product': product_id
+                            })
+                            print("Dòng 193 Khong co cau hinh")
+                        else:
+                            setting_by_product = setting_score_audit.get(product_id)
+                            min_product = setting_by_product.get("min_product")
+                            print("Dòng 197 ", count_value)
+                            print("Dòng 198 ", min_product)
+                            child_doc.update({
+                                'parent': name, 
+                                'parentfield': 'report_sku',
+                                'parenttype': 'VGM_Report',
+                                'category': category_id,
+                                'sum_product': count_value,
+                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                                'product': product_id,
+                                'scoring_machine': 1 if count_value >= min_product else 0 
+                            })
+                            arr_score_audit.append(1 if count_value >= min_product else 0)
+                            print("Dòng 208 Co cau hinh", setting_score_audit)
+                        child_doc.insert()
+                if setting_score_audit is not None:
+                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1)
             except Exception as e:
                 print({'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))})
         else:
