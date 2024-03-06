@@ -9,7 +9,11 @@ import {
     Modal,
     Table,
     TableColumnsType,
+    Collapse,
+    Checkbox
   } from "antd";
+  import './view.css'; 
+  import type { CollapseProps } from 'antd';
   import { FormItemCustom, TableCustom } from "../../components";
   import { useState, useEffect } from "react";
   import { AxiosService } from "../../services/server";
@@ -43,6 +47,7 @@ import {
   }
   
   export default function ProductCampaignEdit({onChangeCategory, categoryEdit}) {
+    const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
     const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   
@@ -50,6 +55,8 @@ import {
     const [searchCategory, setSearchCategory] = useState("");
     const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
   
+    const onChange = (key: string | string[]) => {
+    };
     useEffect(() => {
         initDataCategoriesWithOutFilter();
     }, []);
@@ -86,12 +93,22 @@ import {
           }
             setCategories(dataCategories);
             let categoryInitSelected = [];
+            let allProducts = [];
             for(let i = 0; i < categoryEdit.length; i++){
                 let dataCategoryFilter = dataCategories.filter(x => x.name==categoryEdit[i]);
                 if(dataCategoryFilter != null && dataCategoryFilter.length > 0){
-                    categoryInitSelected.push(dataCategoryFilter[0]);
+                   // categoryInitSelected.push(dataCategoryFilter[0]);
+                    let categoryCopy = { ...dataCategoryFilter[0] };
+                      // Thêm trường "name" của category vào mỗi phần tử trong mảng "products"
+          categoryCopy.products = categoryCopy.products.map(product => {
+            return { ...product, cate_name: categoryCopy.category_name  , product_num : "1"};
+        });
+        allProducts = allProducts.concat(categoryCopy.products);
+        categoryInitSelected.push(categoryCopy);
                 } 
             }
+            console.log( allProducts);
+            setProductSelected(allProducts)
             setCategoriesSelected(categoryInitSelected)
         }
     }
@@ -179,10 +196,49 @@ import {
   
     const handleDeleteCategory = (item) => {
       const updatedCategoriesSelected = categoriesSelected.filter(category => category.name !== item.name);
+      const updatedProductSelected = productSelected.filter(product => product.cate_name !== item.category_name);
+      setProductSelected(updatedProductSelected)
       setCategoriesSelected(updatedCategoriesSelected);
       onChangeCategory(updatedCategoriesSelected);
     }
+    const columnProduct: TableColumnsType<DataType> = [
+      { title: "Mã sản phẩm", dataIndex: "product_code",  },
+      { title: "Tên sản phẩm", dataIndex: "product_name", },
+      { title: "Danh mục", dataIndex: "cate_name",  },
+      { 
+        title: "Số lượng ít nhất", 
+        dataIndex: "product_num", 
+        render: (item: number, rowData: DataType, index: number) => ( // Thêm index vào render function
+            <Input style={{width : '120px'}}
+                defaultValue={item}  
+                onChange={(e) => handleQuantityChange(index, parseInt(e.target.value))} // Sử dụng index trong handleQuantityChange
+            />
+        )
+    },
+     
+    ];
   
+    const handleQuantityChange = (index: number, newValue: number) => {
+      // Tạo một bản sao của dữ liệu hàng
+      const updatedRowData = [...productSelected];
+      // Cập nhật giá trị "Số lượng ít nhất" của hàng với chỉ số index
+      updatedRowData[index].product_num = newValue;
+      // Cập nhật trạng thái của bảng
+      setProductSelected(updatedRowData);
+  };
+    const itemscoll: CollapseProps['itemscoll'] = [
+      {
+        key: '1',
+        label: <Checkbox> <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tồn tại sản phẩm </span> </Checkbox> ,
+        children:  <div>
+        <TableCustom
+          columns={columnProduct}
+          dataSource={productSelected}
+        />
+      </div>,
+      },
+      
+    ];
     const expandedRowRender = (record, index) => {
       const columnProducts: TableColumnsType<ExpandedDataType> = [
         { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
@@ -223,6 +279,7 @@ import {
             expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
             dataSource={categoriesSelected}
           />
+           <Collapse items={itemscoll} defaultActiveKey={['1','2']} onChange={onChange} className="custom-collapse"/>
         </div>
   
         <Modal
