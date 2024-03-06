@@ -192,12 +192,9 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                                 # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
                                 'product': product_id
                             })
-                            print("Dòng 193 Khong co cau hinh")
                         else:
                             setting_by_product = setting_score_audit.get(product_id)
                             min_product = setting_by_product.get("min_product")
-                            print("Dòng 197 ", count_value)
-                            print("Dòng 198 ", min_product)
                             child_doc.update({
                                 'parent': name, 
                                 'parentfield': 'report_sku',
@@ -209,7 +206,6 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                                 'scoring_machine': 1 if count_value >= min_product else 0 
                             })
                             arr_score_audit.append(1 if count_value >= min_product else 0)
-                            print("Dòng 208 Co cau hinh", setting_score_audit)
                         child_doc.insert()
                 if setting_score_audit is not None:
                     frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1)
@@ -218,7 +214,6 @@ def process_report_sku(name, report_images, category, setting_score_audit):
         else:
             print({'status': 'fail', 'message': _("No data provided for report_sku")})
     except Exception as e:
-        print(e)
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)

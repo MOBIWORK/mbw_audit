@@ -1,12 +1,10 @@
 
-import { LuUploadCloud } from "react-icons/lu";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import  {AxiosService, AxiosServiceMBW} from '../../services/server';
-import { VscAdd } from "react-icons/vsc";
+import  {AxiosService} from '../../services/server';
 import {
-  DeleteOutlined,
-  EditOutlined,
   SearchOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from "@ant-design/icons";
 import { Input, Space, Table, TableColumnsType,DatePicker,Select,Upload } from "antd";
 import { useState,useEffect } from "react";
@@ -39,14 +37,6 @@ const columns: TableColumnsType<DataType> = [
     title: "Nhân viên thực hiện",
     dataIndex: "employee_name",
   },
-  // {
-  //   title: "Thời gian vào",
-  //   dataIndex: "date_check_in",
-  // },
-  // {
-  //   title: "Thời gian ra",
-  //   dataIndex: "date_check_out",
-  // },
   {
     title: "Số lượng danh mục sản phẩm",
     dataIndex: "quantity_cate",
@@ -56,12 +46,14 @@ const columns: TableColumnsType<DataType> = [
     dataIndex: "images_time",
   },
   {
-    title: "Hình ảnh",
-    dataIndex: "images",
-    render: (imgs: Array<string>) => (
-      <img src={`${imgs != null && typeof(imgs) != "string" && imgs.length > 0? imgs[0] : ""}`} alt="image.png" style={{ width: '80px', height: '80px',borderRadius:'5px' }} /> //${import.meta.env.VITE_BASE_URL}
-  ),
-  
+    title: "Chấm điểm trưng bày",
+    dataIndex: "scoring_machine",
+    render: (scoring_machine: number) => (
+      <>
+        {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+        {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+      </>
+    )
   },
 ];
 // rowSelection object indicates the need for row selection
@@ -102,7 +94,6 @@ const fetchDataReport = async () => {
     try {
         let urlReport = apiUrl + '.api.get_list_reports';
         const response = await AxiosService.get(urlReport);
-
         if (response && response.message && response.message.data) {
             let dataReport: DataType[] = response.message.data.map((item: DataType, index: number) => {
               let stt: string = (index + 1).toString().padStart(2, '0'); // Chuyển stt thành chuỗi và thêm số 0 nếu nhỏ hơn 10
