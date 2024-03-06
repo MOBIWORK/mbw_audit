@@ -90,7 +90,6 @@ export default function Campaign() {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
-      console.log(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         const bufferArray = event.target.result;
@@ -101,11 +100,18 @@ export default function Campaign() {
         let dataImport = [];
         if(data.length >= 2){
           for(let i = 1; i < data.length; i++){
+            const EXCEL_EPOCH = new Date(1899, 11, 31);
+            const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+            let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
+
+            const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+            let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
+
             let objDataImport = {
               'campaign_name': data[i][0],
               'campaign_description': data[i][1],
-              'campaign_start': typeof(data[i][2]) == "string" && data[i][2] != ""?  data[i][2] : null,
-              'campaign_end': typeof(data[i][3]) == "string" && data[i][3] != ""?  data[i][3] : null,
+              'campaign_start': (startDate.getTime() / 1000).toString(),
+              'campaign_end': (endDate.getTime() / 1000).toString(),
               'campaign_status': data[i][4] != ""? data[i][4] : "Open",
               'campaign_categories': data[i][5],
               'campaign_employees': data[i][6],
@@ -115,7 +121,6 @@ export default function Campaign() {
           }
         }
         setLstCampaignImport(dataImport);
-        console.log(dataImport);
       };
       reader.readAsArrayBuffer(file);
       return false;
@@ -238,8 +243,19 @@ export default function Campaign() {
     setIsModalOpenImportFileExcel(true);
   }
 
-  const handleOkImportExcel = () => {
-
+  const handleOkImportExcel = async() => {
+    let url_import_campaign = apiUrl + ".api.import_campaign";
+    let dataPost ={
+      "listcampaign" :JSON.stringify(lstCampaignImport)
+    }
+    let res = await AxiosService.post(url_import_campaign, dataPost);
+    if(res.status == "success"){
+      message.success("Thên chiến dịch thành công");
+    }else{
+      message.success("Thên chiến dịch thất bại");
+    }
+    
+   
   }
 
   const handleCancelImportExcel = () => {

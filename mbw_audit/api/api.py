@@ -325,31 +325,41 @@ def save_tmp_file(filename, filedata):
         f.write(filedata)
     return tmp_file_path
 
-@frappe.whitelist(methods=["POST"], allow_guest=True)
+
+@frappe.whitelist(methods="POST")
 def import_campaign(*args, **kwargs):
     try:
         list_campaigns = json.loads(kwargs.get('listcampaign'))
         date_format_with_time = '%Y/%m/%d %H:%M:%S'
 
         for data in list_campaigns:
-            
             new_campaign = frappe.new_doc('VGM_Campaign')
             new_campaign.campaign_name = data.get('campaign_name', '')
             new_campaign.campaign_description = data.get('campaign_description', '')
-            start_date = int(data.get('campaign_start'))
-            start_date = datetime.fromtimestamp(start_date).strftime(date_format_with_time)
-            end_date = int(data.get('campaign_end'))
-            end_date = datetime.fromtimestamp(end_date).strftime(date_format_with_time)
+
+            start_date_str = data.get('campaign_start')
+            end_date_str = data.get('campaign_end')
+
+            start_date = None
+            end_date = None
+
+            if start_date_str:
+                start_date = datetime.fromtimestamp(int(start_date_str)).strftime(date_format_with_time)
+
+            if end_date_str:
+                end_date = datetime.fromtimestamp(int(end_date_str)).strftime(date_format_with_time)
+
             new_campaign.start_date = start_date
             new_campaign.end_date = end_date
+
             categories = json.loads(data.get('campaign_categories'))
             employees = json.loads(data.get('campaign_employees'))
             retails = json.loads(data.get('campaign_customers'))
+
             new_campaign.campaign_status = data.get("campaign_status")
             new_campaign.categories = json.dumps(categories)
             new_campaign.employees = json.dumps(employees)
             new_campaign.retails = json.dumps(retails)
-            
 
             new_campaign.insert()
 
