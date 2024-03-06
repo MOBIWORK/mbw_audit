@@ -49,7 +49,6 @@ class VGM_Product(Document):
                     image_ids.append(image_id)
                 response = products.add(collection_name, product_id_ai, self.product_name, image_ids, image_paths)
                 products.update_by_id(collection_name, product_id_ai, self.product_name)
-                print(response)
                 if response.get('status') == 'completed':
                     pass
                 else:

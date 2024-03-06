@@ -251,6 +251,7 @@ export default function Campaign() {
     let res = await AxiosService.post(url_import_campaign, dataPost);
     if(res.status == "success"){
       message.success("Thên chiến dịch thành công");
+      initDataCampaigns();
     }else{
       message.success("Thên chiến dịch thất bại");
     }
