@@ -83,6 +83,7 @@ import {
     }, [searchEmployee]);
   
     const initDataEmployee = async () => {
+      setSelectedRowKeys(employeeEdit);
       let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
       let res = await AxiosService.get(urlEmployee);
       let arrEmployeeSource = [];
