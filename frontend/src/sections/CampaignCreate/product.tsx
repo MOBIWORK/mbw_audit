@@ -204,6 +204,7 @@ export default function Product({onChangeCategory}) {
     updatedRowData[index].product_num = newValue;
     // Cập nhật trạng thái của bảng
     setProductSelected(updatedRowData);
+    onChangeCategory(categoriesSelected)
 };
   const itemscoll: CollapseProps['itemscoll'] = [
     {

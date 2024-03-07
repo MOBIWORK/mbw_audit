@@ -24,6 +24,8 @@ export default function CampaignEdit() {
   const [categoryEdit, setCategoryEdit] = useState([]);
   const [employeeEdit, setEmployeeEdit] = useState([]);
   const [customerEdit, setCustomerEdit] = useState([]);
+  const [productEdit, setProductEdit] = useState({});
+  
 
   useEffect(() => {
     initDataByIdCampaign();
@@ -38,10 +40,11 @@ export default function CampaignEdit() {
             'campaign_description': res.data.campaign_description,
             'campaign_start': convertDateFormat(res.data.start_date),
             'campaign_end': convertDateFormat(res.data.end_date),
-             campaign_status: res.data.campaign_status
+             campaign_status: res.data.campaign_status,
         })
         setStatusCampaignEdit(res.data.campaign_status);
         setCategoryEdit(JSON.parse(res.data.categories));
+        setProductEdit(JSON.parse(res.data.setting_score_audit));
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
 
@@ -54,29 +57,37 @@ export default function CampaignEdit() {
   }
 
   const handleEditCampaign = async () => {
-    let objFrm = form.getFieldsValue();
-    let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
-    let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
-    let arrCustomer = (customersSelected && customersSelected.length > 0) ? customersSelected.map(x => x.name) : customerEdit;
-    let urlPutData = `/api/resource/VGM_Campaign/${name}`;
-    let dataPut = {
-      'campaign_name': objFrm.campaign_name,
-      'campaign_description': objFrm.campaign_description,
-      'start_date': convertDate(objFrm.campaign_start),
-      'end_date': convertDate(objFrm.campaign_end),
-      'campaign_status': campaignStatus,
-      'categories': JSON.stringify(arrCategory),
-      'employees': JSON.stringify(arrEmployee),
-      'retails': JSON.stringify(arrCustomer)
+    try {
+        let objFrm = form.getFieldsValue();
+        let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
+        let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
+        let arrCustomer = (customersSelected && customersSelected.length > 0) ? customersSelected.map(x => x.name) : customerEdit;
+        let urlPutData = `/api/resource/VGM_Campaign/${name}`;
+        let dataPut = {
+            'campaign_name': objFrm.campaign_name,
+            'campaign_description': objFrm.campaign_description,
+            'start_date': convertDate(objFrm.campaign_start),
+            'end_date': convertDate(objFrm.campaign_end),
+            'campaign_status': campaignStatus,
+            'categories': JSON.stringify(arrCategory),
+            'employees': JSON.stringify(arrEmployee),
+            'retails': JSON.stringify(arrCustomer),
+            'setting_score_audit': productEdit
+        };
+
+        let res = await AxiosService.put(urlPutData, dataPut);
+
+        if (res != null && res.data != null) {
+            message.success("Cập nhật thành công");
+            navigate('/campaign');
+        } else {
+            message.error("Cập nhật thất bại");
+        }
+    } catch (error) {
+        // Xử lý khi có lỗi xảy ra trong quá trình cập nhật
+        message.error("Không thể cập nhật. Vui lòng kiểm tra lại thông tin");
     }
-    let res = await AxiosService.put(urlPutData, dataPut);
-    if(res != null && res.data != null){
-      message.success("Cập nhật thành công");
-      navigate('/campaign');
-    }else{
-      message.error("Cập nhật thất bại");
-    }
-  }
+};
 
   const convertDate = (val) => {
     // Tạo một đối tượng Date từ chuỗi thời gian
@@ -93,6 +104,18 @@ export default function CampaignEdit() {
 
   const handleChangeCategory = (val) => {
     setCategoriesSelected(val);
+      // Khởi tạo biến kết quả
+      let result = {};
+      for (let i = 0; i < val.length; i++) {
+        // Duyệt qua mảng products và tạo biến kết quả
+        val[i].products.forEach((product) => {
+          result[product.key] = {
+            min_product: parseInt(product.product_num),
+          };
+        });
+      }
+
+      setProductEdit(result);
   }
 
   const handleChangeEmployee = (val) => {
@@ -139,7 +162,7 @@ export default function CampaignEdit() {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
                 children: (
-                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit}
+                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} 
                   />
                 ),
               },

@@ -4,7 +4,6 @@ let AxiosService:any = axios;
 // console.log(import.meta.env.VITE_BASE_URL);
 
 if (import.meta.env.VITE_BASE_URL) {
-  console.log('vao day');
   
   AxiosService = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL,
@@ -25,8 +24,6 @@ if (import.meta.env.VITE_BASE_URL) {
 }
 AxiosService.interceptors.response.use(
   function (response) {
-    console.log("response",response);
-    
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
     return response.data;
