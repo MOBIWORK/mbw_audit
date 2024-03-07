@@ -90,6 +90,7 @@ export default function Campaign() {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
+      console.log(fileListExport);
       const reader = new FileReader();
       reader.onload = (event) => {
         const bufferArray = event.target.result;
@@ -137,6 +138,8 @@ export default function Campaign() {
   const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] = useState(false);
   const [lstCampaignImport, setLstCampaignImport] = useState([]);
 
+  const [fileListExport , setFileListExport] = useState<any[]>([]);
+  
   useEffect(() => {
     initDataCampaigns();
   }, []);
@@ -354,7 +357,7 @@ export default function Campaign() {
         <p className="text-[#637381] font-normal text-sm">
           Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
         </p>
-        <Dragger {...propUploadImportFileExcel}>
+        <Dragger {...propUploadImportFileExcel} >
           <p className="ant-upload-drag-icon">
             <PlusOutlined />
           </p>

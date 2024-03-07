@@ -67,6 +67,7 @@ export default function ProductCampaignEdit({
   }, []);
 
   const initDataCategoriesWithOutFilter = async () => {
+    setSelectedRowKeys(categoryEdit)
     let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
     const response = await AxiosService.get(urlCategory);
     // Kiểm tra xem kết quả từ API có chứa dữ liệu không
@@ -190,13 +191,24 @@ export default function ProductCampaignEdit({
 
   const handleSelectCategory = () => {
     let arrCategorySelect: TypeCategory[] = [];
+    let allProducts = [];
     for (let i = 0; i < selectedRowKeys.length; i++) {
       let item = categories.filter((x) => x.name == selectedRowKeys[i]);
       if (item != null && item.length > 0) {
         item[0].stt = arrCategorySelect.length + 1;
-        arrCategorySelect.push(item[0]);
+        // Tạo một bản sao của đối tượng category
+        let categoryCopy = { ...item[0] };
+
+        // Thêm trường "name" của category vào mỗi phần tử trong mảng "products"
+        categoryCopy.products = categoryCopy.products.map(product => {
+            return { ...product, cate_name: categoryCopy.category_name  , product_num : "1"};
+        });
+        allProducts = allProducts.concat(categoryCopy.products);
+        arrCategorySelect.push(categoryCopy);
+        
       }
     }
+    setProductSelected(allProducts)
     setCategoriesSelected(arrCategorySelect);
     onChangeCategory(arrCategorySelect);
     handleCancelAddCategory();
