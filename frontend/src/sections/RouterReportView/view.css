@@ -12,3 +12,6 @@
   :where(.css-dev-only-do-not-override-dkbvqv).ant-collapse .ant-collapse-content>.ant-collapse-content-box {
     padding : 0
 }
+.ant-form-item-label{
+  padding-bottom: 0px !important;
+}

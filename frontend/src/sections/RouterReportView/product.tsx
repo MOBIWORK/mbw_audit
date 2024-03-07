@@ -78,11 +78,13 @@ const expandedRowData = props.recordData?.category_names.map((category, index) =
           columns={mainColumns}
           expandable={{
             expandedRowRender: (record, index) => (
+              <div style={{ margin: 5 }}>
                 <Table
                     columns={expandedColumns}
                     dataSource={expandedRowData[index]}
                     pagination={false}
                 />
+              </div>
             ),
             rowExpandable: (record) => expandedRowData[record.key].length > 0
         }}

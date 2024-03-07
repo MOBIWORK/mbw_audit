@@ -122,7 +122,7 @@ def record_report_data(*args, **kwargs):
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
     images = json.loads(kwargs.get('images'))
     images_str = json.dumps(images)
-    setting_score_audit = json.loads(kwargs.get('setting_score_audit'))
+    setting_score_audit = json.loads(kwargs.get('setting_score_audit')) if kwargs.get('setting_score_audit') is not None else None
     try:
         data = {
             'doctype': 'VGM_Report',
@@ -190,11 +190,12 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                                 'category': category_id,
                                 'sum_product': count_value,
                                 # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                                'product': product_id
+                                'product': product_id,
+                                'scoring_machine': -1
                             })
                         else:
                             setting_by_product = setting_score_audit.get(product_id)
-                            min_product = setting_by_product.get("min_product")
+                            result_score_audit = process_setting_score_audit(count_value, setting_by_product)
                             child_doc.update({
                                 'parent': name, 
                                 'parentfield': 'report_sku',
@@ -203,18 +204,26 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                                 'sum_product': count_value,
                                 # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
                                 'product': product_id,
-                                'scoring_machine': 1 if count_value >= min_product else 0 
+                                'scoring_machine': result_score_audit 
                             })
-                            arr_score_audit.append(1 if count_value >= min_product else 0)
+                            arr_score_audit.append(result_score_audit)
                         child_doc.insert()
                 if setting_score_audit is not None:
-                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1)
+                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1 if 1 in arr_score_audit else -1)
+                else:
+                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
             except Exception as e:
                 print({'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))})
         else:
             print({'status': 'fail', 'message': _("No data provided for report_sku")})
     except Exception as e:
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
+
+def process_setting_score_audit(count_value, setting_score_audit):
+    result = -1
+    if setting_score_audit is not None and setting_score_audit.get("min_product") is not None:
+        result = 1 if count_value >= setting_score_audit.get("min_product") else 0
+    return result
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):
