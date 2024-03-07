@@ -283,11 +283,15 @@ export default function ProductCampaignEdit({
       { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" },
     ];
     return (
-      <Table
-        columns={columnProducts}
-        dataSource={record.products}
-        pagination={false}
-      />
+      <>
+      <div style={{ margin: 5 }}>
+        <Table
+          columns={columnProducts}
+          dataSource={record.products}
+          pagination={false}
+        />
+      </div>  
+      </>
     );
   };
 

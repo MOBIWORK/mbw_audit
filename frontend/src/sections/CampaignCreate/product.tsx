@@ -163,7 +163,7 @@ export default function Product({onChangeCategory}) {
       { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
       { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" },
     ];
-    return <Table columns={columnProducts} dataSource={record.products} pagination={false} />;
+    return <><div style={{ margin: 5 }}><Table columns={columnProducts} dataSource={record.products} pagination={false} /></div></>;
   };
 
   const columnCategories: TableColumnsType<DataType> = [
