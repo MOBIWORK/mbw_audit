@@ -336,7 +336,8 @@ def upload_file():
 
         # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
         fileInfo = save_file(filename, filedata, "File", "Home")
-        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url})
+        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url,
+                                        "date_time" : str(datetime.now().timestamp())})
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
         return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
