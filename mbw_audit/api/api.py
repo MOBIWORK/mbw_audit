@@ -370,30 +370,37 @@ def import_campaign(*args, **kwargs):
             start_date_str = data.get('campaign_start')
             end_date_str = data.get('campaign_end')
 
-            start_date = None
-            end_date = None
-
-            if start_date_str:
-                start_date = datetime.fromtimestamp(int(start_date_str)).strftime(date_format_with_time)
-
-            if end_date_str:
-                end_date = datetime.fromtimestamp(int(end_date_str)).strftime(date_format_with_time)
+            start_date = datetime.fromtimestamp(int(start_date_str)).strftime(date_format_with_time) if start_date_str else None
+            end_date = datetime.fromtimestamp(int(end_date_str)).strftime(date_format_with_time) if end_date_str else None
 
             new_campaign.start_date = start_date
             new_campaign.end_date = end_date
 
             categories = json.loads(data.get('campaign_categories'))
+            min_products = {}
+            category_names = []
+
+            for category in categories:
+                category_name = frappe.get_value("VGM_Category", {"category_name": category}, "name")
+                if category_name:
+                    category_names.append(category_name)
+                    products = frappe.get_all("VGM_Product", filters={"category": category_name}, fields=["name"])
+                    min_products.update({product.name: {"min_product": 1} for product in products})
+
             employees = json.loads(data.get('campaign_employees'))
             retails = json.loads(data.get('campaign_customers'))
 
             new_campaign.campaign_status = data.get("campaign_status")
-            new_campaign.categories = json.dumps(categories)
+            new_campaign.categories = json.dumps(category_names)
             new_campaign.employees = json.dumps(employees)
             new_campaign.retails = json.dumps(retails)
+            
+            # Gán min_products vào trường setting_score_audit        
+            new_campaign.setting_score_audit = json.dumps(min_products)
 
             new_campaign.insert()
 
         return {'status': 'success', 'message': 'Campaigns imported successfully'}
     except Exception as e:
         return {'status': 'failed', 'message': str(e)}
- 
+

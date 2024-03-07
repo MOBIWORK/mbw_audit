@@ -121,6 +121,7 @@ export default function Campaign() {
             dataImport.push(objDataImport);
           }
         }
+        console.log(dataImport);
         setLstCampaignImport(dataImport);
       };
       reader.readAsArrayBuffer(file);
@@ -252,11 +253,11 @@ export default function Campaign() {
       "listcampaign" :JSON.stringify(lstCampaignImport)
     }
     let res = await AxiosService.post(url_import_campaign, dataPost);
-    if(res.status == "success"){
+    if(res.message.status == "success"){
       message.success("Thên chiến dịch thành công");
       initDataCampaigns();
     }else{
-      message.success("Thên chiến dịch thất bại");
+      message.error("Thêm chiến dịch thất bại");
     }
     
    

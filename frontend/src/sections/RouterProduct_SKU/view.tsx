@@ -130,38 +130,52 @@ export default function Product_SKU() {
   let labelColors = {}
   
   const [lstProductImport, setLstProductImport] = useState([]);
+  const [fileListImport, setFileListImport] = useState<UploadFile[]>([])
+  
 
-  const propUploadImportFileExcel: UploadProps = {
+ const propUploadImportFileExcel: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const bufferArray = event.target.result;
-        const wb = XLSX.read(bufferArray, { type: "buffer" });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        let dataImport = [];
-        if(data.length >= 2){
-          for(let i = 1; i < data.length; i++){
-            let objDataImport = {
-              'product_code': data[i][0],
-              'barcode': data[i][1] ? data[i][1] : "" ,
-              'product_name': data[i][2],
-              'product_description': data[i][3],
-              'url_images': JSON.parse(data[i][4]),
-            }
-            dataImport.push(objDataImport);
-          }
+        try {
+            let obj = [{
+                uid: '-1',
+                name: file.name,
+                status: 'done',
+                url: ''
+            }];
+            setFileListImport(obj);
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const bufferArray = event.target.result;
+                const wb = XLSX.read(bufferArray, { type: "buffer" });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                let dataImport = [];
+                if (data.length >= 2) {
+                    for (let i = 1; i < data.length; i++) {
+                        let objDataImport = {
+                            'product_code': data[i][0] ? data[i][0] : "",
+                            'barcode': data[i][1] ? data[i][1] : "",
+                            'product_name': data[i][2],
+                            'product_description': data[i][3],
+                            'url_images': JSON.parse(data[i][4]),
+                        }
+                        dataImport.push(objDataImport);
+                    }
+                }
+                setLstProductImport(dataImport);
+            };
+            reader.readAsArrayBuffer(file);
+            return false;
+        } catch (error) {
+            message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+            // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
+            return false; // Trả về false để ngăn việc tự động tải file
         }
-        console.log(dataImport);
-        setLstProductImport(dataImport);
-      };
-      reader.readAsArrayBuffer(file);
-      return false;
-    }
-  }
+    },
+};
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
@@ -535,31 +549,40 @@ export default function Product_SKU() {
   const handleOkAddProduct = async () => {
     let objProduct = formAddProduct.getFieldsValue();
     let arrImages = [];
-    for(let i = 0; i < fileUploadAddProduct.length; i++){
-      arrImages.push(fileUploadAddProduct[i].file_url);
+    for (let i = 0; i < fileUploadAddProduct.length; i++) {
+        arrImages.push(fileUploadAddProduct[i].file_url);
     }
+
+    // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
+    if (!objProduct.product_name || arrImages.length === 0) {
+        // Hiển thị thông báo lỗi
+        message.error("Vui lòng nhập đủ thông tin sản phẩm và tải lên ít nhất một hình ảnh");
+        return;
+    }
+
     let urlAddProduct = "/api/resource/VGM_Product";
     let objProductCreate = {
-      'barcode': objProduct.barcode_product,
-      'product_code': objProduct.product_code,
-      'product_name': objProduct.product_name,
-      'product_description': objProduct.product_description,
-      'category': categorySelected.name,
-      'images': JSON.stringify(arrImages)
-    }
+        'barcode': objProduct.barcode_product,
+        'product_code': objProduct.product_code,
+        'product_name': objProduct.product_name,
+        'product_description': objProduct.product_description,
+        'category': categorySelected.name,
+        'images': JSON.stringify(arrImages)
+    };
+
     let res = await AxiosService.post(urlAddProduct, objProductCreate);
-    if(res != null && res.data != null){
-      message.success("Thêm mới thành công");
-      formAddProduct.resetFields();
-      let barcode = document.getElementById("barcode");
-      barcode.innerHTML = "";
-      setFileUploadAddProduct([]);
-      initDataProductByCategory();
-      handleCancelAddProduct();
-    }else{
-      message.error("Thêm mới thất bại");
+    if (res != null && res.data != null) {
+        message.success("Thêm mới thành công");
+        formAddProduct.resetFields();
+        let barcode = document.getElementById("barcode");
+        barcode.innerHTML = "";
+        setFileUploadAddProduct([]);
+        initDataProductByCategory();
+        handleCancelAddProduct();
+    } else {
+        message.error("Thêm mới thất bại");
     }
-  };
+};
 
   const handleRenderBarcodeAddProduct = (event) => {
     renderBarcodeByValue(event.target.value);
@@ -828,6 +851,7 @@ objectBoxes.forEach((box) => {
   }
   const handleCancelImportExcel = () => {
     setIsModalOpenImportFileExcel(false);
+    setFileListImport([])
   }
 
   useEffect(() => {
@@ -894,6 +918,7 @@ objectBoxes.forEach((box) => {
   }
   const handleImportFileProduct = () => {
     setIsModalOpenImportFileExcel(true);
+    setFileListImport([])
   }
   const handleOkImportExcel = async() => {
     let dataPost = {
@@ -1388,7 +1413,7 @@ objectBoxes.forEach((box) => {
         <p className="text-[#637381] font-normal text-sm">
           Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
         </p>
-        <Dragger {...propUploadImportFileExcel}>
+        <Dragger {...propUploadImportFileExcel} fileList={fileListImport}>
           <p className="ant-upload-drag-icon">
             <PlusOutlined />
           </p>
