@@ -459,25 +459,45 @@ export default function Product_SKU() {
   };
 
   const handleOkCategory = async () => {
-    let valField = form.getFieldsValue();
-    let dataPost = {
-      'doc': JSON.stringify({
-        'doctype': "VGM_Category",
-        'category_name': valField.name_item,
-        'category_description': valField.des
-      }),
-      'action': "Save"
+    const valField = form.getFieldsValue();
+    const categoryName = valField.name_item.trim();
+
+    if (!categoryName) {
+        message.warning("Vui lòng nhập tên danh mục.");
+        return;
     }
-    let resCreateCategory = await AxiosService.post('/api/method/frappe.desk.form.save.savedocs', dataPost);
-    if(resCreateCategory != null && resCreateCategory.docs != null && resCreateCategory.docs.length > 0){
-      form.resetFields();
-      message.success("Thêm mới thành công");
-      fetchDataCategories();
-      setIsModalOpenAddCategory(false);
-    }else{
-      message.error("Thêm mới thất bại");
+    // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
+    const isCategoryExists = categories.some(cat => cat.category_name === categoryName);
+    if (isCategoryExists) {
+        message.error("Danh mục đã tồn tại.");
+        return;
     }
-  };
+
+    try {
+        const dataPost = {
+            'doc': JSON.stringify({
+                'doctype': "VGM_Category",
+                'category_name': categoryName,
+                'category_description': valField.des
+            }),
+            'action': "Save"
+        };
+
+        const resCreateCategory = await AxiosService.post('/api/method/frappe.desk.form.save.savedocs', dataPost);
+        if (resCreateCategory && resCreateCategory.docs && resCreateCategory.docs.length > 0) {
+            form.resetFields();
+            message.success("Thêm mới thành công");
+            fetchDataCategories();
+            setIsModalOpenAddCategory(false);
+        } else {
+            message.error("Thêm mới thất bại");
+        }
+    } catch (error) {
+        console.error("Lỗi khi thêm mới danh mục:", error);
+        message.error("Đã xảy ra lỗi khi thêm mới danh mục.");
+    }
+};
+
 
   const handleCancelCategory = () => {
     setIsModalOpenAddCategory(false);
