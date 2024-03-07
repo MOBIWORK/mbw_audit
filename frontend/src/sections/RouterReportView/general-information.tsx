@@ -43,13 +43,13 @@ export default function GeneralInformation({ form,recordData }) {
   }, [recordData]);
   return (
     <>
-      <div className="p-4 pt-6 pb-[58px]">
+      <div className="p-4 pt-6 pb-[40px]">
         <RowCustom>
           <Col span={10} style={{height: '400px'}}>
             <Carousel dots={true}>
               {lstImage.map((image, index) => (
                 <div key={index} style={{ backgroundColor: "#99989859" }}>
-                  <img src={image} style={{ width: '100%', height: 'auto' }} />
+                  <img src={image} style={{ width: '100%', height: '400px' }} />
                 </div>
               ))}
             </Carousel>
