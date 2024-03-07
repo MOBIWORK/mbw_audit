@@ -46,7 +46,7 @@ interface TypeProduct{
   product_name: string;
 }
 
-export default function Product({onChangeCategory}) {
+export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
   const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
@@ -54,6 +54,7 @@ export default function Product({onChangeCategory}) {
   const [searchCategory, setSearchCategory] = useState("");
   const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
   const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
+  const [checkExistProduct, setCheckExistProduct] = useState(true);
 
   useEffect(() => {
     initDataCategories();
@@ -158,6 +159,11 @@ export default function Product({onChangeCategory}) {
     onChangeCategory(updatedCategoriesSelected);
   }
 
+  const handleChangeCheckExist = (e) => {
+    setCheckExistProduct(e.target.checked);
+    onChangeCheckExistProduct(e.target.checked);
+  }
+
   const expandedRowRender = (record, index) => {
     const columnProducts: TableColumnsType<ExpandedDataType> = [
       { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
@@ -209,7 +215,7 @@ export default function Product({onChangeCategory}) {
   const itemscoll: CollapseProps['itemscoll'] = [
     {
       key: '1',
-      label: <Checkbox> <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tồn tại sản phẩm </span> </Checkbox> ,
+      label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tồn tại sản phẩm </span> </Checkbox> ,
       children:  <div>
       <TableCustom
         columns={columnProduct}

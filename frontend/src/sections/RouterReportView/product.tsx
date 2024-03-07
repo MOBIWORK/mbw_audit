@@ -19,11 +19,11 @@ interface ExpandedDataType {
 export default function Product(props) {
 
   const sumProductByCategory = {};
-
+  console.log(props.recordData)
   // Tính tổng sum_product cho từng danh mục
   props.recordData?.detail.forEach(detailItem => {
       const categoryCode = detailItem.category;
-      const sumProduct = parseInt(detailItem.sum_product);
+      const sumProduct = 1;
   
       // Kiểm tra và cập nhật tổng sum_product cho từng danh mục
       sumProductByCategory[categoryCode] = (sumProductByCategory[categoryCode] || 0) + sumProduct;

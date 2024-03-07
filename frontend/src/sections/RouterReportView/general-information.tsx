@@ -44,20 +44,17 @@ export default function GeneralInformation({ form,recordData }) {
   return (
     <>
       <div className="p-4 pt-6 pb-[58px]">
-
         <RowCustom>
-          <Col span={10}>
-            <Carousel >
+          <Col span={10} style={{height: '350px'}}>
+            <Carousel dots={true}>
               {lstImage.map((image, index) => (
-                <div key={index} style={{position: 'relative'}}>
-                  <div style={{ backgroundColor: "#99989859" }}>
-                    <img src={image} style={{ width: '100%', height: 'auto' }} />
-                  </div>
+                <div key={index} style={{ backgroundColor: "#99989859" }}>
+                  <img src={image} style={{ width: '100%', height: 'auto' }} />
                 </div>
               ))}
             </Carousel>
           </Col>
-          <Col span={14}>
+          <Col span={14} style={{height: '350px'}}>
             <FormItemCustom label="Khách hàng" name="store" className="pt-3" required>
               <Input readOnly={true} />
             </FormItemCustom>

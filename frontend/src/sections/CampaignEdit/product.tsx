@@ -50,6 +50,7 @@ export default function ProductCampaignEdit({
   onChangeCategory,
   categoryEdit,
   productEdit,
+  onChangeCheckExistProduct
 }) {
   const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
   const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
@@ -57,9 +58,8 @@ export default function ProductCampaignEdit({
 
   const [categories, setCategories] = useState<TypeCategory[]>([]);
   const [searchCategory, setSearchCategory] = useState("");
-  const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>(
-    []
-  );
+  const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
+  const [checkExistProduct, setCheckExistProduct] = useState(false);
 
   const onChange = (key: string | string[]) => {};
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function ProductCampaignEdit({
           categoryCopy.products = categoryCopy.products.map((product) => {
             // Lấy giá trị min_product tương ứng với product_code của sản phẩm
             const minProductValue = productEdit[product.name]?.min_product || 0;
-
+            if(productEdit[product.name] != null && productEdit[product.name]?.min_product != null && !checkExistProduct) setCheckExistProduct(true);
             // Gán giá trị cate_name và min_product cho sản phẩm
             return {
               ...product,
@@ -238,6 +238,12 @@ export default function ProductCampaignEdit({
     setCategoriesSelected(updatedCategoriesSelected);
     onChangeCategory(updatedCategoriesSelected);
   };
+
+  const handleChangeCheckExist = (e)=>{
+    setCheckExistProduct(e.target.checked);
+    onChangeCheckExistProduct(e.target.checked);
+  }
+
   const columnProduct: TableColumnsType<DataType> = [
     { title: "Mã sản phẩm", dataIndex: "product_code" },
     { title: "Tên sản phẩm", dataIndex: "product_name" },
@@ -274,7 +280,7 @@ export default function ProductCampaignEdit({
     {
       key: "1",
       label: (
-        <Checkbox>
+        <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}>
           {" "}
           <span style={{ fontWeight: 700, fontSize: "15px" }}>
             {" "}

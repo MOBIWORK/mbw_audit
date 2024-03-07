@@ -25,6 +25,7 @@ export default function CampaignEdit() {
   const [employeeEdit, setEmployeeEdit] = useState([]);
   const [customerEdit, setCustomerEdit] = useState([]);
   const [productEdit, setProductEdit] = useState({});
+  const [checkExistProduct, setCheckExistProduct] = useState(false);
   
 
   useEffect(() => {
@@ -58,6 +59,15 @@ export default function CampaignEdit() {
 
   const handleEditCampaign = async () => {
     try {
+      let objSettingScore = {};
+      let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
+      propertiesSettingScore.forEach(item => {
+        let valSettingScore = productEdit[item];
+        if(!checkExistProduct){
+          delete valSettingScore["min_product"]
+        }
+        objSettingScore[item] = valSettingScore;
+      });
         let objFrm = form.getFieldsValue();
         let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
         let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
@@ -72,7 +82,7 @@ export default function CampaignEdit() {
             'categories': JSON.stringify(arrCategory),
             'employees': JSON.stringify(arrEmployee),
             'retails': JSON.stringify(arrCustomer),
-            'setting_score_audit': productEdit
+            'setting_score_audit': objSettingScore
         };
 
         let res = await AxiosService.put(urlPutData, dataPut);
@@ -126,6 +136,10 @@ export default function CampaignEdit() {
     setCustomersSelected(val);
   }
 
+  const handleChangeExistProduct = (val) => {
+    setCheckExistProduct(val);
+  }
+
   return (
     <>
       <HeaderPage
@@ -162,7 +176,7 @@ export default function CampaignEdit() {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
                 children: (
-                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} 
+                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} onChangeCheckExistProduct={handleChangeExistProduct}
                   />
                 ),
               },

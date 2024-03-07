@@ -17,9 +17,19 @@ export default function CampaignCreate() {
   const [employeesSelected, setEmployeesSelected] = useState([]);
   const [customersSelected, setCustomersSelected] = useState([]);
   const [scoreSelected, setScoreSelected] = useState({});
+  const [checkExistProduct, setCheckExistProduct] = useState(true);
 
   const handleAddCampaign = async () => {
     try {
+      let objSettingScore = {};
+      let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
+      propertiesSettingScore.forEach(item => {
+        let valSettingScore = scoreSelected[item];
+        if(!checkExistProduct){
+          delete valSettingScore["min_product"]
+        }
+        objSettingScore[item] = valSettingScore;
+      });
         let objFrm = form.getFieldsValue();
         let arrCategory = categoriesSelected.map((x) => x.name);
         let arrEmployee = employeesSelected.map((x) => x.name);
@@ -35,9 +45,8 @@ export default function CampaignCreate() {
             categories: JSON.stringify(arrCategory),
             employees: JSON.stringify(arrEmployee),
             retails: JSON.stringify(arrCustomer),
-            setting_score_audit: scoreSelected
+            setting_score_audit: objSettingScore
         };
-        
         let res = await AxiosService.post(urlPostData, dataPost);
         
         if (res != null && res.data != null) {
@@ -92,6 +101,10 @@ export default function CampaignCreate() {
     setCustomersSelected(val);
   };
 
+  const handleChangeExistProduct = (val) => {
+    setCheckExistProduct(val);
+  }
+
   return (
     <>
       <HeaderPage
@@ -132,7 +145,7 @@ export default function CampaignCreate() {
               {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
-                children: <Product onChangeCategory={handleChangeCategory} />,
+                children: <Product onChangeCategory={handleChangeCategory} onChangeCheckExistProduct={handleChangeExistProduct}/>,
               },
               {
                 label: <p className="px-4 mb-0">Nhân viên bán hàng</p>,

@@ -115,7 +115,7 @@ def get_campaign_info(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
-    images_time = int(kwargs.get('images_time'))
+    images_time = float(kwargs.get('images_time'))
     
     images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
