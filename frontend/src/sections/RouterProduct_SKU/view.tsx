@@ -804,7 +804,7 @@ export default function Product_SKU() {
       setObjectBoxes(arrBoxes);
     }
     
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL+fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
