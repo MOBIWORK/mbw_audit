@@ -16,6 +16,8 @@ from frappe.utils.file_manager import (
 )
 from frappe.utils import get_site_path
 from datetime import datetime
+import base64
+import cv2
 
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
@@ -205,11 +207,13 @@ def render_image_ai(verbose):
         locates = item.get("locates", [])
         image = base64_to_cv2(base64_image)
         for locate in locates:
-            draw_detections(image, locate.get("bbox"), locate.get("label"))
+            if locate.get("label") != "Unknow":
+                draw_detections(image, locate.get("bbox"), locate.get("label"))
         timestamp = datetime.timestamp(datetime.now())
-        print("Dòng 210", timestamp)
-        print("Dòng 211", image)
-        fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", image, "File", "Home")
+        # Mã hóa hình ảnh thành chuỗi Base64
+        _, buffer = cv2.imencode('.jpg', image)
+        base64_image_encoded = base64.b64encode(buffer).decode("utf-8")
+        fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "Home")
         arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
     return arr_image_ai
 
