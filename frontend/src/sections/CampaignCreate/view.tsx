@@ -23,13 +23,14 @@ export default function CampaignCreate() {
     try {
       let objSettingScore = {};
       let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
-      propertiesSettingScore.forEach(item => {
-        let valSettingScore = scoreSelected[item];
-        if(!checkExistProduct){
-          delete valSettingScore["min_product"]
-        }
-        objSettingScore[item] = valSettingScore;
-      });
+      if(checkExistProduct){
+        let objMinProduct = {};
+        propertiesSettingScore.forEach(item => {
+          let valSettingScore = scoreSelected[item];
+          objMinProduct[item] = valSettingScore.min_product;
+        })
+        objSettingScore["min_product"] = objMinProduct;
+      }
         let objFrm = form.getFieldsValue();
         let arrCategory = categoriesSelected.map((x) => x.name);
         let arrEmployee = employeesSelected.map((x) => x.name);

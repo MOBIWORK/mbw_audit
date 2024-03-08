@@ -45,11 +45,24 @@ export default function CampaignEdit() {
         })
         setStatusCampaignEdit(res.data.campaign_status);
         setCategoryEdit(JSON.parse(res.data.categories));
-        setProductEdit(JSON.parse(res.data.setting_score_audit));
+        setProductEdit(convertSettingScoreAudit(JSON.parse(res.data.setting_score_audit)));
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
-
+        let objSettingScore = JSON.parse(res.data.setting_score_audit);
+        if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
     }
+  }
+
+  const convertSettingScoreAudit = (objSetting: any) => {
+    let objResult = {};
+    if(objSetting.min_product != null && Object.getOwnPropertyNames(objSetting.min_product).length > 0){
+      let arrFieldNameProduct = Object.getOwnPropertyNames(objSetting.min_product);
+      arrFieldNameProduct.forEach(item => {
+        objResult[item] = {};
+        objResult[item].min_product = objSetting.min_product[item];
+      })
+    }
+    return objResult;
   }
 
   const convertDateFormat = (val) => {
@@ -61,13 +74,14 @@ export default function CampaignEdit() {
     try {
       let objSettingScore = {};
       let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
-      propertiesSettingScore.forEach(item => {
-        let valSettingScore = productEdit[item];
-        if(!checkExistProduct){
-          delete valSettingScore["min_product"]
-        }
-        objSettingScore[item] = valSettingScore;
-      });
+      if(checkExistProduct){
+        let objMinProduct = {};
+        propertiesSettingScore.forEach(item => {
+          let valSettingScore = productEdit[item];
+          objMinProduct[item] = valSettingScore.min_product;
+        })
+        objSettingScore["min_product"] = objMinProduct;
+      }
         let objFrm = form.getFieldsValue();
         let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
         let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;

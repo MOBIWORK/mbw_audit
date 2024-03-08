@@ -1,5 +1,4 @@
 import frappe
-import requests
 from frappe import _
 import json
 import sys
@@ -9,19 +8,19 @@ sys.path.append(__dir__)
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import ProductCountService
+from deepvision.service import OnShelfAvailabilityService
 from datetime import datetime
-from mbw_audit.api.common import (post_images,post_images_check,gen_response)
+from mbw_audit.api.common import (post_images, post_images_check, gen_response, base64_to_cv2, draw_detections)
 from frappe.utils.file_manager import (
     save_file
 )
 from frappe.utils import get_site_path
-import base64
-import threading
+from datetime import datetime
 
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
-    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
     products: Products = product_recognition.get_products()
@@ -46,7 +45,7 @@ def deleteListByDoctype(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
-    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
     recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
     base_url = frappe.utils.get_request_site_address()
@@ -68,7 +67,7 @@ def checkImageProductExist(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
-    RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
     products: Products = product_recognition.get_products()
@@ -116,7 +115,6 @@ def get_campaign_info(*args,**kwargs):
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     images_time = float(kwargs.get('images_time'))
-    
     images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
@@ -141,8 +139,6 @@ def record_report_data(*args, **kwargs):
         doc.insert()
         #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
         process_report_sku(doc.name, images, category, setting_score_audit)
-        #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
-        #process_report_sku_thread.start()
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
@@ -160,69 +156,68 @@ def process_report_sku(name, report_images, category, setting_score_audit):
             products_by_category.append({"category_id": category_id, "products": product_names})
         #Thêm các trường vào doctype con VGM_ReportDetailSKU
         if products_by_category:
-            try:
-                for category_data in products_by_category:
-                    category_id = category_data["category_id"]
-                    product_ids = category_data["products"]
-                    for product_id in product_ids:
-                        child_doc = frappe.new_doc('VGM_ReportDetailSKU')
-                        # AI đếm số lượng sản phẩm trong ảnh
-                        RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
-                        deep_vision: DeepVision = DeepVision()
-                        recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
-                        base_url = frappe.utils.get_request_site_address()
-                        collection_name = category_id
-                        image_path = report_images
-                        
-                        get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
-                        response = recognition.count(collection_name, image_path)
-                        if response.get('status') == 'completed':
-                            count_value = response.get('results', {}).get('count', {}).get(get_product_name)
-                            if count_value is None:
-                                count_value = 0
-                        else:
-                            count_value = 0
-                        if setting_score_audit is None:
-                            child_doc.update({
-                                'parent': name, 
-                                'parentfield': 'report_sku',
-                                'parenttype': 'VGM_Report',
-                                'category': category_id,
-                                'sum_product': count_value,
-                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                                'product': product_id,
-                                'scoring_machine': -1
-                            })
-                        else:
-                            setting_by_product = setting_score_audit.get(product_id)
-                            result_score_audit = process_setting_score_audit(count_value, setting_by_product)
-                            child_doc.update({
-                                'parent': name, 
-                                'parentfield': 'report_sku',
-                                'parenttype': 'VGM_Report',
-                                'category': category_id,
-                                'sum_product': count_value,
-                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                                'product': product_id,
-                                'scoring_machine': result_score_audit 
-                            })
-                            arr_score_audit.append(result_score_audit)
-                        child_doc.insert()
-                if setting_score_audit is not None:
-                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1 if 1 in arr_score_audit else -1)
-                else:
-                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
-            except Exception as e:
-                print({'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))})
-        else:
-            print({'status': 'fail', 'message': _("No data provided for report_sku")})
+            score_by_products = []
+            for category_data in products_by_category:
+                category_id = category_data["category_id"]
+                product_ids = category_data["products"]
+                lst_product_check = {}
+                for product_id in product_ids:
+                    objMinProduct = setting_score_audit.get("min_product", {})
+                    if objMinProduct is not None:
+                        lst_product_check[product_id] = objMinProduct.get(product_id)
+                resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                for product_id in product_ids:
+                    num_product_recog = 0
+                    is_exist_product = 0 
+                    if resultExistProduct.get("status") == "completed":
+                        process_results = resultExistProduct.get("process_results")
+                        count_product_recog = process_results.get("count")
+                        num_product_recog = count_product_recog.get(product_id, 0)
+                        product_availability = process_results.get("on_shelf_availability", {}).get("availability_result",{}).get("product_availability")
+                        is_exist_product = 1 if product_id in product_availability else 0
+                        score_by_products.append(is_exist_product)
+                    child_doc = frappe.new_doc('VGM_ReportDetailSKU')
+                    child_doc.update({
+                        'parent': name, 
+                        'parentfield': 'report_sku',
+                        'parenttype': 'VGM_Report',
+                        'category': category_id,
+                        'sum_product': num_product_recog,
+                        'product': product_id,
+                        'scoring_machine': is_exist_product
+                    })
+                    child_doc.insert()
+                if resultExistProduct.get("status") == "completed":
+                    image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
+                    print("Dòng 192, ", image_ais)
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps(image_ais))
+            if setting_score_audit is not None:
+                frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
+            else:
+                frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
     except Exception as e:
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
 
-def process_setting_score_audit(count_value, setting_score_audit):
-    result = -1
-    if setting_score_audit is not None and setting_score_audit.get("min_product") is not None:
-        result = 1 if count_value >= setting_score_audit.get("min_product") else 0
+def render_image_ai(verbose):
+    arr_image_ai = []
+    for item in verbose:
+        base64_image = item.get("base64_image")
+        locates = item.get("locates", [])
+        image = base64_to_cv2(base64_image)
+        for locate in locates:
+            draw_detections(image, locate.get("bbox"), locate.get("label"))
+        timestamp = datetime.timestamp(datetime.now())
+        print("Dòng 210", timestamp)
+        print("Dòng 211", image)
+        fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", image, "File", "Home")
+        arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
+    return arr_image_ai
+
+def shelf_availability_by_category(category_name, image_paths, lst_product_check):
+    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
+    deep_vision: DeepVision = DeepVision()
+    on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(RECOGNITION_API_KEY)
+    result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
     return result
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
