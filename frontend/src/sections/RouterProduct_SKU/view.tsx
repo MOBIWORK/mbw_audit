@@ -137,44 +137,59 @@ export default function Product_SKU() {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
-        try {
-            let obj = [{
-                uid: '-1',
-                name: file.name,
-                status: 'done',
-                url: ''
-            }];
-            setFileListImport(obj);
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const bufferArray = event.target.result;
-                const wb = XLSX.read(bufferArray, { type: "buffer" });
-                const wsname = wb.SheetNames[0];
-                const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                let dataImport = [];
-                if (data.length >= 2) {
-                    for (let i = 1; i < data.length; i++) {
-                        let objDataImport = {
-                            'product_code': data[i][0] ? data[i][0] : "",
-                            'barcode': data[i][1] ? data[i][1] : "",
-                            'product_name': data[i][2],
-                            'product_description': data[i][3],
-                            'url_images': JSON.parse(data[i][4]),
-                        }
-                        dataImport.push(objDataImport);
-                    }
-                }
-                setLstProductImport(dataImport);
-            };
-            reader.readAsArrayBuffer(file);
-            return false;
-        } catch (error) {
-            message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
-            // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
-            return false; // Trả về false để ngăn việc tự động tải file
-        }
-    },
+      try {
+          const fileName = file.name.toLowerCase();
+          if (fileName.endsWith('.xls') || 
+              fileName.endsWith('.xlsx') || 
+              fileName.endsWith('.xlsm') || 
+              fileName.endsWith('.xlsb') || 
+              fileName.endsWith('.csv') || 
+              fileName.endsWith('.ods')) {
+              // Xử lý khi là file Excel
+              let obj = [{
+                  uid: '-1',
+                  name: file.name,
+                  status: 'done',
+                  url: ''
+              }];
+              setFileListImport(obj);
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                  const bufferArray = event.target.result;
+                  const wb = XLSX.read(bufferArray, { type: "buffer" });
+                  const wsname = wb.SheetNames[0];
+                  const ws = wb.Sheets[wsname];
+                  const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                  let dataImport = [];
+                  if (data.length >= 2) {
+                      for (let i = 1; i < data.length; i++) {
+                          let objDataImport = {
+                              'product_code': data[i][0] ? data[i][0] : "",
+                              'barcode': data[i][1] ? data[i][1] : "",
+                              'product_name': data[i][2],
+                              'product_description': data[i][3],
+                              'url_images': JSON.parse(data[i][4]),
+                          }
+                          dataImport.push(objDataImport);
+                      }
+                  }
+                  console.log(dataImport);
+                  setLstProductImport(dataImport);
+              };
+              reader.readAsArrayBuffer(file);
+              return false;
+          } else {
+              // Xử lý khi không phải là file Excel
+              message.error("Đã xảy ra lỗi, không đúng định dạng file: xls, xlsx, xlsm, xlsb, csv, ods");
+              return false; // Trả về false để ngăn việc tự động tải file
+          }
+      } catch (error) {
+          // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
+         
+          message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+          return false; // Trả về false để ngăn việc tự động tải file
+      }
+  },
 };
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
@@ -941,19 +956,24 @@ objectBoxes.forEach((box) => {
     setFileListImport([])
   }
   const handleOkImportExcel = async() => {
-    let dataPost = {
-      'listproduct': JSON.stringify(lstProductImport),
-      'category': categorySelected.name
-    }
-    let urlPostData = apiUrl + ".api.import_product";
-    let res = await AxiosService.post(urlPostData, dataPost);
-    if(res != null && res.message != null && res.message.status == "success"){
-      message.success("Thêm mới thành công");
-      initDataProductByCategory();
-      setIsModalOpenImportFileExcel(false);
+    if(lstProductImport && lstProductImport.length > 0){
+      let dataPost = {
+        'listproduct': JSON.stringify(lstProductImport),
+        'category': categorySelected.name
+      }
+      let urlPostData = apiUrl + ".api.import_product";
+      let res = await AxiosService.post(urlPostData, dataPost);
+      if(res != null && res.message != null && res.message.status == "success"){
+        message.success("Thêm mới thành công");
+        initDataProductByCategory();
+        setIsModalOpenImportFileExcel(false);
+      }else{
+        message.error("Thêm mới thất bại");
+      }
     }else{
-      message.error("Thêm mới thất bại");
+      message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
     }
+  
   }
   return (
     <>
