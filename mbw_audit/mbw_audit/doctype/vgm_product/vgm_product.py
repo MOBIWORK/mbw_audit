@@ -26,7 +26,7 @@ class VGM_Product(Document):
             # Kiểm tra và thêm sản phẩm
             self.check_and_add_product()
     def update_product(self):
-        RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+        RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
         deep_vision: DeepVision = DeepVision()
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
         collection_name = self.category
@@ -56,7 +56,7 @@ class VGM_Product(Document):
                 
     def check_and_add_product(self):
         # Sử dụng self để truy cập trường product_name
-        RECOGNITION_API_KEY: str = '00000000-0000-0000-0000-000000000002'
+        RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
         deep_vision: DeepVision = DeepVision()
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
         product_name = self.product_name

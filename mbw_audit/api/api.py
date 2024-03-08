@@ -151,32 +151,35 @@ def process_report_sku(name, report_images, category, setting_score_audit):
         arr_score_audit = []
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
-            products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["name"])
+            products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["*"])
             # Lấy danh sách tên sản phẩm
-            product_names = [product.name for product in products_in_category]
+            info_products = [{"name": product.name, "product_name": product.product_name} for product in products_in_category]
             # Thêm danh sách tên sản phẩm vào từ điển theo category
-            products_by_category.append({"category_id": category_id, "products": product_names})
+            products_by_category.append({"category_id": category_id, "products": info_products})
         #Thêm các trường vào doctype con VGM_ReportDetailSKU
         if products_by_category:
             score_by_products = []
             for category_data in products_by_category:
                 category_id = category_data["category_id"]
-                product_ids = category_data["products"]
+                info_products = category_data["products"]
                 lst_product_check = {}
-                for product_id in product_ids:
+                for info_product in info_products:
                     objMinProduct = setting_score_audit.get("min_product", {})
                     if objMinProduct is not None:
-                        lst_product_check[product_id] = objMinProduct.get(product_id)
+                        lst_product_check[info_product.get("name")] = objMinProduct.get(info_product.get("name"))
                 resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
-                for product_id in product_ids:
+                for info_product in info_products:
                     num_product_recog = 0
                     is_exist_product = 0 
                     if resultExistProduct.get("status") == "completed":
                         process_results = resultExistProduct.get("process_results")
                         count_product_recog = process_results.get("count")
-                        num_product_recog = count_product_recog.get(product_id, 0)
+                        num_product_recog = count_product_recog.get(info_product.get("product_name"), 0)
+                        print("DÒng 178 ", process_results.get("on_shelf_availability", {}))
                         product_availability = process_results.get("on_shelf_availability", {}).get("availability_result",{}).get("product_availability")
-                        is_exist_product = 1 if product_id in product_availability else 0
+                        print("Dòng 180 ", product_availability)
+                        print("dòng 181 ", info_product.get("product_name"))
+                        is_exist_product = 1 if info_product.get("product_name") in product_availability else 0
                         score_by_products.append(is_exist_product)
                     child_doc = frappe.new_doc('VGM_ReportDetailSKU')
                     child_doc.update({
@@ -185,13 +188,12 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                         'parenttype': 'VGM_Report',
                         'category': category_id,
                         'sum_product': num_product_recog,
-                        'product': product_id,
+                        'product': info_product.get("name"),
                         'scoring_machine': is_exist_product
                     })
                     child_doc.insert()
                 if resultExistProduct.get("status") == "completed":
                     image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
-                    print("Dòng 192, ", image_ais)
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps(image_ais))
             if setting_score_audit is not None:
                 frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
