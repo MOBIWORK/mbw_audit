@@ -1,6 +1,9 @@
 
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import  {AxiosService} from '../../services/server';
+import { VscAdd } from "react-icons/vsc";
+import * as XLSX from 'xlsx';
+import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
   SearchOutlined,
   CheckCircleOutlined,
@@ -158,10 +161,60 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
     });
     setFilteredDataReport(filteredData);
   }, [searchCampaign, searchTime, searchEmployee, dataReport]);
+  const transformDataSourceForExcel = (dataSource) => {
+    return dataSource.map(item => ({
+      ...item,
+      scoring_machine: item.scoring_machine === 1 ? "Đạt" : "Không đạt"
+      // Thêm các chuyển đổi khác nếu cần
+    }));
+  };
+  const exportToExcel = (columns, dataSource, fileName) => {
+    const boldCellStyle = { font: { bold: true } };
+
+    // Tạo dữ liệu từ dataSource
+    const transformedDataSource = transformDataSourceForExcel(filteredDataReport);
+    const data = transformedDataSource.map((item) =>
+        columns.map((column) => item[column.dataIndex])
+    );
+
+    // Tạo sheet từ dữ liệu
+    const ws = XLSX.utils.aoa_to_sheet([
+        columns.map((column) => column.title),
+        ...data,
+    ]);
+
+    // Thiết lập các cấu hình cho các ô trong sheet
+    ws['!cols'] = columns.map(() => ({ width: 20 })); // Thiết lập độ rộng cột
+    ws['!rows'] = [{ hpx: 30 }]; // Thiết lập chiều cao dòng
+
+    // Thiết lập các cấu hình cho từng ô trong hàng đầu tiên (tên cột)
+    columns.forEach((column, colIndex) => {
+        const cell = XLSX.utils.encode_cell({ r: 0, c: colIndex }); // Tên ô
+        ws[cell].s = boldCellStyle; // Áp dụng kiểu cho ô
+    });
+
+    // Tạo workbook và append sheet vào workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Xuất file Excel
+    XLSX.writeFile(wb, fileName + '.xlsx');
+};
+
   return (
     <>
       <HeaderPage
         title="Báo cáo"
+        buttons={[
+          {
+            label: "Xuất dữ liệu",
+            type: "primary",
+            icon: <VerticalAlignBottomOutlined className="text-xl" />,
+            size: "20px",
+            className: "flex items-center",
+             action: () => exportToExcel(columns,filteredDataReport,'Danh sách báo cáo'),
+          },
+        ]}
       />
       <div className="bg-white rounded-xl">
         <div className="flex p-4" style={{ alignItems: 'flex-end' }}>
