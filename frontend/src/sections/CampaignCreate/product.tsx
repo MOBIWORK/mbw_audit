@@ -212,19 +212,28 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
     setProductSelected(updatedRowData);
     onChangeCategory(categoriesSelected)
 };
+const itemsChildren: CollapseProps['itemsChildren'] = [
+  {
+    key: '1',
+    label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 1. Thiết lập tiêu chí sản phẩm</span> </Checkbox> ,
+    children:  <div>
+    <TableCustom
+      columns={columnProduct}
+      dataSource={productSelected}
+    />
+  </div>,
+  },
+]
   const itemscoll: CollapseProps['itemscoll'] = [
     {
       key: '1',
-      label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tồn tại sản phẩm </span> </Checkbox> ,
-      children:  <div>
-      <TableCustom
-        columns={columnProduct}
-        dataSource={productSelected}
-      />
-    </div>,
+      label:  <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tiêu chí sản phẩm</span> ,
+      children:  
+         <Collapse items={itemsChildren} defaultActiveKey={['1','2']}  className="custom-collapse"/>
     },
     
   ];
+ 
   const onChange = (key: string | string[]) => {
   };
   return (
