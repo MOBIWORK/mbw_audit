@@ -1,0 +1,1 @@
+KEY_API_AI = "0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv"

@@ -7,8 +7,7 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
-from deepvision.service import ProductCountService
-from deepvision.service import OnShelfAvailabilityService
+from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService)
 from datetime import datetime
 from mbw_audit.api.common import (post_images, post_images_check, gen_response, base64_to_cv2, draw_detections)
 from frappe.utils.file_manager import (
@@ -18,13 +17,13 @@ from frappe.utils import get_site_path
 from datetime import datetime
 import base64
 import cv2
+from mbw_audit.utils import appconst
 
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs): 
-    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
-    product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
+    product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     try:
         # Chuyển đổi ids từ chuỗi JSON thành danh sách Python
@@ -47,9 +46,8 @@ def deleteListByDoctype(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
-    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
-    recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
+    recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
     base_url = frappe.utils.get_request_site_address()
     collection_name = kwargs.get('collection_name')
     link_image = kwargs.get('linkimages')
@@ -69,9 +67,8 @@ def checkImageProductExist(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
-    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
-    product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(RECOGNITION_API_KEY)
+    product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     collection_name = kwargs.get('collection_name')
     products.delete_all(collection_name)
@@ -163,11 +160,31 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                 category_id = category_data["category_id"]
                 info_products = category_data["products"]
                 lst_product_check = {}
-                for info_product in info_products:
-                    objMinProduct = setting_score_audit.get("min_product", {})
-                    if objMinProduct is not None:
-                        lst_product_check[info_product.get("name")] = objMinProduct.get(info_product.get("name"))
-                resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                lst_product_sequence = []
+                resultExistProduct = {}
+                resultSequenceProduct = {}
+                #Sinh điều kiện sản phẩm tồn tại trong AI, nếu không có cấu hình thì mặc định là 0 để thực hiện lấy số lượng
+                if setting_score_audit.get("min_product") is not None:
+                    for info_product in info_products:
+                        objMinProduct = setting_score_audit.get("min_product", {})
+                        if objMinProduct is not None:
+                            lst_product_check[info_product.get("product_name")] = objMinProduct.get(info_product.get("name"))
+                    resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                else:
+                    for info_product in info_products:
+                        lst_product_check[info_product.get("product_name")] = 0
+                    resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
+                if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
+                    obj_setting_sequences = setting_score_audit.get("sequence_product", [])
+                    setting_sequence_dict = {obj["name"]: obj["product_name"] for obj in info_products}
+                    lst_product_sequence = [setting_sequence_dict[id] for id in obj_setting_sequences if id in setting_sequence_dict]
+                    resultSequenceProduct = sequence_of_product_by_category(category_id, report_images, lst_product_sequence)
+                    if resultSequenceProduct.get("status") == "completed":
+                        process_result_sequence = resultSequenceProduct.get("process_results", {})
+                        sequence_of_product = process_result_sequence.get("sequence_of_product")
+                        score_by_products.append(1 if sequence_of_product == 1 else 0)
+                #Sinh dữ liệu báo cáo SKU
                 for info_product in info_products:
                     num_product_recog = 0
                     is_exist_product = 0 
@@ -175,10 +192,7 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                         process_results = resultExistProduct.get("process_results")
                         count_product_recog = process_results.get("count")
                         num_product_recog = count_product_recog.get(info_product.get("product_name"), 0)
-                        print("DÒng 178 ", process_results.get("on_shelf_availability", {}))
                         product_availability = process_results.get("on_shelf_availability", {}).get("availability_result",{}).get("product_availability")
-                        print("Dòng 180 ", product_availability)
-                        print("dòng 181 ", info_product.get("product_name"))
                         is_exist_product = 1 if info_product.get("product_name") in product_availability else 0
                         score_by_products.append(is_exist_product)
                     child_doc = frappe.new_doc('VGM_ReportDetailSKU')
@@ -220,10 +234,15 @@ def render_image_ai(verbose):
     return arr_image_ai
 
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
-    RECOGNITION_API_KEY: str = '0ks6kmjB0otEzcY29UkwkL9ftRCWw1gZNFeFVgRv'
     deep_vision: DeepVision = DeepVision()
-    on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(RECOGNITION_API_KEY)
+    on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
+    return result
+
+def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
+    deep_vision: DeepVision = DeepVision()
+    sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
+    result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
     return result
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
