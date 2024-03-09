@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService)
 from datetime import datetime
-from mbw_audit.api.common import (post_images, post_images_check, gen_response, base64_to_cv2, draw_detections)
+from mbw_audit.api.common import (post_images, post_images_check, gen_response, base64_to_cv2, draw_detections, create_folder)
 from frappe.utils.file_manager import (
     save_file
 )
@@ -361,6 +361,11 @@ def upload_file():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
         return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
+
+@frappe.whitelist(methods="GET")
+def test_folder():
+    create_folder("Thư mục test", "Thư mục test/1")
+    return "ok"
 
 def save_tmp_file(filename, filedata):
     site_path = get_site_path()
