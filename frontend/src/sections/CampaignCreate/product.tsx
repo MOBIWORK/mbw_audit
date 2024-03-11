@@ -106,12 +106,20 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
   }
 
   const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
+    console.log(newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
+    
   };
-
+//   const onSelectAllCategory = (selected: boolean, selectedRows: TypeCategory[], changeRows: TypeCategory[]) => {
+//     const keys = selected ? categories.map(row => row.key) : [];
+//     console.log(keys);
+//     setSelectedRowKeys(keys);
+// };
   const rowSelectionCategory = {
     selectedRowKeys,
+  //  onSelectAll: onSelectAllCategory,
     onChange: onSelectChangeCategory,
+    
   };
 
   const handleSelectCategory = () => {

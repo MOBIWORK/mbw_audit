@@ -72,26 +72,38 @@ export default function CampaignEdit() {
 
   const handleEditCampaign = async () => {
     try {
-      let objSettingScore = {};
-      let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
-      if(checkExistProduct){
-        let objMinProduct = {};
-        propertiesSettingScore.forEach(item => {
-          let valSettingScore = productEdit[item];
-          objMinProduct[item] = valSettingScore.min_product;
-        })
-        objSettingScore["min_product"] = objMinProduct;
-      }
+        // Lấy giá trị từ form và các dữ liệu khác
+        let objSettingScore = {};
+        let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
+        if (checkExistProduct) {
+            let objMinProduct = {};
+            propertiesSettingScore.forEach(item => {
+                let valSettingScore = productEdit[item];
+                objMinProduct[item] = valSettingScore.min_product;
+            })
+            objSettingScore["min_product"] = objMinProduct;
+        }
+
         let objFrm = form.getFieldsValue();
+
+        // Kiểm tra nếu start_date bé hơn end_date
+        let startDate = convertDate(objFrm.campaign_start);
+        let endDate = convertDate(objFrm.campaign_end);
+        if (startDate >= endDate) {
+            message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
+            return; // Dừng lại nếu có lỗi
+        }
+
         let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
         let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
         let arrCustomer = (customersSelected && customersSelected.length > 0) ? customersSelected.map(x => x.name) : customerEdit;
+
         let urlPutData = `/api/resource/VGM_Campaign/${name}`;
         let dataPut = {
             'campaign_name': objFrm.campaign_name,
             'campaign_description': objFrm.campaign_description,
-            'start_date': convertDate(objFrm.campaign_start),
-            'end_date': convertDate(objFrm.campaign_end),
+            'start_date': startDate,
+            'end_date': endDate,
             'campaign_status': campaignStatus,
             'categories': JSON.stringify(arrCategory),
             'employees': JSON.stringify(arrEmployee),

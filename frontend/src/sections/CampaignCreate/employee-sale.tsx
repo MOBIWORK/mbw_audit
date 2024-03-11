@@ -157,7 +157,7 @@ export default function EmployeeSell({onChangeEmployees}) {
           <p className="text-sm font-bold text-[#1877F2]">Chọn nhân viên</p>
         </div>
         <div className="pt-6 ml-4">
-          <TableCustom columns={columnEmployeesSelect} dataSource={employeeSelected} />;
+          <TableCustom columns={columnEmployeesSelect} dataSource={employeeSelected} />
         </div>
 
         <Modal

@@ -21,17 +21,29 @@ export default function CampaignCreate() {
 
   const handleAddCampaign = async () => {
     try {
-      let objSettingScore = {};
-      let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
-      if(checkExistProduct){
-        let objMinProduct = {};
-        propertiesSettingScore.forEach(item => {
-          let valSettingScore = scoreSelected[item];
-          objMinProduct[item] = valSettingScore.min_product;
-        })
-        objSettingScore["min_product"] = objMinProduct;
-      }
+        // Lấy giá trị từ form và các dữ liệu khác
         let objFrm = form.getFieldsValue();
+        let startDate = convertDate(objFrm.campaign_start);
+        let endDate = convertDate(objFrm.campaign_end);
+
+        // Kiểm tra nếu start_date bé hơn end_date
+        if (startDate >= endDate) {
+            message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
+            return; // Dừng lại nếu có lỗi
+        }
+
+        // Tiếp tục xử lý nếu không có lỗi về ngày tháng
+        let objSettingScore = {};
+        let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
+        if (checkExistProduct) {
+            let objMinProduct = {};
+            propertiesSettingScore.forEach(item => {
+                let valSettingScore = scoreSelected[item];
+                objMinProduct[item] = valSettingScore.min_product;
+            })
+            objSettingScore["min_product"] = objMinProduct;
+        }
+
         let arrCategory = categoriesSelected.map((x) => x.name);
         let arrEmployee = employeesSelected.map((x) => x.name);
         let arrCustomer = customersSelected.map((x) => x.name);
@@ -40,8 +52,8 @@ export default function CampaignCreate() {
         let dataPost = {
             campaign_name: objFrm.campaign_name,
             campaign_description: objFrm.campaign_description,
-            start_date: convertDate(objFrm.campaign_start),
-            end_date: convertDate(objFrm.campaign_end),
+            start_date: startDate,
+            end_date: endDate,
             campaign_status: campaignStatus,
             categories: JSON.stringify(arrCategory),
             employees: JSON.stringify(arrEmployee),
@@ -49,7 +61,7 @@ export default function CampaignCreate() {
             setting_score_audit: objSettingScore
         };
         let res = await AxiosService.post(urlPostData, dataPost);
-        
+
         if (res != null && res.data != null) {
             message.success("Thêm mới thành công");
             navigate("/campaign");
@@ -58,7 +70,7 @@ export default function CampaignCreate() {
         }
     } catch (error) {
         // Xử lý khi có lỗi xảy ra trong quá trình thêm mới
-        message.error("Không thể thêm mới. Vui lòng kiểm tra lại và điền đủ thông tin");
+        message.error("Không thể thêm mới. Vui lòng kiểm tra lại thông tin thời gian, sản phẩm, nhân viên, khách hàng");
     }
 };
 
