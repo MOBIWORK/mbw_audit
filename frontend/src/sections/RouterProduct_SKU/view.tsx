@@ -194,6 +194,18 @@ export default function Product_SKU() {
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
+
+      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      if (!isJpgOrPng) {
+        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        return isJpgOrPng;
+      }
+
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        return isLt2M;
+      }
     
       const formData = new FormData();
       const fields = {
@@ -223,6 +235,18 @@ export default function Product_SKU() {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
      
+      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      if (!isJpgOrPng) {
+        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        return isJpgOrPng;
+      }
+
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        return isLt2M;
+      }
+
       const formData = new FormData();
       const fields = {
         file,
@@ -249,8 +273,21 @@ export default function Product_SKU() {
   };
   const propUploadCheckProducts: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
+    accept: "image/png, image/jpeg",
     beforeUpload: async (file) => {
       
+      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      if (!isJpgOrPng) {
+        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        return isJpgOrPng;
+      }
+
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        return isLt2M;
+      }
+
       const formData = new FormData();
       const fields = {
         file,
@@ -482,7 +519,7 @@ export default function Product_SKU() {
         return;
     }
     // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
-    const isCategoryExists = categories.some(cat => cat.category_name === categoryName);
+    const isCategoryExists = categories.some(cat => cat.category_name.toLowerCase() === categoryName.toLowerCase());
     if (isCategoryExists) {
         message.error("Danh mục đã tồn tại.");
         return;
@@ -583,6 +620,11 @@ export default function Product_SKU() {
 
   const handleOkAddProduct = async () => {
     let objProduct = formAddProduct.getFieldsValue();
+    let productFilter = products.filter(x => x.product_code.toLowerCase() == objProduct.product_code.toLowerCase());
+    if(productFilter.length > 0){
+      message.error("Mã sản phẩm đã tồn tại");
+      return;
+    }
     let arrImages = [];
     for (let i = 0; i < fileUploadAddProduct.length; i++) {
         arrImages.push(fileUploadAddProduct[i].file_url);
@@ -591,16 +633,16 @@ export default function Product_SKU() {
     // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
     if (!objProduct.product_name || arrImages.length === 0) {
         // Hiển thị thông báo lỗi
-        message.error("Vui lòng nhập đủ thông tin sản phẩm và tải lên ít nhất một hình ảnh");
+        message.error("Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh");
         return;
     }
 
     let urlAddProduct = "/api/resource/VGM_Product";
     let objProductCreate = {
         'barcode': objProduct.barcode_product,
-        'product_code': objProduct.product_code,
-        'product_name': objProduct.product_name,
-        'product_description': objProduct.product_description,
+        'product_code': objProduct.product_code != null? objProduct.product_code.trim() : null,
+        'product_name': objProduct.product_name != null? objProduct.product_name.trim() : null,
+        'product_description': objProduct.product_description != null? objProduct.product_description.trim() : null,
         'category': categorySelected.name,
         'images': JSON.stringify(arrImages)
     };
@@ -669,15 +711,15 @@ export default function Product_SKU() {
 
   const handleOkEditProduct = async () => {
     let arrImage = [];
+    let objProduct = formEditProduct.getFieldsValue();
     for(let i = 0; i < fileListEdit.length; i++) if(fileListEdit[i].url_base != null && fileListEdit[i].url_base != "") arrImage.push(fileListEdit[i].url_base);
     if(fileUploadEditProduct != null) for(let i = 0; i < fileUploadEditProduct.length; i++) arrImage.push(fileUploadEditProduct[i].file_url);
-    let objProduct = formEditProduct.getFieldsValue();
     let urlEditProduct = `/api/resource/VGM_Product/${editItemProduct.name}`;
     let objProductEdit = {
       'barcode': objProduct.barcode_product,
-      'product_code': objProduct.product_code,
-      'product_name': objProduct.product_name,
-      'product_description': objProduct.product_description,
+      'product_code': objProduct.product_code != null? objProduct.product_code.trim(): null,
+      'product_name': objProduct.product_name != null? objProduct.product_name.trim() : null,
+      'product_description': objProduct.product_description != null? objProduct.product_description.trim() : null,
       'category': categorySelected.name,
       'images': JSON.stringify(arrImage)
     }
@@ -891,6 +933,7 @@ objectBoxes.forEach((box) => {
 
   useEffect(() => {
     //Goi dich vu san pham tu erp theo tu khoa
+    initDataProductFromERP();
   },[searchProductFromERP])
 
   const hasSelected = productFromERPSelected.length > 0;
@@ -909,7 +952,8 @@ objectBoxes.forEach((box) => {
 
   const initDataProductFromERP = async () => {
     //Goi dich vu lay danh sach san pham tu erp
-    let url = "/api/method/mbw_dms.api.selling.product.list_product"
+    let url = "/api/method/mbw_dms.api.selling.product.list_product";
+    if(searchProductFromERP != null && searchProductFromERP != "") url = `${url}?item_name=${searchProductFromERP.trim()}`;
     let res = await AxiosService.get(url);
     let arrProductERPSource = [];
     if(res != null && res.result != null && res.result.data != null){
@@ -1244,6 +1288,7 @@ objectBoxes.forEach((box) => {
               <Upload {...propUploadAddProducts}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
+                accept="image/png, image/jpeg"
                 fileList={fileList}
                 onChange={onChangeImageFormAddProduct}
                 onPreview={onPreview}
@@ -1321,6 +1366,7 @@ objectBoxes.forEach((box) => {
               <Upload {...propUploadEditProducts}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
+                accept="image/png, image/jpeg"
                 fileList={fileListEdit}
                 onChange={onChangeImageFormEditProduct}
                 onPreview={onPreview}
@@ -1435,6 +1481,7 @@ objectBoxes.forEach((box) => {
         <div>{deleteItemCategory.contentConfirm}</div>
         <div>{deleteItemCategory.contentRemind}</div>
       </Modal>
+
       <Modal
         title="Nhập dữ liệu từ tệp excel"
         open={isModalOpenImportFileExcel}
@@ -1451,7 +1498,7 @@ objectBoxes.forEach((box) => {
         ]}
       >
         <p className="text-[#637381] font-normal text-sm">
-          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/product_sample.xlsx">tại đây</a>
         </p>
         <Dragger {...propUploadImportFileExcel} fileList={fileListImport}>
           <p className="ant-upload-drag-icon">
