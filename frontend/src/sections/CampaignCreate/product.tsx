@@ -48,13 +48,24 @@ interface TypeProduct{
 
 export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
   const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
+  const [isModalOpenProduct , setIsModalOpenProduct] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedProductRowKeys, setSelectedProductRowKeys] = useState<React.Key[]>([]);
 
   const [categories, setCategories] = useState<TypeCategory[]>([]);
+  const [arrProductCategory, setArrProductCategory] = useState([]);
+  const [arrPro, setArrPro] = useState([]);
+  const [productSort, setProductSort] = useState([]);
+  
+  
   const [searchCategory, setSearchCategory] = useState("");
+  const [searchProduct, setSearchProduct] = useState("");
   const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
   const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
   const [checkExistProduct, setCheckExistProduct] = useState(true);
+  
+  const [sequenceValues, setSequenceValues] = useState({});
+
 
   useEffect(() => {
     initDataCategories();
@@ -82,7 +93,9 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
         for(let i = 0; i < dataCategories.length; i++){
           let urlProduct = `/api/resource/VGM_Product?fields=["name","product_code","product_name"]&&filters=[["category","=","${dataCategories[i].name}"]]`;
           let res = await AxiosService.get(urlProduct);
+        
           if(res != null && res.data != null){
+            
             dataCategories[i].product_num = res.data.length;
             let arrProducts: TypeProduct[] = res.data.map((item: TypeProduct) => {
               return {
@@ -90,6 +103,8 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
                 key: item.name
               }
             })
+            
+            
             dataCategories[i].products = arrProducts;
           } 
           else{
@@ -104,11 +119,45 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
   const handleSearchCategory = (event) => {
     setSearchCategory(event.target.value);
   }
+  const handleSearchProduct = (event) => {
+    const searchValue = event.target.value.toLowerCase(); // Lấy giá trị tìm kiếm và chuyển đổi thành chữ thường
+    setSearchProduct(searchValue);
+    // Tạo một mảng tạm thời để lưu trữ danh sách sản phẩm ban đầu
+    const tempProducts = [...arrPro];
+    // Nếu ô tìm kiếm rỗng, hiển thị lại tất cả sản phẩm từ mảng tạm thời
+    if (searchValue === '') {
+        setArrProductCategory(arrPro);
+        return;
+    }else{
+        // Lọc danh sách sản phẩm hiển thị dựa trên giá trị tìm kiếm
+    const filteredProducts = tempProducts.filter(product => {
+      // Kiểm tra xem tên sản phẩm có chứa giá trị tìm kiếm không
+      return product.product_name.toLowerCase().includes(searchValue);
+  });
+
+  // Cập nhật danh sách sản phẩm hiển thị sau khi lọc
+  setArrProductCategory(filteredProducts);
+    }
+
+  
+}
 
   const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
     console.log(newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
     
+  };
+  const onSelectChangeProduct = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
+    console.log(newSelectedRowKeys);
+    console.log(arrPro);
+    // Thêm trường sequence_product vào mỗi phần tử trong mảng dữ liệu
+const newData = arrPro.map((item, index) => {
+  const sequenceIndex = newSelectedRowKeys.indexOf(item.name);
+  const sequenceProduct = sequenceIndex !== -1 ? sequenceIndex + 1 : null;
+  return { ...item, sequence_product: sequenceProduct };
+});
+setArrProductCategory(newData)
+setSelectedProductRowKeys(newSelectedRowKeys);
   };
 //   const onSelectAllCategory = (selected: boolean, selectedRows: TypeCategory[], changeRows: TypeCategory[]) => {
 //     const keys = selected ? categories.map(row => row.key) : [];
@@ -119,6 +168,12 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
     selectedRowKeys,
   //  onSelectAll: onSelectAllCategory,
     onChange: onSelectChangeCategory,
+    
+  };
+  const rowSelectionProduct = {
+    selectedProductRowKeys,
+  //  onSelectAll: onSelectAllCategory,
+    onChange: onSelectChangeProduct,
     
   };
 
@@ -145,10 +200,30 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
     onChangeCategory(arrCategorySelect);
     handleCancelAddCategory();
   }
+  const handleSelectProduct = () => {
+    const result = arrProductCategory.filter(item => selectedProductRowKeys.includes(item.name));
+    console.log(result);
+    setProductSort(result)
+   // onChangeCategory(arrCategorySelect);
+    handleCancelProduct();
+  }
 
   const hasSelected = selectedRowKeys.length > 0;
+  const hasSelectedProduct = selectedProductRowKeys.length > 0;
   const showModalCategory = () => {
     setIsModalOpenCategory(true);
+  };
+  const showModalProduct= () => {
+    setIsModalOpenProduct(true);
+   // Tạo mảng chứa tất cả sản phẩm
+const allProducts = [];
+// Duyệt qua mỗi danh mục
+categoriesSelected.forEach(category => {
+    // Thêm sản phẩm của từng danh mục vào mảng allProducts
+    allProducts.push(...category.products.map(product => ({ ...product, cate_name: category.category_name })));
+});
+  setArrProductCategory(allProducts); // In ra mảng chứa tất cả sản phẩm của từng danh mục
+  setArrPro(allProducts)
   };
 
   const handleOkAddCategory = () => {
@@ -157,6 +232,9 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
 
   const handleCancelAddCategory = () => {
     setIsModalOpenCategory(false);
+  };
+  const handleCancelProduct = () => {
+    setIsModalOpenProduct(false);
   };
 
   const handleDeleteCategory = (item) => {
@@ -208,8 +286,18 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
           />
       )
   },
+ 
    
   ];
+  const columnProductSort: TableColumnsType<DataType> = [
+    { title: "STT", dataIndex: "sequence_product",  },
+    { title: "Mã sản phẩm", dataIndex: "product_code", },
+    { title: "Tên sản phẩm", dataIndex: "product_name",  },
+    { 
+      title: "Danh mục", 
+      dataIndex: "cate_name",
+  },
+]
 
   const handleQuantityChange = (index: number, newValue: number) => {
     // Tạo một bản sao của dữ liệu hàng
@@ -220,10 +308,13 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
     setProductSelected(updatedRowData);
     onChangeCategory(categoriesSelected)
 };
+const handleQuantityChangeProduct = (index: number, newValue: number) => {
+  console.log(index,newValue);
+};
 const itemsChildren: CollapseProps['itemsChildren'] = [
   {
     key: '1',
-    label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 1. Thiết lập tiêu chí sản phẩm</span> </Checkbox> ,
+    label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 1. Tiêu chí tồn tại sản phẩm</span> </Checkbox> ,
     children:  <div>
     <TableCustom
       columns={columnProduct}
@@ -231,6 +322,31 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
     />
   </div>,
   },
+  {
+    key: '2',
+    label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 2. Tiêu chí sắp xếp sản phẩm</span> </Checkbox> ,
+    children:  <div>
+        <div
+        onClick={showModalProduct}
+        className="flex justify-center h-9 cursor-pointer items-center ml-4 mt-4 mb-4 border-solid border-[1px] border-indigo-600 rounded-xl w-[160px] "
+      >
+        <p className="mr-2">
+          <PlusOutlined />
+        </p>
+        <p className="text-sm font-bold text-[#1877F2]">Chọn sản phẩm</p>
+      </div>
+      <div className="ml-4 mb-4 mr-4 mt-4" style={{ fontSize: '17px', fontStyle: 'italic', fontWeight: 400, lineHeight: '21px', letterSpacing: '0em', textAlign: 'left',color:"rgba(99, 115, 129, 1)" }}>
+    <span>
+        Di chuyển (kéo, thả) các sản phẩm để sắp xếp thứ tự sản phẩm
+    </span>
+</div>
+    <TableCustom
+      columns={columnProductSort}
+      dataSource={productSort}
+    />
+  </div>,
+  },
+  
 ]
   const itemscoll: CollapseProps['itemscoll'] = [
     {
@@ -239,6 +355,7 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
       children:  
          <Collapse items={itemsChildren} defaultActiveKey={['1','2']}  className="custom-collapse"/>
     },
+    
     
   ];
  
@@ -292,6 +409,44 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
               { title: "Danh mục sản phẩm", dataIndex: "category_name", key: "category_name" },
               { title: "Số lượng sản phẩm", dataIndex: "product_num", key: "product_num" },
             ]} dataSource={categories} />
+        </div>
+      </Modal>
+
+      <Modal
+        width={990}
+        title="Sắp xếp sản phẩm"
+        open={isModalOpenProduct}
+        onOk={handleOkAddCategory}
+        onCancel={handleCancelProduct}
+        footer={false}
+      >
+        <div className="flex items-center justify-between">
+          <FormItemCustom className="w-[320px] border-none pt-4">
+            <Input value={searchProduct} onChange={handleSearchProduct}
+              placeholder="Tìm kiếm sản phẩm"
+              prefix={<SearchOutlined />}
+            />
+          </FormItemCustom>
+          <div>
+            <span style={{ marginRight: 8 }}>
+              {hasSelectedProduct ? `Đã chọn ${selectedProductRowKeys.length} sản phẩm` : ""}
+            </span>
+            <Button type="primary" onClick={handleSelectProduct}>Thêm</Button>
+          </div>
+        </div>
+        <div className="pt-4">
+          <TableCustom rowSelection={rowSelectionProduct} columns={[
+              { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
+              { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" }, { title: "Danh mục", dataIndex: "cate_name", key: "cate_name" },
+              { title: "Chọn thứ tự", dataIndex: "sequence_product", dataIndex: "sequence_product", 
+              render: (item: number, rowData: DataType, index: number) => ( // Thêm index vào render function
+                  <Input style={{width : '120px'}}
+                      defaultValue={item} 
+                      value={item} 
+                      onChange={(e) => handleQuantityChangeProduct(index, parseInt(e.target.value))} // Sử dụng index trong handleQuantityChange
+                  />
+              ) }
+            ]} dataSource={arrProductCategory} />
         </div>
       </Modal>
     </div>
