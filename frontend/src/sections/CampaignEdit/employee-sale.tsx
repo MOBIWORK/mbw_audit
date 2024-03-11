@@ -19,8 +19,7 @@ import {
     {
       title: "Mã nhân viên",
       dataIndex: "name",
-      key: "name",
-      render: (text: string) => <a>{text}</a>,
+      key: "name"
     },
     {
       title: "Tên nhân viên",
@@ -46,8 +45,7 @@ import {
       {
         title: "Mã nhân viên",
         dataIndex: "name",
-        key: "name",
-        render: (text: string) => <a>{text}</a>,
+        key: "name"
       },
       {
         title: "Tên nhân viên",

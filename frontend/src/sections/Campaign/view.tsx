@@ -40,8 +40,7 @@ export default function Campaign() {
   const columnCampaigns: TableColumnsType<TypeCampaign> = [
     {
       title: "Tên chiến dịch",
-      dataIndex: "campaign_name",
-      render: (text: string) => <a>{text}</a>,
+      dataIndex: "campaign_name"
     },
     {
       title: "Trạng thái",
@@ -137,7 +136,6 @@ export default function Campaign() {
                                 dataImport.push(objDataImport);
                             }
                         }
-                        console.log(dataImport);
                         setLstCampaignImport(dataImport);
                     };
                     reader.readAsArrayBuffer(file);

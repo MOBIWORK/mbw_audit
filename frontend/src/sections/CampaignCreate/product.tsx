@@ -18,6 +18,8 @@ import { FormItemCustom, TableCustom } from "../../components";
 import { useState, useEffect } from "react";
 import { AxiosService } from "../../services/server";
 
+import DrapTable from "../common/drap-table";
+
 interface DataType {
   key: React.Key;
   stt?: string;
@@ -46,7 +48,7 @@ interface TypeProduct{
   product_name: string;
 }
 
-export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
+export default function Product({onChangeCategory, onChangeCheckExistProduct, onChangeCheckSequenceProduct, onChangeSequenceProducts}) {
   const [isModalOpenCategory, setIsModalOpenCategory] = useState(false);
   const [isModalOpenProduct , setIsModalOpenProduct] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -63,6 +65,8 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct}) {
   const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>([]);
   const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
   const [checkExistProduct, setCheckExistProduct] = useState(true);
+  const [checkSequenceProduct, setCheckSequenceProduct] = useState(false);
+  const [sequenceProducts, setSequenceProducts] = useState([]);
   
   const [sequenceValues, setSequenceValues] = useState({});
 
@@ -203,6 +207,8 @@ setSelectedProductRowKeys(newSelectedRowKeys);
   const handleSelectProduct = () => {
     const result = arrProductCategory.filter(item => selectedProductRowKeys.includes(item.name));
     console.log(result);
+    let arrSequenceProduct = result.map(x => x.name);
+    onChangeSequenceProducts(arrSequenceProduct);
     setProductSort(result)
    // onChangeCategory(arrCategorySelect);
     handleCancelProduct();
@@ -250,6 +256,11 @@ categoriesSelected.forEach(category => {
     onChangeCheckExistProduct(e.target.checked);
   }
 
+  const handleChangeCheckSequence = (e) => {
+    setCheckSequenceProduct(e.target.checked);
+    onChangeCheckSequenceProduct(e.target.checked);
+  }
+
   const expandedRowRender = (record, index) => {
     const columnProducts: TableColumnsType<ExpandedDataType> = [
       { title: "Mã sản phẩm", dataIndex: "product_code", key: "product_code" },
@@ -290,6 +301,7 @@ categoriesSelected.forEach(category => {
    
   ];
   const columnProductSort: TableColumnsType<DataType> = [
+    { key: 'sort' },
     { title: "STT", dataIndex: "sequence_product",  },
     { title: "Mã sản phẩm", dataIndex: "product_code", },
     { title: "Tên sản phẩm", dataIndex: "product_name",  },
@@ -311,6 +323,11 @@ categoriesSelected.forEach(category => {
 const handleQuantityChangeProduct = (index: number, newValue: number) => {
   console.log(index,newValue);
 };
+const handleDragRowEvent = (data: any) => {
+  let arrSequenceProduct = data.map(x => x.name);
+  setSequenceProducts(arrSequenceProduct);
+  onChangeSequenceProducts(arrSequenceProduct);
+}
 const itemsChildren: CollapseProps['itemsChildren'] = [
   {
     key: '1',
@@ -324,7 +341,7 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
   },
   {
     key: '2',
-    label: <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 2. Tiêu chí sắp xếp sản phẩm</span> </Checkbox> ,
+    label: <Checkbox checked={checkSequenceProduct} onChange={handleChangeCheckSequence}> <span style={{ fontWeight: 700, fontSize: '15px' }}> 2. Tiêu chí sắp xếp sản phẩm</span> </Checkbox> ,
     children:  <div>
         <div
         onClick={showModalProduct}
@@ -340,18 +357,14 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
         Di chuyển (kéo, thả) các sản phẩm để sắp xếp thứ tự sản phẩm
     </span>
 </div>
-    <TableCustom
-      columns={columnProductSort}
-      dataSource={productSort}
-    />
-  </div>,
-  },
-  
+    <DrapTable columnsTable={columnProductSort} datasTable={productSort} keyPros={"sequence_product"} onDragRowEvent={handleDragRowEvent}></DrapTable>
+  </div>
+  }
 ]
   const itemscoll: CollapseProps['itemscoll'] = [
     {
       key: '1',
-      label:  <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tiêu chí sản phẩm</span> ,
+      label:  <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tiêu chí chấm điểm trưng bày sản phẩm</span> ,
       children:  
          <Collapse items={itemsChildren} defaultActiveKey={['1','2']}  className="custom-collapse"/>
     },
@@ -363,7 +376,7 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
   };
   return (
     <div className="pt-4">
-      <p className="ml-4 font-semibold text-sm text-[#212B36]">Sản phẩm</p>
+      <p className="ml-4 font-semibold text-sm text-[#212B36]">Danh sách sản phẩm</p>
       <div
         onClick={showModalCategory}
         className="flex justify-center h-9 cursor-pointer items-center ml-4 border-solid border-[1px] border-indigo-600 rounded-xl w-[160px]"

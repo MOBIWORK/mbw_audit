@@ -32,8 +32,7 @@ import { AxiosService } from "../../services/server";
       {
         title: "ID",
         dataIndex: "customer_code",
-        key: "customer_code",
-        render: (text: string) => <a>{text}</a>,
+        key: "customer_code"
       },{
         title: "Tên khách hàng",
         key: "customer_name",
@@ -186,8 +185,7 @@ import { AxiosService } from "../../services/server";
                 columns={[{
                   title: "ID",
                   dataIndex: "customer_code",
-                  key: "customer_code",
-                  render: (text: string) => <a>{text}</a>,
+                  key: "customer_code"
                 },{
                   title: "Tên khách hàng",
                   key: "customer_name",

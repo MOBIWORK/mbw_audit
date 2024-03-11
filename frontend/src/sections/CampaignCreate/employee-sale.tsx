@@ -19,8 +19,7 @@ const columnEmployees: TableProps<TypeEmployee>["columns"] = [
   {
     title: "Mã nhân viên",
     dataIndex: "name",
-    key: "name",
-    render: (text: string) => <a>{text}</a>,
+    key: "name"
   },
   {
     title: "Tên nhân viên",
@@ -46,8 +45,7 @@ export default function EmployeeSell({onChangeEmployees}) {
     {
       title: "Mã nhân viên",
       dataIndex: "name",
-      key: "name",
-      render: (text: string) => <a>{text}</a>,
+      key: "name"
     },
     {
       title: "Tên nhân viên",

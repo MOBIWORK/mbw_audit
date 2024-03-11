@@ -32,8 +32,7 @@ export default function Customer({onChangeCustomer}) {
     {
       title: "ID",
       dataIndex: "customer_code",
-      key: "customer_code",
-      render: (text: string) => <a>{text}</a>,
+      key: "customer_code"
     },{
       title: "Tên khách hàng",
       key: "customer_name",
@@ -176,8 +175,7 @@ export default function Customer({onChangeCustomer}) {
               columns={[{
                 title: "ID",
                 dataIndex: "customer_code",
-                key: "customer_code",
-                render: (text: string) => <a>{text}</a>,
+                key: "customer_code"
               },{
                 title: "Tên khách hàng",
                 key: "customer_name",

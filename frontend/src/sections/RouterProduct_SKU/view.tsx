@@ -325,7 +325,7 @@ export default function Product_SKU() {
     {
       title: "Mã Sản phẩm",
       dataIndex: "product_code",
-      render: (text: string) => <a>{text}</a>,
+      render: (text: string) => <div>{text}</div>,
     },
     {
       title: "Tên sản phẩm",

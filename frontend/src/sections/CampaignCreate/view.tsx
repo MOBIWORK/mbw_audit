@@ -18,6 +18,8 @@ export default function CampaignCreate() {
   const [customersSelected, setCustomersSelected] = useState([]);
   const [scoreSelected, setScoreSelected] = useState({});
   const [checkExistProduct, setCheckExistProduct] = useState(true);
+  const [checkSequenceProduct, setCheckSequenceProduct] = useState(false);
+  const [sequenceProducts, setSequenceProducts] = useState([]);
 
   const handleAddCampaign = async () => {
     try {
@@ -42,6 +44,10 @@ export default function CampaignCreate() {
                 objMinProduct[item] = valSettingScore.min_product;
             })
             objSettingScore["min_product"] = objMinProduct;
+        }
+
+        if(checkSequenceProduct){
+          objSettingScore["sequence_product"] = sequenceProducts;
         }
 
         let arrCategory = categoriesSelected.map((x) => x.name);
@@ -118,6 +124,14 @@ export default function CampaignCreate() {
     setCheckExistProduct(val);
   }
 
+  const handleChangeCheckSequenceProduct = (val) => {
+    setCheckSequenceProduct(val);
+  }
+
+  const handleChangeSequenceProducts = (val) => {
+    setSequenceProducts(val);
+  }
+
   return (
     <>
       <HeaderPage
@@ -158,7 +172,8 @@ export default function CampaignCreate() {
               {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
-                children: <Product onChangeCategory={handleChangeCategory} onChangeCheckExistProduct={handleChangeExistProduct}/>,
+                children: <Product onChangeCategory={handleChangeCategory} onChangeCheckExistProduct={handleChangeExistProduct}
+                onChangeCheckSequenceProduct={handleChangeCheckSequenceProduct} onChangeSequenceProducts={handleChangeSequenceProducts}/>,
               },
               {
                 label: <p className="px-4 mb-0">Nhân viên bán hàng</p>,
