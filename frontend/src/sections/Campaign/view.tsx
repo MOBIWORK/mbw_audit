@@ -92,47 +92,62 @@ export default function Campaign() {
     multiple: false,
     beforeUpload: async (file) => {
         try {
-            let obj = [{
-                uid: '-1',
-                name: file.name,
-                status: 'done',
-                url: ''
-            }];
-            setFileListImport(obj);
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const bufferArray = event.target.result;
-                const wb = XLSX.read(bufferArray, { type: "buffer" });
-                const wsname = wb.SheetNames[0];
-                const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                let dataImport = [];
-                if (data.length >= 2) {
-                    for (let i = 1; i < data.length; i++) {
-                        const EXCEL_EPOCH = new Date(1899, 11, 31);
-                        const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
-                        let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
-
-                        const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
-                        let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
-
-                        let objDataImport = {
-                            'campaign_name': data[i][0],
-                            'campaign_description': data[i][1],
-                            'campaign_start': (startDate.getTime() / 1000).toString(),
-                            'campaign_end': (endDate.getTime() / 1000).toString(),
-                            'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
-                            'campaign_categories': data[i][5],
-                            'campaign_employees': data[i][6],
-                            'campaign_customers': data[i][7]
+          const fileName = file.name.toLowerCase();
+          if (fileName.endsWith('.xls') || 
+          fileName.endsWith('.xlsx') || 
+          fileName.endsWith('.xlsm') || 
+          fileName.endsWith('.xlsb') || 
+          fileName.endsWith('.csv') || 
+          fileName.endsWith('.ods')) {
+                      // Xử lý khi là file Excel
+                      let obj = [{
+                        uid: '-1',
+                        name: file.name,
+                        status: 'done',
+                        url: ''
+                    }];
+                    setFileListImport(obj);
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const bufferArray = event.target.result;
+                        const wb = XLSX.read(bufferArray, { type: "buffer" });
+                        const wsname = wb.SheetNames[0];
+                        const ws = wb.Sheets[wsname];
+                        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                        let dataImport = [];
+                        if (data.length >= 2) {
+                            for (let i = 1; i < data.length; i++) {
+                                const EXCEL_EPOCH = new Date(1899, 11, 31);
+                                const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+                                let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
+        
+                                const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+                                let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
+        
+                                let objDataImport = {
+                                    'campaign_name': data[i][0],
+                                    'campaign_description': data[i][1],
+                                    'campaign_start': (startDate.getTime() / 1000).toString(),
+                                    'campaign_end': (endDate.getTime() / 1000).toString(),
+                                    'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
+                                    'campaign_categories': data[i][5],
+                                    'campaign_employees': data[i][6],
+                                    'campaign_customers': data[i][7]
+                                }
+                                dataImport.push(objDataImport);
+                            }
                         }
-                        dataImport.push(objDataImport);
-                    }
-                }
-                console.log(dataImport);
-                setLstCampaignImport(dataImport);
-            };
-            reader.readAsArrayBuffer(file);
+                        console.log(dataImport);
+                        setLstCampaignImport(dataImport);
+                    };
+                    reader.readAsArrayBuffer(file);
+
+          } else{
+             // Xử lý khi không phải là file Excel
+             message.error("Đã xảy ra lỗi, không đúng định dạng file: xls, xlsx, xlsm, xlsb, csv, ods");
+             return false; // Trả về false để ngăn việc tự động tải file
+          }
+
         } catch (error) {
           message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
             // Thực hiện xử lý lỗi ở đây
