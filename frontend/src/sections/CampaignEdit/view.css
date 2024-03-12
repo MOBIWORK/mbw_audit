@@ -1,7 +1,7 @@
 .ant-collapse-header .ant-collapse-arrow {
   position: absolute;
-  left: 250px;
-  top: 50%;
+  left: auto;
+  right: 30px;
   transform: translateY(-50%);
   
 }
@@ -11,4 +11,17 @@
 }
 :where(.css-dev-only-do-not-override-dkbvqv).ant-collapse .ant-collapse-content>.ant-collapse-content-box {
   padding : 0
+}
+.custom-collapse-audit .ant-collapse-arrow {
+  color: #dde3e9; /* Màu của icon */
+  font-size: 24px; /* Kích thước của icon */
+  position: absolute;
+  left: auto;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.custom-collapse-parent .ant-collapse-header .ant-collapse-arrow{
+  left: auto;
+  right: 30px;
 }

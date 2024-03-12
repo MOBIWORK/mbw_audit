@@ -206,9 +206,7 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct, on
     let arrSequenceProduct = result.map(x => x.name);
     onChangeSequenceProducts(arrSequenceProduct);
     setProductSort(result);
-    setSelectedProductRowKeys([]);
-    console.log(selectedProductRowKeys);
-   // onChangeCategory(arrCategorySelect);
+    console.log(arrProductCategory);
     handleCancelProduct();
   }
 
@@ -450,11 +448,11 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
               { title: "Tên sản phẩm", dataIndex: "product_name", key: "product_name" }, { title: "Danh mục", dataIndex: "cate_name", key: "cate_name" },
               { title: "Chọn thứ tự", dataIndex: "sequence_product", dataIndex: "sequence_product", 
               render: (item: number, rowData: DataType, index: number) => ( // Thêm index vào render function
-                  <Input style={{width : '120px'}}
-                      defaultValue={item} 
-                      value={item} 
-                      onChange={(e) => handleQuantityChangeProduct(index, parseInt(e.target.value))} // Sử dụng index trong handleQuantityChange
-                  />
+                <Input style={{width : '120px'}}
+                    defaultValue={item} 
+                    value={item} 
+                    onChange={(e) => handleQuantityChangeProduct(index, parseInt(e.target.value))} // Sử dụng index trong handleQuantityChange
+                />
               ) }
             ]} dataSource={arrProductCategory} />
         </div>

@@ -26,6 +26,7 @@ export default function CampaignEdit() {
   const [customerEdit, setCustomerEdit] = useState([]);
   const [productEdit, setProductEdit] = useState({});
   const [checkExistProduct, setCheckExistProduct] = useState(false);
+  const [settingSequenceProduct, setSettingSequenceProduct] = useState([]);
   
 
   useEffect(() => {
@@ -48,6 +49,10 @@ export default function CampaignEdit() {
         setProductEdit(convertSettingScoreAudit(JSON.parse(res.data.setting_score_audit)));
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
+        if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){
+          let objSettingScoreAudit = JSON.parse(res.data.setting_score_audit);
+          if(objSettingScoreAudit.sequence_product != null) setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
+        }
         let objSettingScore = JSON.parse(res.data.setting_score_audit);
         if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
     }
@@ -202,7 +207,8 @@ export default function CampaignEdit() {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
                 children: (
-                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} onChangeCheckExistProduct={handleChangeExistProduct}
+                  <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} objSettingSequenceProduct={settingSequenceProduct}
+                      onChangeCheckExistProduct={handleChangeExistProduct}
                   />
                 ),
               },
