@@ -134,17 +134,15 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct, on
         return;
     }else{
         // Lọc danh sách sản phẩm hiển thị dựa trên giá trị tìm kiếm
-    const filteredProducts = tempProducts.filter(product => {
-      // Kiểm tra xem tên sản phẩm có chứa giá trị tìm kiếm không
-      return product.product_name.toLowerCase().includes(searchValue);
-  });
+      const filteredProducts = tempProducts.filter(product => {
+        // Kiểm tra xem tên sản phẩm có chứa giá trị tìm kiếm không
+        return product.product_name.toLowerCase().includes(searchValue);
+      });
 
-  // Cập nhật danh sách sản phẩm hiển thị sau khi lọc
-  setArrProductCategory(filteredProducts);
+      // Cập nhật danh sách sản phẩm hiển thị sau khi lọc
+      setArrProductCategory(filteredProducts);
     }
-
-  
-}
+  }
 
   const onSelectChangeCategory = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
     console.log(newSelectedRowKeys);
@@ -152,16 +150,14 @@ export default function Product({onChangeCategory, onChangeCheckExistProduct, on
     
   };
   const onSelectChangeProduct = (newSelectedRowKeys: React.Key[], selectedRow: TypeCategory[]) => {
-    console.log(newSelectedRowKeys);
-    console.log(arrPro);
     // Thêm trường sequence_product vào mỗi phần tử trong mảng dữ liệu
-const newData = arrPro.map((item, index) => {
-  const sequenceIndex = newSelectedRowKeys.indexOf(item.name);
-  const sequenceProduct = sequenceIndex !== -1 ? sequenceIndex + 1 : null;
-  return { ...item, sequence_product: sequenceProduct };
-});
-setArrProductCategory(newData)
-setSelectedProductRowKeys(newSelectedRowKeys);
+    const newData = arrPro.map((item, index) => {
+      const sequenceIndex = newSelectedRowKeys.indexOf(item.name);
+      const sequenceProduct = sequenceIndex !== -1 ? sequenceIndex + 1 : null;
+      return { ...item, sequence_product: sequenceProduct };
+    });
+    setArrProductCategory(newData)
+    setSelectedProductRowKeys(newSelectedRowKeys);
   };
 //   const onSelectAllCategory = (selected: boolean, selectedRows: TypeCategory[], changeRows: TypeCategory[]) => {
 //     const keys = selected ? categories.map(row => row.key) : [];
@@ -209,7 +205,9 @@ setSelectedProductRowKeys(newSelectedRowKeys);
     console.log(result);
     let arrSequenceProduct = result.map(x => x.name);
     onChangeSequenceProducts(arrSequenceProduct);
-    setProductSort(result)
+    setProductSort(result);
+    setSelectedProductRowKeys([]);
+    console.log(selectedProductRowKeys);
    // onChangeCategory(arrCategorySelect);
     handleCancelProduct();
   }
@@ -366,7 +364,7 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
       key: '1',
       label:  <span style={{ fontWeight: 700, fontSize: '15px' }}>  Thiết lập tiêu chí chấm điểm trưng bày sản phẩm</span> ,
       children:  
-         <Collapse items={itemsChildren} defaultActiveKey={['1','2']}  className="custom-collapse"/>
+         <Collapse items={itemsChildren} defaultActiveKey={['1','2']}  className="custom-collapse-audit"/>
     },
     
     
@@ -392,7 +390,7 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
           expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
           dataSource={categoriesSelected}
         />
-         <Collapse items={itemscoll} defaultActiveKey={['1','2']} onChange={onChange} className="custom-collapse"/>
+         <Collapse items={itemscoll} defaultActiveKey={['1','2']} onChange={onChange} className="custom-collapse-parent"/>
       </div>
 
       <Modal
@@ -429,7 +427,6 @@ const itemsChildren: CollapseProps['itemsChildren'] = [
         width={990}
         title="Sắp xếp sản phẩm"
         open={isModalOpenProduct}
-        onOk={handleOkAddCategory}
         onCancel={handleCancelProduct}
         footer={false}
       >
