@@ -70,6 +70,7 @@ import { AxiosService } from "../../services/server";
     }, [searchCustomer]);
   
     const initDataCustomer = async () => {
+      setSelectedRowKeys(customerEdit);
       let urlCustomer = "/api/method/mbw_dms.api.selling.customer.list_customer";
       let res = await AxiosService.get(urlCustomer);
       let arrCustomerSource = [];

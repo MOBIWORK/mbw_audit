@@ -1,23 +1,13 @@
 import {
-  DeleteOutlined,
-  PlusOutlined,
-  SearchOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from "@ant-design/icons";
 import {
-  Button,
-  Input,
-  Modal,
   Table,
   TableColumnsType,
 } from "antd";
-import { FormItemCustom, TableCustom } from "../../components";
+import { TableCustom } from "../../components";
 import { useState } from "react"; 
-interface DataType {
-  key: React.Key;
-  stt?: string;
-  product: string;
-  quantity: string;
-}
 
 interface ExpandedDataType {
   key: React.Key;
@@ -25,60 +15,15 @@ interface ExpandedDataType {
   name: string;
 }
 
-const items = [
-  { key: "1", label: "Action 1" },
-  { key: "2", label: "Action 2" },
-];
 
 export default function Product(props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
-  const hasSelected = selectedRowKeys.length > 0;
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  const expandedRowRender = () => {
-    const columns: TableColumnsType<ExpandedDataType> = [
-      { title: "STT", dataIndex: "stt" },
-      { title: "Tên sản phẩm", dataIndex: "name" },
-      { title: "Số lượng sản phẩm máy chấm", dataIndex: "quantityAI"},
-      { title: "Ảnh trưng bày", dataIndex: "date", }
-    ];
-
-    const data = [];
-    for (let i = 0; i < 3; ++i) {
-      data.push({
-        key: i.toString(),
-        date: "2014-12-24 23:12:00",
-        name: "This is production name",
-      });
-    }
-    return <Table columns={columns} dataSource={data} pagination={false} />;
-  };
   const sumProductByCategory = {};
-
+  console.log(props.recordData)
   // Tính tổng sum_product cho từng danh mục
   props.recordData?.detail.forEach(detailItem => {
       const categoryCode = detailItem.category;
-      const sumProduct = parseInt(detailItem.sum_product);
+      const sumProduct = 1;
   
       // Kiểm tra và cập nhật tổng sum_product cho từng danh mục
       sumProductByCategory[categoryCode] = (sumProductByCategory[categoryCode] || 0) + sumProduct;
@@ -98,11 +43,12 @@ export default function Product(props) {
     { title: "STT", dataIndex: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name_product" },
     { title: "Số lượng sản phẩm máy chấm", dataIndex: "sum_product" },
-    // { title: "Ảnh trưng bày", dataIndex: "image",  render: (image) => (
-    //   <a >
-    //   Xem ảnh
-    // </a>
-    // ), },
+    { title: "Chấm điểm trưng bày", dataIndex: "scoring_machine", render: (scoring_machine: number) => (
+      <>
+        {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+        {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+      </>
+    ) }
 ];
 // Các cột cho bảng chính
 const mainColumns = [
@@ -121,6 +67,7 @@ const expandedRowData = props.recordData?.category_names.map((category, index) =
       sum_product: detailItem.sum_product.toString(),
       image: detailItem.images,
       creation: detailItem.creation,
+      scoring_machine: detailItem.scoring_machine
       // Các trường dữ liệu khác của chi tiết
   }));
 });
@@ -131,15 +78,16 @@ const expandedRowData = props.recordData?.category_names.map((category, index) =
           columns={mainColumns}
           expandable={{
             expandedRowRender: (record, index) => (
+              <div style={{ margin: 5 }}>
                 <Table
                     columns={expandedColumns}
                     dataSource={expandedRowData[index]}
                     pagination={false}
                 />
+              </div>
             ),
             rowExpandable: (record) => expandedRowData[record.key].length > 0
         }}
-          // expandable={{ expandedRowRender, defaultExpandedRowKeys: ["0"] }}
           dataSource={mainTableData}
         />
       </>

@@ -1,6 +1,8 @@
 import { LuUploadCloud } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import ObjectDetectionResult from './ObjectDetectionResult';
+import * as XLSX from "xlsx";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -71,6 +73,7 @@ interface TypeProductFromERP{
 
 import type { GetProp } from "antd";
 
+
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 const apiUrl = paths.apiUrl;
 export default function Product_SKU() {
@@ -121,7 +124,44 @@ export default function Product_SKU() {
   const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
   const [fileListImage , setFileListImage] = useState<any[]>([]);
+  const [urlImageAI , setUrlImageAI] = useState("");
+  const [objectBoxes , setObjectBoxes] = useState<any[]>([])
+  const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] = useState(false);
+  let labelColors = {}
+  
+  const [lstProductImport, setLstProductImport] = useState([]);
 
+  const propUploadImportFileExcel: UploadProps = {
+    action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
+    multiple: false,
+    beforeUpload: async (file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const bufferArray = event.target.result;
+        const wb = XLSX.read(bufferArray, { type: "buffer" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        let dataImport = [];
+        if(data.length >= 2){
+          for(let i = 1; i < data.length; i++){
+            let objDataImport = {
+              'product_code': data[i][0],
+              'barcode': data[i][1] ? data[i][1] : "" ,
+              'product_name': data[i][2],
+              'product_description': data[i][3],
+              'url_images': JSON.parse(data[i][4]),
+            }
+            dataImport.push(objDataImport);
+          }
+        }
+        console.log(dataImport);
+        setLstProductImport(dataImport);
+      };
+      reader.readAsArrayBuffer(file);
+      return false;
+    }
+  }
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
@@ -696,19 +736,51 @@ export default function Product_SKU() {
       );
     }
     if(res != null && res.message != null){
-      console.log(res.message);
+      setUrlImageAI("data:image/png;base64,"+res.message.results.verbose[0].base64_image);
+      let arrBoxes = [];
       arrProductDetect.forEach(item => {
         if(res.message.results.count[item.product_name] != null) item.product_count = res.message.results.count[item.product_name];
+        let locates = res.message.results.verbose[0].locates;
+        
+        // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+        let locatesWithLabel = locates.filter(function (obj) {
+            return obj.label === item.product_name;
+        });
+        let newObjectBoxes = locatesWithLabel.map(function(box) {
+          let bbox = box.bbox;
+          return {
+              x: bbox[0],
+              y: bbox[1],
+              width: bbox[2] - bbox[0],
+              height: bbox[3] - bbox[1],
+              label: box.label
+          };
+      });
+      arrBoxes = arrBoxes.concat(newObjectBoxes);
       })
+      setObjectBoxes(arrBoxes);
     }
-    console.log(arrProductDetect);
-    console.log(fileUploadCheckProduct);
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
+    
+    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? import.meta.env.VITE_BASE_URL+fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
   };
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+};
 
+// Xác định màu viền cho các nhãn và lưu vào đối tượng labelColors
+objectBoxes.forEach((box) => {
+    if (!labelColors[box.label]) {
+        labelColors[box.label] = getRandomColor();
+    }
+});
   const handleCancelCheckProduct = () => {
     setFileListImage([])
     setIsModalOpenCheckProduct(false);
@@ -753,6 +825,9 @@ export default function Product_SKU() {
 
   const handleSearchProductFromERP = (event)=>{
     setSearchProductFromERP(event.target.value);
+  }
+  const handleCancelImportExcel = () => {
+    setIsModalOpenImportFileExcel(false);
   }
 
   useEffect(() => {
@@ -806,7 +881,7 @@ export default function Product_SKU() {
       'listproduct': JSON.stringify(arrProductPost),
       'category': categorySelected.name
     }
-    let urlPostData = apiUrl + "api.import_product";
+    let urlPostData = apiUrl + ".api.import_product";
     let res = await AxiosService.post(urlPostData, dataPost);
     if(res != null && res.message != null && res.message.status == "success"){
       message.success("Thêm mới thành công");
@@ -817,7 +892,24 @@ export default function Product_SKU() {
       message.error("Thêm mới thất bại");
     }
   }
-
+  const handleImportFileProduct = () => {
+    setIsModalOpenImportFileExcel(true);
+  }
+  const handleOkImportExcel = async() => {
+    let dataPost = {
+      'listproduct': JSON.stringify(lstProductImport),
+      'category': categorySelected.name
+    }
+    let urlPostData = apiUrl + ".api.import_product";
+    let res = await AxiosService.post(urlPostData, dataPost);
+    if(res != null && res.message != null && res.message.status == "success"){
+      message.success("Thêm mới thành công");
+      initDataProductByCategory();
+      setIsModalOpenImportFileExcel(false);
+    }else{
+      message.error("Thêm mới thất bại");
+    }
+  }
   return (
     <>
       <HeaderPage
@@ -837,6 +929,7 @@ export default function Product_SKU() {
             icon: <LuUploadCloud className="text-xl" />,
             size: "20px",
             className: "flex items-center mr-2",
+            action: handleImportFileProduct
           },
           {
             label: "Thêm sản phẩm từ ERP",
@@ -968,13 +1061,18 @@ export default function Product_SKU() {
       <Modal
         title="Kiểm tra ảnh sản phẩm"
         open={isModelResultProduct}
-        width={777}
+        width={920}
         onCancel={handleCancelResultCheckProduct}
         footer={null}
       >
-        <div style={{marginBottom: "20px"}}>
-          <img src={urlImageCheckProductResult} style={{ maxWidth: '100%', height: 'auto' }} />
+        <div style={{marginBottom: "20px",display:'flex'}}>
+          <img src={urlImageCheckProductResult} style={{ width: '450px', height: '450px', marginRight: '20px' }} />
+          <ObjectDetectionResult
+                            imageSrc={urlImageAI}
+                            objectBoxes={objectBoxes}
+                            labelColors={labelColors} />
         </div>
+        
         <div>
           <div>Kết quả kiểm tra hình ảnh:</div>
           <Table dataSource={resultProductCheck} columns={[
@@ -1271,6 +1369,31 @@ export default function Product_SKU() {
       >
         <div>{deleteItemCategory.contentConfirm}</div>
         <div>{deleteItemCategory.contentRemind}</div>
+      </Modal>
+      <Modal
+        title="Nhập dữ liệu từ tệp excel"
+        open={isModalOpenImportFileExcel}
+        width={777}
+        onOk={handleOkImportExcel}
+        onCancel={handleCancelImportExcel}
+        footer={[
+          <Button key="back" onClick={handleCancelImportExcel}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleOkImportExcel}>
+            Lưu lại
+          </Button>,
+        ]}
+      >
+        <p className="text-[#637381] font-normal text-sm">
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
+        </p>
+        <Dragger {...propUploadImportFileExcel}>
+          <p className="ant-upload-drag-icon">
+            <PlusOutlined />
+          </p>
+          <p className="ant-upload-text">Kéo, thả hoặc chọn tệp để tải lên</p>
+        </Dragger>
       </Modal>
     </>
   );

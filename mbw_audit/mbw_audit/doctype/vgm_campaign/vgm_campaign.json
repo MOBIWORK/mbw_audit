@@ -13,7 +13,8 @@
   "campaign_status",
   "categories",
   "employees",
-  "retails"
+  "retails",
+  "setting_score_audit"
  ],
  "fields": [
   {
@@ -60,11 +61,16 @@
    "fieldname": "retails",
    "fieldtype": "JSON",
    "label": "Retails"
+  },
+  {
+   "fieldname": "setting_score_audit",
+   "fieldtype": "JSON",
+   "label": "Setting Score Audit"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-29 14:39:46.411155",
+ "modified": "2024-03-06 04:26:17.544366",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Campaign",

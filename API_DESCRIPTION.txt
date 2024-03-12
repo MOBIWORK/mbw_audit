@@ -23,7 +23,8 @@
 			"campaign_code": "12aed3e4ec",
 			"category" : "[\"5439ebcea2\",\"5439ebcea2\"]",
 			"images_time": "1708570011",
-			"images": "http://hr.mbwcloud.com:8007/files/858da12c-1558-4c0f-8aec-8e3f20f66221.png" //Đường dẫn ảnh dịch vụ upload file trả về
+			"images": '["http://hr.mbwcloud.com:8007/files/858da12c-1558-4c0f-8aec-8e3f20f66221.png"]', //Đường dẫn ảnh dịch vụ upload file trả về
+			"setting_score_audit": "{\n    \"557b6d066a\": {\n        \"min_product\": 1\n    }\n}"   //Tiêu chí chấm điểm từ chiến dịch trả về
 		}
 
 	

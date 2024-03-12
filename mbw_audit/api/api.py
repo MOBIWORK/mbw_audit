@@ -115,12 +115,14 @@ def get_campaign_info(*args,**kwargs):
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
-    images_time = int(kwargs.get('images_time'))
+    images_time = float(kwargs.get('images_time'))
     
     images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
-    
+    images = json.loads(kwargs.get('images'))
+    images_str = json.dumps(images)
+    setting_score_audit = json.loads(kwargs.get('setting_score_audit')) if kwargs.get('setting_score_audit') is not None else None
     try:
         data = {
             'doctype': 'VGM_Report',
@@ -129,7 +131,7 @@ def record_report_data(*args, **kwargs):
             'campaign_code': kwargs.get('campaign_code'),
             'categories': categories_str,
             'images_time': images_time,
-            'images': kwargs.get("images"),
+            'images': images_str,
             'latitude_check_in': '',
             'latitude_check_out': '',
             'longitude_check_in': '',
@@ -138,16 +140,17 @@ def record_report_data(*args, **kwargs):
         doc = frappe.get_doc(data)
         doc.insert()
         #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
-        process_report_sku(doc.name, kwargs.get("images"), category)
+        process_report_sku(doc.name, images, category, setting_score_audit)
         #process_report_sku_thread = threading.Thread(target=process_report_sku, args=(doc.name, kwargs.get("images"), category, frappe.db))
         #process_report_sku_thread.start()
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
 
-def process_report_sku(name, report_images, category):
+def process_report_sku(name, report_images, category, setting_score_audit):
     try:
         products_by_category = []
+        arr_score_audit = []
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
             products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["name"])
@@ -169,32 +172,58 @@ def process_report_sku(name, report_images, category):
                         recognition: ProductCountService = deep_vision.init_product_count_service(RECOGNITION_API_KEY)
                         base_url = frappe.utils.get_request_site_address()
                         collection_name = category_id
-                        image_ai = report_images
-                        image_path = [image_ai]
+                        image_path = report_images
                         
                         get_product_name = frappe.get_value("VGM_Product", {"name": product_id}, "product_name")
                         response = recognition.count(collection_name, image_path)
                         if response.get('status') == 'completed':
                             count_value = response.get('results', {}).get('count', {}).get(get_product_name)
+                            if count_value is None:
+                                count_value = 0
                         else:
                             count_value = 0
-                        child_doc.update({
-                            'parent': name, 
-                            'parentfield': 'report_sku',
-                            'parenttype': 'VGM_Report',
-                            'category': category_id,
-                            'sum_product': count_value,
-                            # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
-                            'product': product_id
-                        })
-                        child_doc.insert() 
+                        if setting_score_audit is None:
+                            child_doc.update({
+                                'parent': name, 
+                                'parentfield': 'report_sku',
+                                'parenttype': 'VGM_Report',
+                                'category': category_id,
+                                'sum_product': count_value,
+                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                                'product': product_id,
+                                'scoring_machine': -1
+                            })
+                        else:
+                            setting_by_product = setting_score_audit.get(product_id)
+                            result_score_audit = process_setting_score_audit(count_value, setting_by_product)
+                            child_doc.update({
+                                'parent': name, 
+                                'parentfield': 'report_sku',
+                                'parenttype': 'VGM_Report',
+                                'category': category_id,
+                                'sum_product': count_value,
+                                # 'images': json.dumps(image_ai),  # Chuyển đổi thành chuỗi JSON
+                                'product': product_id,
+                                'scoring_machine': result_score_audit 
+                            })
+                            arr_score_audit.append(result_score_audit)
+                        child_doc.insert()
+                if setting_score_audit is not None:
+                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in arr_score_audit else 1 if 1 in arr_score_audit else -1)
+                else:
+                    frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
             except Exception as e:
                 print({'status': 'fail','message': _("Failed to process doctype VGM_ReportDetailSKU: {0}").format(str(e))})
         else:
             print({'status': 'fail', 'message': _("No data provided for report_sku")})
     except Exception as e:
-        print(e)
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
+
+def process_setting_score_audit(count_value, setting_score_audit):
+    result = -1
+    if setting_score_audit is not None and setting_score_audit.get("min_product") is not None:
+        result = 1 if count_value >= setting_score_audit.get("min_product") else 0
+    return result
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):
@@ -307,7 +336,8 @@ def upload_file():
 
         # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
         fileInfo = save_file(filename, filedata, "File", "Home")
-        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url})
+        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url,
+                                        "date_time" : str(datetime.now().timestamp())})
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
         return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
@@ -325,31 +355,41 @@ def save_tmp_file(filename, filedata):
         f.write(filedata)
     return tmp_file_path
 
-@frappe.whitelist(methods=["POST"], allow_guest=True)
+
+@frappe.whitelist(methods="POST")
 def import_campaign(*args, **kwargs):
     try:
         list_campaigns = json.loads(kwargs.get('listcampaign'))
         date_format_with_time = '%Y/%m/%d %H:%M:%S'
 
         for data in list_campaigns:
-            
             new_campaign = frappe.new_doc('VGM_Campaign')
             new_campaign.campaign_name = data.get('campaign_name', '')
             new_campaign.campaign_description = data.get('campaign_description', '')
-            start_date = int(data.get('campaign_start'))
-            start_date = datetime.fromtimestamp(start_date).strftime(date_format_with_time)
-            end_date = int(data.get('campaign_end'))
-            end_date = datetime.fromtimestamp(end_date).strftime(date_format_with_time)
+
+            start_date_str = data.get('campaign_start')
+            end_date_str = data.get('campaign_end')
+
+            start_date = None
+            end_date = None
+
+            if start_date_str:
+                start_date = datetime.fromtimestamp(int(start_date_str)).strftime(date_format_with_time)
+
+            if end_date_str:
+                end_date = datetime.fromtimestamp(int(end_date_str)).strftime(date_format_with_time)
+
             new_campaign.start_date = start_date
             new_campaign.end_date = end_date
+
             categories = json.loads(data.get('campaign_categories'))
             employees = json.loads(data.get('campaign_employees'))
             retails = json.loads(data.get('campaign_customers'))
+
             new_campaign.campaign_status = data.get("campaign_status")
             new_campaign.categories = json.dumps(categories)
             new_campaign.employees = json.dumps(employees)
             new_campaign.retails = json.dumps(retails)
-            
 
             new_campaign.insert()
 

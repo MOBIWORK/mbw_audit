@@ -1,14 +1,11 @@
-import { VscAdd } from "react-icons/vsc";
 import { useState,useEffect } from "react";
 import { HeaderPage } from "../../components";
-import { LeftOutlined,CaretRightOutlined } from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Form, Tabs ,Collapse  } from "antd";
+import { Form ,Collapse  } from "antd";
 import type { CollapseProps } from 'antd';
 import GeneralInformation from "./general-information";
 import Product from "./product";
-import Customer from "./customer-list";
-import EmployeeSell from "./employee-sale";
 import './view.css'; 
 export default function  ReportView() {
   const [recordData, setRecordData] = useState(null);
@@ -26,8 +23,6 @@ export default function  ReportView() {
       key: '2',
       label: <span style={{ fontWeight: 700 }}>Sản phẩm</span>,
       children: <Product recordData={recordData}
-      // handleCustomer={setCustomerRouter}
-      // listCustomer={customerRouter}
     />,
     },
     
@@ -63,14 +58,6 @@ export default function  ReportView() {
             <LeftOutlined />
           </p>
         }
-        // buttons={[
-        //   {
-        //     label: "Thêm mới",
-        //     type: "primary",
-        //     size: "20px",
-        //     className: "flex items-center",
-        //   },
-        // ]}
       />
       <div className="bg-white  rounded-xl">
         <Form layout="vertical" form={form}>

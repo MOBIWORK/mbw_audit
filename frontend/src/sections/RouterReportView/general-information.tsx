@@ -1,8 +1,7 @@
-import { Col, Input, Select,Upload } from "antd";
+import { Col, Input,Carousel,Button } from "antd";
 import { useState,useEffect } from "react";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
-import TextArea from "antd/es/input/TextArea";
 
 type Options = {
   label: string;
@@ -19,69 +18,57 @@ export const statusOption: Options[] = [
   },
 ];
 export default function GeneralInformation({ form,recordData }) {
-  const { getFieldDecorator } = form;
-  const [fileList, setFileList] = useState<UploadFile[]>([ 
-  ]);
+  const [lstImage, setLstImage] = useState<string[]>([]);
   useEffect(() => {
+    console.log(recordData);
     if (recordData) {
       let arrimage = []
       form.setFieldsValue({
         store: recordData.retail_code,
         campaign_name: recordData.campaign_name,
-        date_check_in: recordData.date_check_in,
-        date_check_out: recordData.date_check_out,
         employee_code: recordData.employee_name,
         quatity: recordData.quantity_cate,
+        time_report: recordData.images_time,
+        scoring_machine: recordData.scoring_machine == 1? "Đạt" : recordData.scoring_machine == 0? "Không đạt" : ""
        
         // Gán giá trị cho các trường khác nếu cần
       });
-        let obj = {
-          uid : -1,
-          name: 'image.png',
-          status: 'done',
-          url: recordData.images //import.meta.env.VITE_BASE_URL
-        }
-        arrimage.push(obj)
-      
-        setFileList(arrimage)
+      let arrImage = [];
+      if( recordData.images != null && recordData.images != ""){
+        let objArrImage = JSON.parse(recordData.images);
+        arrImage = objArrImage;
+      }
+      setLstImage(arrImage);
     }
   }, [recordData]);
   return (
     <>
       <div className="p-4 pt-6 pb-[58px]">
         <RowCustom>
-          <Col span={12}>
-            <FormItemCustom label="Khách hàng" name="store" required>
-              <Input />
-            </FormItemCustom>
+          <Col span={10} style={{height: '350px'}}>
+            <Carousel dots={true}>
+              {lstImage.map((image, index) => (
+                <div key={index} style={{ backgroundColor: "#99989859" }}>
+                  <img src={image} style={{ width: '100%', height: 'auto' }} />
+                </div>
+              ))}
+            </Carousel>
           </Col>
-          <Col span={12}>
-            <FormItemCustom label="Chiến dịch" name="campaign_name" required>
-              <Input />
+          <Col span={14} style={{height: '350px'}}>
+            <FormItemCustom label="Khách hàng" name="store" className="pt-3" required>
+              <Input readOnly={true} />
             </FormItemCustom>
-          </Col>
-        </RowCustom>
-     
-        <RowCustom className="pt-2">
-        <Col span={12}>
-            <FormItemCustom label="Nhân viên thực hiện"  name="employee_code" required>
-              <Input />
+            <FormItemCustom label="Chiến dịch" name="campaign_name" className="pt-3" required>
+              <Input readOnly={true} />
             </FormItemCustom>
-          </Col>
-          <Col span={12}>
-            <FormItemCustom label="Số lượng danh mục sản phẩm" name="quatity" required>
-              <Input />
+            <FormItemCustom label="Nhân viên thực hiện"  name="employee_code" className="pt-3" required>
+              <Input readOnly={true} />
             </FormItemCustom>
-          </Col>
-        </RowCustom>
-        <RowCustom className="pt-2">
-        <Col span={12}>
-            <FormItemCustom label="Hình ảnh"  name="image" required>
-            <Upload
-        listType="picture-card"
-        fileList={fileList}
-      >
-      </Upload>
+            <FormItemCustom label="Thời gian thực hiện"  name="time_report" className="pt-3" required>
+              <Input readOnly={true} />
+            </FormItemCustom>
+            <FormItemCustom label="Chấm điểm trưng bày"  name="scoring_machine" className="pt-3" required>
+              <Input readOnly={true} />
             </FormItemCustom>
           </Col>
         </RowCustom>
