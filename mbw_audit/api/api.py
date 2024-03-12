@@ -169,10 +169,12 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                         objMinProduct = setting_score_audit.get("min_product", {})
                         if objMinProduct is not None:
                             lst_product_check[info_product.get("product_name")] = objMinProduct.get(info_product.get("name"))
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps({"category": category_id, "report_images": report_images, "lst_product_check": lst_product_check}))
                     resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
                 else:
                     for info_product in info_products:
                         lst_product_check[info_product.get("product_name")] = 0
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps({"category": category_id, "report_images": report_images, "lst_product_check": lst_product_check}))
                     resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
                 #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
                 if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
