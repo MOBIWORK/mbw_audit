@@ -209,6 +209,8 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                 if resultExistProduct.get("status") == "completed":
                     image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps(image_ais))
+                else:
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps([]))
             if setting_score_audit is not None:
                 frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
             else:
