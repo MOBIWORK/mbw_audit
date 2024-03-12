@@ -15,7 +15,7 @@ dependencies = [
     "requests-toolbelt~=0.10.1",
     "opencv-python-headless",
     "pysqlite3-binary",
-    "chromadb"
+    #"chromadb"
 ]
 
 [build-system]
