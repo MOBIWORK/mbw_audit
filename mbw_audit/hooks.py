@@ -4,6 +4,14 @@ app_publisher = "mbw"
 app_description = "mbw audit"
 app_email = "ekgis@gmail.com"
 app_license = "mit"
+
+website_route_rules = [
+	{
+		"from_route": "/mbw_audit/<path:app_path>",
+		"to_route": "mbw_audit",
+	},
+]
+
 # required_apps = []
 
 # Includes in <head>

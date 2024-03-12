@@ -12,7 +12,7 @@ import {
   Collapse,
   Checkbox,
 } from "antd";
-import "./view.css";
+import './view.css';
 import type { CollapseProps } from "antd";
 import { FormItemCustom, TableCustom } from "../../components";
 import { useState, useEffect } from "react";

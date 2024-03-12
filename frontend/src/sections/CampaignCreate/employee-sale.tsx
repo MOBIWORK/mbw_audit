@@ -19,8 +19,7 @@ const columnEmployees: TableProps<TypeEmployee>["columns"] = [
   {
     title: "Mã nhân viên",
     dataIndex: "name",
-    key: "name",
-    render: (text: string) => <a>{text}</a>,
+    key: "name"
   },
   {
     title: "Tên nhân viên",
@@ -46,8 +45,7 @@ export default function EmployeeSell({onChangeEmployees}) {
     {
       title: "Mã nhân viên",
       dataIndex: "name",
-      key: "name",
-      render: (text: string) => <a>{text}</a>,
+      key: "name"
     },
     {
       title: "Tên nhân viên",
@@ -157,7 +155,7 @@ export default function EmployeeSell({onChangeEmployees}) {
           <p className="text-sm font-bold text-[#1877F2]">Chọn nhân viên</p>
         </div>
         <div className="pt-6 ml-4">
-          <TableCustom columns={columnEmployeesSelect} dataSource={employeeSelected} />;
+          <TableCustom columns={columnEmployeesSelect} dataSource={employeeSelected} />
         </div>
 
         <Modal

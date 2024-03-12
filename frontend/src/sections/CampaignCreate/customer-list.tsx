@@ -32,8 +32,7 @@ export default function Customer({onChangeCustomer}) {
     {
       title: "ID",
       dataIndex: "customer_code",
-      key: "customer_code",
-      render: (text: string) => <a>{text}</a>,
+      key: "customer_code"
     },{
       title: "Tên khách hàng",
       key: "customer_name",
@@ -144,7 +143,7 @@ export default function Customer({onChangeCustomer}) {
           <p className="text-sm font-bold text-[#1877F2]">Chọn khách hàng</p>
         </div>
         <div className="pt-6 ml-4">
-          <TableCustom columns={columns} dataSource={customersSelected} />;
+          <TableCustom columns={columns} dataSource={customersSelected} />
         </div>
         <Modal
           width={990}
@@ -176,8 +175,7 @@ export default function Customer({onChangeCustomer}) {
               columns={[{
                 title: "ID",
                 dataIndex: "customer_code",
-                key: "customer_code",
-                render: (text: string) => <a>{text}</a>,
+                key: "customer_code"
               },{
                 title: "Tên khách hàng",
                 key: "customer_name",

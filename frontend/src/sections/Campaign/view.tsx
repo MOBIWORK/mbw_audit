@@ -16,6 +16,7 @@ import moment from 'moment';
 import "./campaign.css";
 import paths from "../AppConst/path.js";
 import * as XLSX from "xlsx";
+import { UploadFile } from "antd/lib";
 
 interface TypeCampaign {
   key: React.Key;
@@ -39,8 +40,7 @@ export default function Campaign() {
   const columnCampaigns: TableColumnsType<TypeCampaign> = [
     {
       title: "Tên chiến dịch",
-      dataIndex: "campaign_name",
-      render: (text: string) => <a>{text}</a>,
+      dataIndex: "campaign_name"
     },
     {
       title: "Trạng thái",
@@ -85,48 +85,75 @@ export default function Campaign() {
       else setShowDeleteListCampaign(false);
     },
   };
-
+  const [fileListImport, setFileListImport] = useState<UploadFile[]>([])
   const propUploadImportFileExcel: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
-      console.log(fileListExport);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const bufferArray = event.target.result;
-        const wb = XLSX.read(bufferArray, { type: "buffer" });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        let dataImport = [];
-        if(data.length >= 2){
-          for(let i = 1; i < data.length; i++){
-            const EXCEL_EPOCH = new Date(1899, 11, 31);
-            const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
-            let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
+        try {
+          const fileName = file.name.toLowerCase();
+          if (fileName.endsWith('.xls') || 
+          fileName.endsWith('.xlsx') || 
+          fileName.endsWith('.xlsm') || 
+          fileName.endsWith('.xlsb') || 
+          fileName.endsWith('.csv') || 
+          fileName.endsWith('.ods')) {
+                      // Xử lý khi là file Excel
+                      let obj = [{
+                        uid: '-1',
+                        name: file.name,
+                        status: 'done',
+                        url: ''
+                    }];
+                    setFileListImport(obj);
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const bufferArray = event.target.result;
+                        const wb = XLSX.read(bufferArray, { type: "buffer" });
+                        const wsname = wb.SheetNames[0];
+                        const ws = wb.Sheets[wsname];
+                        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                        let dataImport = [];
+                        if (data.length >= 2) {
+                            for (let i = 1; i < data.length; i++) {
+                                const EXCEL_EPOCH = new Date(1899, 11, 31);
+                                const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+                                let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
+        
+                                const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+                                let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
+        
+                                let objDataImport = {
+                                    'campaign_name': data[i][0],
+                                    'campaign_description': data[i][1],
+                                    'campaign_start': (startDate.getTime() / 1000).toString(),
+                                    'campaign_end': (endDate.getTime() / 1000).toString(),
+                                    'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
+                                    'campaign_categories': data[i][5],
+                                    'campaign_employees': data[i][6],
+                                    'campaign_customers': data[i][7]
+                                }
+                                dataImport.push(objDataImport);
+                            }
+                        }
+                        setLstCampaignImport(dataImport);
+                    };
+                    reader.readAsArrayBuffer(file);
 
-            const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
-            let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
-
-            let objDataImport = {
-              'campaign_name': data[i][0],
-              'campaign_description': data[i][1],
-              'campaign_start': (startDate.getTime() / 1000).toString(),
-              'campaign_end': (endDate.getTime() / 1000).toString(),
-              'campaign_status': data[i][4] != ""? data[i][4] : "Open",
-              'campaign_categories': data[i][5],
-              'campaign_employees': data[i][6],
-              'campaign_customers': data[i][7]
-            }
-            dataImport.push(objDataImport);
+          } else{
+             // Xử lý khi không phải là file Excel
+             message.error("Đã xảy ra lỗi, không đúng định dạng file: xls, xlsx, xlsm, xlsb, csv, ods");
+             return false; // Trả về false để ngăn việc tự động tải file
           }
+
+        } catch (error) {
+          message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+            // Thực hiện xử lý lỗi ở đây
         }
-        setLstCampaignImport(dataImport);
-      };
-      reader.readAsArrayBuffer(file);
-      return false;
+        return false;
     }
-  }
+}
+
 
   const [campaigns, setCampaigns] = useState<TypeCampaign[]>([]);
   const [searchCampaign, setSearchCampaign] = useState("");
@@ -244,6 +271,7 @@ export default function Campaign() {
 
   const handleImportFileCampaign = () => {
     setIsModalOpenImportFileExcel(true);
+    setFileListImport([])
   }
 
   const handleOkImportExcel = async() => {
@@ -252,11 +280,12 @@ export default function Campaign() {
       "listcampaign" :JSON.stringify(lstCampaignImport)
     }
     let res = await AxiosService.post(url_import_campaign, dataPost);
-    if(res.status == "success"){
+    if(res.message.status == "success"){
       message.success("Thên chiến dịch thành công");
+      setIsModalOpenImportFileExcel(false)
       initDataCampaigns();
     }else{
-      message.success("Thên chiến dịch thất bại");
+      message.error("Thêm chiến dịch thất bại");
     }
     
    
@@ -264,6 +293,7 @@ export default function Campaign() {
 
   const handleCancelImportExcel = () => {
     setIsModalOpenImportFileExcel(false);
+    setFileListImport([])
   }
 
 
@@ -357,7 +387,7 @@ export default function Campaign() {
         <p className="text-[#637381] font-normal text-sm">
           Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
         </p>
-        <Dragger {...propUploadImportFileExcel} >
+        <Dragger {...propUploadImportFileExcel}  fileList={fileListImport}>
           <p className="ant-upload-drag-icon">
             <PlusOutlined />
           </p>
