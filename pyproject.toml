@@ -9,7 +9,7 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
-    "deepvision_python_sdk@git+https://bugs.ekgis.vn/deepvision/deepvision_python_sdk#egg=master",
+    "deepvision@git+https://bugs.ekgis.vn/deepvision/deepvision_python_sdk#egg=master",
     "pyarrow",
     "urllib3~=1.26.15",
     "requests-toolbelt~=0.10.1",
