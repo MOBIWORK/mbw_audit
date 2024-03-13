@@ -96,8 +96,15 @@ export default function Product_SKU() {
   //item and isShowModel for edit category
   const [editItemCategory, setEditItemCategory] = useState({});
   const [isModelOpenEditCategory, setIsModelOpenEditCategory] = useState(false);
+  const [loadingAddCategory, setLoadingAddCategory] = useState<boolean>(false);
+  const [loadingEditCategory,setLoadingEditCategory] = useState<boolean>(false);
 
   //biến cho sản phẩm theo danh mục
+  const [loadingAddProduct, setLoadingAddProduct] = useState<boolean>(false);
+  const [loadingEditProduct, setLoadingEditProduct] = useState<boolean>(false);
+  const [loadingCheckProduct, setLoadingCheckProduct] = useState<boolean>(false);
+  const [loadingAddListProduct, setLoadingAddListProduct] = useState<boolean>(false);
+  const [loadingImportFileExcelProduct, setLoadingImportFileExcelProduct] = useState<boolean>(false);
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
   const [searchProduct, setSearchProduct] = useState("");
@@ -505,6 +512,7 @@ export default function Product_SKU() {
   };
 
   const handleOkEditCategory = async () => {
+    setLoadingEditCategory(true);
     let objCategory = formEditCategory.getFieldsValue();
     if (editItemCategory != null && editItemCategory.name != null) {
       let urlPutCategory = `/api/resource/VGM_Category/${editItemCategory.name}`;
@@ -515,10 +523,12 @@ export default function Product_SKU() {
       let res = await AxiosService.put(urlPutCategory, dataPut);
       if (res != null && res.data != null) {
         message.success("Sửa thành công");
+        setLoadingEditCategory(false);
         fetchDataCategories();
         handleCancelEditCategory();
       } else {
         message.error("Sửa thất bại");
+        setLoadingEditCategory(false);
       }
     }
   };
@@ -533,6 +543,7 @@ export default function Product_SKU() {
   };
 
   const handleOkCategory = async () => {
+    setLoadingAddCategory(true);
     const valField = form.getFieldsValue();
     const categoryName = valField.name_item.trim();
 
@@ -570,10 +581,12 @@ export default function Product_SKU() {
       ) {
         form.resetFields();
         message.success("Thêm mới thành công");
+        setLoadingAddCategory(false);
         fetchDataCategories();
         setIsModalOpenAddCategory(false);
       } else {
         message.error("Thêm mới thất bại");
+        setLoadingAddCategory(false);
       }
     } catch (error) {
       console.error("Lỗi khi thêm mới danh mục:", error);
@@ -650,6 +663,7 @@ export default function Product_SKU() {
   };
 
   const handleOkAddProduct = async () => {
+    setLoadingAddProduct(true);
     let objProduct = formAddProduct.getFieldsValue();
     let productFilter = products.filter(
       (x) =>
@@ -691,6 +705,7 @@ export default function Product_SKU() {
     let res = await AxiosService.post(urlAddProduct, objProductCreate);
     if (res != null && res.data != null) {
       message.success("Thêm mới thành công");
+      setLoadingAddProduct(false);
       formAddProduct.resetFields();
       let barcode = document.getElementById("barcode");
       barcode.innerHTML = "";
@@ -699,6 +714,7 @@ export default function Product_SKU() {
       handleCancelAddProduct();
     } else {
       message.error("Thêm mới thất bại");
+      setLoadingAddProduct(false);
     }
   };
 
@@ -751,6 +767,7 @@ export default function Product_SKU() {
   };
 
   const handleOkEditProduct = async () => {
+    setLoadingEditProduct(true);
     let arrImage = [];
     let objProduct = formEditProduct.getFieldsValue();
     for (let i = 0; i < fileListEdit.length; i++)
@@ -776,6 +793,7 @@ export default function Product_SKU() {
     let res = await AxiosService.put(urlEditProduct, objProductEdit);
     if (res != null && res.data != null) {
       message.success("Sửa thành công");
+      setLoadingEditProduct(false);
       formEditProduct.resetFields();
       let barcode = document.getElementById("barcode");
       barcode.innerHTML = "";
@@ -784,6 +802,7 @@ export default function Product_SKU() {
       handleCancelEditProduct();
     } else {
       message.error("Sửa thất bại");
+      setLoadingEditProduct(false);
     }
   };
 
@@ -869,6 +888,7 @@ export default function Product_SKU() {
   };
 
   const handleOkCheckProduct = async () => {
+    setLoadingCheckProduct(true);
     let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
     let objCheckProduct = {
       collection_name: categorySelected.name,
@@ -921,6 +941,7 @@ export default function Product_SKU() {
         ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url
         : ""
     ); //import.meta.env.VITE_BASE_URL+
+    setLoadingCheckProduct(false);
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
@@ -1036,6 +1057,7 @@ export default function Product_SKU() {
 
   const handleSaveProductFromERP = async () => {
     //Goi dich vu luu san pham tu erp
+    setLoadingAddListProduct(true);
     let arrProductPost = [];
     for (let i = 0; i < productFromERPSelected.length; i++) {
       let itemProduct = {
@@ -1059,11 +1081,13 @@ export default function Product_SKU() {
     let res = await AxiosService.post(urlPostData, dataPost);
     if (res != null && res.message != null && res.message.status == "success") {
       message.success("Thêm mới thành công");
+      setLoadingAddListProduct(false);
       setProductFromERPSelected([]);
       initDataProductByCategory();
       handleCancelAddProductFromERP();
     } else {
       message.error("Thêm mới thất bại");
+      setLoadingAddListProduct(false);
     }
   };
   const handleImportFileProduct = () => {
@@ -1072,6 +1096,7 @@ export default function Product_SKU() {
   };
   const handleOkImportExcel = async () => {
     if (lstProductImport && lstProductImport.length > 0) {
+      setLoadingImportFileExcelProduct(true);
       let dataPost = {
         listproduct: JSON.stringify(lstProductImport),
         category: categorySelected.name,
@@ -1084,10 +1109,12 @@ export default function Product_SKU() {
         res.message.status == "success"
       ) {
         message.success("Thêm mới thành công");
+        setLoadingImportFileExcelProduct(false);
         initDataProductByCategory();
         setIsModalOpenImportFileExcel(false);
       } else {
         message.error("Thêm mới thất bại");
+        setLoadingImportFileExcelProduct(false);
       }
     } else {
       message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
@@ -1247,7 +1274,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelCheckProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkCheckProduct}>
+          <Button key="submit" type="primary" onClick={handleOkCheckProduct} loading={loadingCheckProduct}>
             Kiểm tra
           </Button>,
         ]}
@@ -1330,7 +1357,7 @@ export default function Product_SKU() {
                 ? `Đã chọn ${productFromERPSelected.length} danh mục`
                 : ""}
             </span>
-            <Button type="primary" onClick={handleSaveProductFromERP}>
+            <Button type="primary" onClick={handleSaveProductFromERP} loading={loadingAddListProduct}>
               Thêm
             </Button>
           </div>
@@ -1366,7 +1393,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelAddProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkAddProduct}>
+          <Button key="submit" type="primary" onClick={handleOkAddProduct} loading={loadingAddProduct}>
             Lưu
           </Button>,
         ]}
@@ -1456,7 +1483,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelEditProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkEditProduct}>
+          <Button key="submit" type="primary" onClick={handleOkEditProduct} loading={loadingEditProduct}>
             Lưu
           </Button>,
         ]}
@@ -1573,7 +1600,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelCategory}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkCategory}>
+          <Button key="submit" type="primary" onClick={handleOkCategory} loading={loadingAddCategory}>
             Lưu
           </Button>,
         ]}
@@ -1608,7 +1635,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelEditCategory}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkEditCategory}>
+          <Button key="submit" type="primary" onClick={handleOkEditCategory} loading={loadingEditCategory}>
             Lưu
           </Button>,
         ]}
@@ -1656,7 +1683,7 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelImportExcel}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkImportExcel}>
+          <Button key="submit" type="primary" onClick={handleOkImportExcel} loading={loadingImportFileExcelProduct}>
             Lưu lại
           </Button>,
         ]}

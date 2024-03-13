@@ -18,6 +18,7 @@ export default function CampaignEdit() {
   const [categoriesSelected, setCategoriesSelected] = useState([]);
   const [employeesSelected, setEmployeesSelected] = useState([]);
   const [customersSelected, setCustomersSelected] = useState([]);
+  const [loadingEditCampaign, setLoadingEditCampaign] = useState<boolean>(false);
 
   //init data
   const [statusCampaignEdit, setStatusCampaignEdit] = useState("");
@@ -78,6 +79,7 @@ export default function CampaignEdit() {
   const handleEditCampaign = async () => {
     try {
         // Lấy giá trị từ form và các dữ liệu khác
+        setLoadingEditCampaign(true);
         let objSettingScore = {};
         let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
         if (checkExistProduct) {
@@ -120,13 +122,16 @@ export default function CampaignEdit() {
 
         if (res != null && res.data != null) {
             message.success("Cập nhật thành công");
+            setLoadingEditCampaign(false);
             navigate('/campaign');
         } else {
             message.error("Cập nhật thất bại");
+            setLoadingEditCampaign(false);
         }
     } catch (error) {
         // Xử lý khi có lỗi xảy ra trong quá trình cập nhật
         message.error("Không thể cập nhật. Vui lòng kiểm tra lại thông tin");
+        setLoadingEditCampaign(false);
     }
 };
 
@@ -189,6 +194,7 @@ export default function CampaignEdit() {
             type: "primary",
             size: "20px",
             className: "flex items-center",
+            loading: loadingEditCampaign,
             action: handleEditCampaign
           },
         ]}

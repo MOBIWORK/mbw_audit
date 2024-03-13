@@ -1,4 +1,4 @@
-import { Col, Input,Carousel,Button ,Image } from "antd";
+import { Col, Input,Select,Button ,Image } from "antd";
 import { useState,useEffect } from "react";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
@@ -18,13 +18,14 @@ export const statusOption: Options[] = [
     value: "Lock",
   },
 ];
-export default function GeneralInformation({ form,recordData }) {
+export default function GeneralInformation({ form,recordData, onChangeScoringHuman }) {
   const [lstImage, setLstImage] = useState<string[]>([]);
   const [lstImageAI, setLstImageAI] = useState<string[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState<number>(0);
   const [mainImageIndexAI, setMainImageIndexAI] = useState<number>(0);
+  const [scoringHuman, setScoringHuman] = useState<number>(0);
+  const [scoringSource, setScoringSource] = useState<any[]>([{'label': "Đạt", 'value': 1}, {'label': "Không đạt", 'value': 0}]);
   useEffect(() => {
-    console.log(recordData);
     if (recordData) {
       form.setFieldsValue({
         store: recordData.customer_name,
@@ -33,37 +34,23 @@ export default function GeneralInformation({ form,recordData }) {
         quatity: recordData.quantity_cate,
         time_report: recordData.images_time,
         scoring_machine: recordData.scoring_machine == 1? "Đạt" : recordData.scoring_machine == 0? "Không đạt" : "",
-
-       
-        // Gán giá trị cho các trường khác nếu cần
+        scoring_human: recordData.scoring_human
       });
+      setScoringHuman(recordData.scoring_human);
       let arrImageStore = [];
       if( recordData.images != null && recordData.images != ""){
         let objArrImage = JSON.parse(recordData.images);
         arrImageStore = objArrImage;
       }
       let arrImageStoreAI = [];
-      if( recordData.image_ai != null && recordData.image_ai != ""){
-        let objArrImage = JSON.parse(recordData.image_ai);
+      if( recordData.images_ai != null && recordData.images_ai != ""){
+        let objArrImage = JSON.parse(recordData.images_ai);
         arrImageStoreAI = objArrImage;
       }
       setLstImage(arrImageStore);
       setLstImageAI(arrImageStoreAI);
     }
   }, [recordData]);
-    // // State để lưu trữ hình ảnh lớn được hiển thị
-    // const [mainImage, setMainImage] = useState(null);
-
-    // // State để lưu trữ danh sách các hình ảnh nhỏ
-    // const [smallImages, setSmallImages] = useState([
-    //   'http://vgm.ts:8003/files/2.png',
-    //   'http://vgm.ts:8003/files/test_1.png',
-    //   'http://vgm.ts:8003/files/img_13.jpg',
-    //   'http://vgm.ts:8003/files/2.png',
-    //   'http://vgm.ts:8003/files/test_1.png',
-    //   'http://vgm.ts:8003/files/test_1.png',
-      
-    // ]);
 
     const handleImageClick = (index: number) => {
       setMainImageIndex(index);
@@ -94,6 +81,12 @@ export default function GeneralInformation({ form,recordData }) {
         setMainImageIndexAI(mainImageIndexAI + 1);
       }
     };
+
+    const handleChangeScoringHuman = (val) => {
+      setScoringHuman(val)
+      onChangeScoringHuman(val)
+    }
+
     return (
       <>
         <div className="p-4 pt-6 pb-[40px]">
@@ -122,7 +115,7 @@ export default function GeneralInformation({ form,recordData }) {
             </Col>
             <Col span={8}>
               <FormItemCustom
-                label="Chấm điểm trưng bày"
+                label="Điểm trưng bày AI chấm"
                 name="scoring_machine"
                 className="pt-3"
                 required
@@ -132,7 +125,24 @@ export default function GeneralInformation({ form,recordData }) {
                 }}/>
               </FormItemCustom>
             </Col>
-            <Col span={8}></Col>
+            <Col span={8}>
+            <FormItemCustom
+                label="Giám sát chấm"
+                name="scoring_human"
+                className="pt-3"
+                required
+              >
+                <Select className="w-[200px] h-[36px]" value={scoringHuman}
+                        onChange={(value) => handleChangeScoringHuman(value)} defaultValue={scoringHuman}>
+                {scoringSource.map(scoring => (
+                  <Select.Option key={scoring.value} value={scoring.value}>
+                    {scoring.label}
+                  </Select.Option>
+                ))}
+              </Select>
+              </FormItemCustom>
+              
+            </Col>
           </RowCustom>
           <RowCustom>
             <Col span={8}>

@@ -20,10 +20,12 @@ export default function CampaignCreate() {
   const [checkExistProduct, setCheckExistProduct] = useState(true);
   const [checkSequenceProduct, setCheckSequenceProduct] = useState(false);
   const [sequenceProducts, setSequenceProducts] = useState([]);
+  const [loadingAddCampaign, setLoadingAddCampaign] = useState<boolean>(false);
 
   const handleAddCampaign = async () => {
     try {
         // Lấy giá trị từ form và các dữ liệu khác
+        setLoadingAddCampaign(true);
         let objFrm = form.getFieldsValue();
         let startDate = convertDate(objFrm.campaign_start);
         let endDate = convertDate(objFrm.campaign_end);
@@ -70,13 +72,16 @@ export default function CampaignCreate() {
 
         if (res != null && res.data != null) {
             message.success("Thêm mới thành công");
+            setLoadingAddCampaign(false);
             navigate("/campaign");
         } else {
             message.error("Thêm mới thất bại");
+            setLoadingAddCampaign(false);
         }
     } catch (error) {
         // Xử lý khi có lỗi xảy ra trong quá trình thêm mới
         message.error("Không thể thêm mới. Vui lòng kiểm tra lại thông tin thời gian, sản phẩm, nhân viên, khách hàng");
+        setLoadingAddCampaign(false);
     }
 };
 
@@ -150,6 +155,7 @@ export default function CampaignCreate() {
             type: "primary",
             size: "20px",
             className: "flex items-center",
+            loading: loadingAddCampaign,
             action: handleAddCampaign,
           },
         ]}
