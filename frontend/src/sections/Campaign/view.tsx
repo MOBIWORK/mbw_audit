@@ -328,7 +328,7 @@ export default function Campaign() {
           },
         ]}
       />
-      <div className="bg-white rounded-xl pt-4">
+      <div className="bg-white rounded-xl pt-4 border-[#DFE3E8] border-[0.2px] border-solid">
         <FormItemCustom className="w-[320px] border-none p-4">
           <Input value={searchCampaign} onChange={onChangeFilterCampaign} 
             placeholder="Tìm kiếm chiến dịch" prefix={<SearchOutlined />} />

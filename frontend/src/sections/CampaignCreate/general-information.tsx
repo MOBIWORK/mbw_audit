@@ -37,12 +37,12 @@ export default function GeneralInformation({ form, onCampaignStatusChange }) {
           </Col>
           <Col span={8}>
             <FormItemCustom label="Thời gian bắt đầu" name="campaign_start" required>
-              <DatePicker showTime />
+              <DatePicker className="!bg-[#F4F6F8]" showTime />
             </FormItemCustom>
           </Col>
           <Col span={8}>
             <FormItemCustom label="Thời gian kết thúc" name="campaign_end" required>
-            <DatePicker showTime />
+            <DatePicker className="!bg-[#F4F6F8]" showTime />
             </FormItemCustom>
           </Col>
         </RowCustom>

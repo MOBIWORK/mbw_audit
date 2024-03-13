@@ -154,7 +154,7 @@ export default function CampaignCreate() {
           },
         ]}
       />
-      <div className="bg-white pt-4 rounded-xl">
+      <div className="bg-white pt-4 rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
         <Form layout="vertical" form={form}>
           <Tabs
             defaultActiveKey="1"

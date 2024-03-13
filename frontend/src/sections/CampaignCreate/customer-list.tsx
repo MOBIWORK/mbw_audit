@@ -142,7 +142,7 @@ export default function Customer({onChangeCustomer}) {
           </p>
           <p className="text-sm font-bold text-[#1877F2]">Chọn khách hàng</p>
         </div>
-        <div className="pt-6 ml-4">
+        <div className="pt-6 mx-4">
           <TableCustom columns={columns} dataSource={customersSelected} />
         </div>
         <Modal
