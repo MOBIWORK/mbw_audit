@@ -1,7 +1,7 @@
 import { LuUploadCloud } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import ObjectDetectionResult from './ObjectDetectionResult';
+import ObjectDetectionResult from "./ObjectDetectionResult";
 import * as XLSX from "xlsx";
 import {
   DeleteOutlined,
@@ -24,7 +24,7 @@ import {
   Typography,
   Upload,
   UploadProps,
-  message
+  message,
 } from "antd";
 import paths from "../AppConst/path.js";
 import { useState, useEffect } from "react";
@@ -32,7 +32,7 @@ import Dragger from "antd/es/upload/Dragger";
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { UploadFile } from "antd/lib";
-import  {AxiosService} from '../../services/server';
+import { AxiosService } from "../../services/server";
 import "./productsku.css";
 import JsBarcode from "jsbarcode";
 
@@ -43,7 +43,7 @@ interface DataType {
   address: string;
 }
 
-interface TypeCategory{
+interface TypeCategory {
   key: React.Key;
   name: string;
   category_name: string;
@@ -51,7 +51,7 @@ interface TypeCategory{
   owner: string;
   hidden: boolean;
 }
-interface TypeProduct{
+interface TypeProduct {
   key: React.Key;
   name: string;
   barcode: string;
@@ -61,40 +61,38 @@ interface TypeProduct{
   product_name: string;
   product_description: string;
 }
-interface TypeProductFromERP{
+interface TypeProductFromERP {
   key: React.Key;
   name: string;
   image: string;
   description: string;
   item_code: string;
   item_group: string;
-  item_name: string
+  item_name: string;
 }
 
 import type { GetProp } from "antd";
 
-
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 const apiUrl = paths.apiUrl;
 export default function Product_SKU() {
-  
   const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
     "checkbox"
   );
   const [categories, setCategories] = useState<any[]>([]);
-  const [searchCategory, setSearchCategory] = useState('');
+  const [searchCategory, setSearchCategory] = useState("");
 
   const [form] = useForm();
   const [formEditCategory] = useForm();
   const [formAddProduct] = useForm();
   const [formEditProduct] = useForm();
 
-  
   const [isModalOpenAddProduct, setIsModalOpenAddProduct] = useState(false);
   const [isModalOpenAddCategory, setIsModalOpenAddCategory] = useState(false);
   //item and isShowModel for delete category
   const [deleteItemCategory, setDeleteItemCategory] = useState({});
-  const [isModelOpenDeleteCategory, setIsModelOpenDeleteCategory] = useState(false);
+  const [isModelOpenDeleteCategory, setIsModelOpenDeleteCategory] =
+    useState(false);
   //item and isShowModel for edit category
   const [editItemCategory, setEditItemCategory] = useState({});
   const [isModelOpenEditCategory, setIsModelOpenEditCategory] = useState(false);
@@ -105,7 +103,8 @@ export default function Product_SKU() {
   const [searchProduct, setSearchProduct] = useState("");
   const [fileUploadAddProduct, setFileUploadAddProduct] = useState([]);
   const [deleteItemProduct, setDeleteItemProduct] = useState({});
-  const [isModelOpenDeleteProduct, setIsModelOpenDeleteProduct] = useState(false);
+  const [isModelOpenDeleteProduct, setIsModelOpenDeleteProduct] =
+    useState(false);
   const [editItemProduct, setEditItemProduct] = useState({});
   const [isModelOpenEditProduct, setIsModelOpenEditProduct] = useState(false);
   const [fileUploadEditProduct, setFileUploadEditProduct] = useState([]);
@@ -115,105 +114,115 @@ export default function Product_SKU() {
   const [isModelOpenDeleteList, setIsModelOpenDeleteList] = useState(false);
   const [isModalOpenCheckProduct, setIsModalOpenCheckProduct] = useState(false);
   const [fileUploadCheckProduct, setFileUploadCheckProduct] = useState([]);
-  const [urlImageCheckProductResult, setUrlImageCheckProductResult] = useState("");
+  const [urlImageCheckProductResult, setUrlImageCheckProductResult] =
+    useState("");
   const [resultProductCheck, setResultProductCheck] = useState([]);
   const [isModelResultProduct, setIsModelResultProduct] = useState(false);
-  const [isModalAddProductFromERP, setIsModalAddProductFromERP] = useState(false);
-  const [searchProductFromERP,setSearchProductFromERP] = useState("");
-  const [productFromERPSelected, setProductFromERPSelected] = useState<any[]>([]);
+  const [isModalAddProductFromERP, setIsModalAddProductFromERP] =
+    useState(false);
+  const [searchProductFromERP, setSearchProductFromERP] = useState("");
+  const [productFromERPSelected, setProductFromERPSelected] = useState<any[]>(
+    []
+  );
   const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
-  const [fileListImage , setFileListImage] = useState<any[]>([]);
-  const [urlImageAI , setUrlImageAI] = useState("");
-  const [objectBoxes , setObjectBoxes] = useState<any[]>([])
-  const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] = useState(false);
-  let labelColors = {}
-  
-  const [lstProductImport, setLstProductImport] = useState([]);
-  const [fileListImport, setFileListImport] = useState<UploadFile[]>([])
-  
+  const [fileListImage, setFileListImage] = useState<any[]>([]);
+  const [urlImageAI, setUrlImageAI] = useState("");
+  const [objectBoxes, setObjectBoxes] = useState<any[]>([]);
+  const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] =
+    useState(false);
+  let labelColors = {};
 
- const propUploadImportFileExcel: UploadProps = {
+  const [lstProductImport, setLstProductImport] = useState([]);
+  const [fileListImport, setFileListImport] = useState<UploadFile[]>([]);
+
+  const propUploadImportFileExcel: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
       try {
-          const fileName = file.name.toLowerCase();
-          if (fileName.endsWith('.xls') || 
-              fileName.endsWith('.xlsx') || 
-              fileName.endsWith('.xlsm') || 
-              fileName.endsWith('.xlsb') || 
-              fileName.endsWith('.csv') || 
-              fileName.endsWith('.ods')) {
-              // Xử lý khi là file Excel
-              let obj = [{
-                  uid: '-1',
-                  name: file.name,
-                  status: 'done',
-                  url: ''
-              }];
-              setFileListImport(obj);
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                  const bufferArray = event.target.result;
-                  const wb = XLSX.read(bufferArray, { type: "buffer" });
-                  const wsname = wb.SheetNames[0];
-                  const ws = wb.Sheets[wsname];
-                  const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                  let dataImport = [];
-                  if (data.length >= 2) {
-                      for (let i = 1; i < data.length; i++) {
-                          let objDataImport = {
-                              'product_code': data[i][0] ? data[i][0] : "",
-                              'barcode': data[i][1] ? data[i][1] : "",
-                              'product_name': data[i][2],
-                              'product_description': data[i][3],
-                              'url_images': JSON.parse(data[i][4]),
-                          }
-                          dataImport.push(objDataImport);
-                      }
-                  }
-                  console.log(dataImport);
-                  setLstProductImport(dataImport);
-              };
-              reader.readAsArrayBuffer(file);
-              return false;
-          } else {
-              // Xử lý khi không phải là file Excel
-              message.error("Đã xảy ra lỗi, không đúng định dạng file: xls, xlsx, xlsm, xlsb, csv, ods");
-              return false; // Trả về false để ngăn việc tự động tải file
-          }
-      } catch (error) {
-          // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
-         
-          message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+        const fileName = file.name.toLowerCase();
+        if (
+          fileName.endsWith(".xls") ||
+          fileName.endsWith(".xlsx") ||
+          fileName.endsWith(".xlsm") ||
+          fileName.endsWith(".xlsb") ||
+          fileName.endsWith(".csv") ||
+          fileName.endsWith(".ods")
+        ) {
+          // Xử lý khi là file Excel
+          let obj = [
+            {
+              uid: "-1",
+              name: file.name,
+              status: "done",
+              url: "",
+            },
+          ];
+          setFileListImport(obj);
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const bufferArray = event.target.result;
+            const wb = XLSX.read(bufferArray, { type: "buffer" });
+            const wsname = wb.SheetNames[0];
+            const ws = wb.Sheets[wsname];
+            const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+            let dataImport = [];
+            if (data.length >= 2) {
+              for (let i = 1; i < data.length; i++) {
+                let objDataImport = {
+                  product_code: data[i][0] ? data[i][0] : "",
+                  barcode: data[i][1] ? data[i][1] : "",
+                  product_name: data[i][2],
+                  product_description: data[i][3],
+                  url_images: JSON.parse(data[i][4]),
+                };
+                dataImport.push(objDataImport);
+              }
+            }
+            console.log(dataImport);
+            setLstProductImport(dataImport);
+          };
+          reader.readAsArrayBuffer(file);
+          return false;
+        } else {
+          // Xử lý khi không phải là file Excel
+          message.error(
+            "Đã xảy ra lỗi, không đúng định dạng file: xls, xlsx, xlsm, xlsb, csv, ods"
+          );
           return false; // Trả về false để ngăn việc tự động tải file
+        }
+      } catch (error) {
+        // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
+
+        message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+        return false; // Trả về false để ngăn việc tự động tải file
       }
-  },
-};
+    },
+  };
   const propUploadAddProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
-
-      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
       if (!isJpgOrPng) {
-        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        message.error("Bạn chỉ có thể tải lên file định dạng JPG/PNG!");
         return isJpgOrPng;
       }
 
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        message.error("Dung lượng tệp tải lên phải bé hơn 2MB!");
         return isLt2M;
       }
-    
+
       const formData = new FormData();
       const fields = {
         file,
         is_private: "0",
-        folder: "Home"
+        folder: "Home",
       };
-  
+
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
@@ -223,7 +232,10 @@ export default function Product_SKU() {
       );
       if (response.message) {
         //fileListUpload.push(response.message);
-        setFileUploadAddProduct(prevFileUpload => [...prevFileUpload, response.message]);
+        setFileUploadAddProduct((prevFileUpload) => [
+          ...prevFileUpload,
+          response.message,
+        ]);
         message.success("Tải ảnh thành công");
       } else {
         message.error("Tải ảnh thất bại");
@@ -234,16 +246,16 @@ export default function Product_SKU() {
   const propUploadEditProducts: UploadProps = {
     onRemove: (file) => {},
     beforeUpload: async (file) => {
-     
-      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
       if (!isJpgOrPng) {
-        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        message.error("Bạn chỉ có thể tải lên file định dạng JPG/PNG!");
         return isJpgOrPng;
       }
 
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        message.error("Dung lượng tệp tải lên phải bé hơn 2MB!");
         return isLt2M;
       }
 
@@ -251,9 +263,9 @@ export default function Product_SKU() {
       const fields = {
         file,
         is_private: "0",
-        folder: "Home"
+        folder: "Home",
       };
-  
+
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
@@ -263,7 +275,10 @@ export default function Product_SKU() {
       );
       if (response.message) {
         //fileListUpload.push(response.message);
-        setFileUploadEditProduct(prevFileUpload => [...prevFileUpload, response.message]);
+        setFileUploadEditProduct((prevFileUpload) => [
+          ...prevFileUpload,
+          response.message,
+        ]);
         message.success("Tải ảnh thành công");
       } else {
         message.error("Tải ảnh thất bại");
@@ -275,16 +290,16 @@ export default function Product_SKU() {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     accept: "image/png, image/jpeg",
     beforeUpload: async (file) => {
-      
-      const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
       if (!isJpgOrPng) {
-        message.error('Bạn chỉ có thể tải lên file định dạng JPG/PNG!');
+        message.error("Bạn chỉ có thể tải lên file định dạng JPG/PNG!");
         return isJpgOrPng;
       }
 
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        message.error('Dung lượng tệp tải lên phải bé hơn 2MB!');
+        message.error("Dung lượng tệp tải lên phải bé hơn 2MB!");
         return isLt2M;
       }
 
@@ -292,9 +307,9 @@ export default function Product_SKU() {
       const fields = {
         file,
         is_private: "0",
-        folder: "Home"
+        folder: "Home",
       };
-  
+
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
@@ -304,23 +319,26 @@ export default function Product_SKU() {
       );
       if (response.message) {
         //fileListUpload.push(response.message);
-        let listFile = []
+        let listFile = [];
         let obj = {
-          uid: '-1',
+          uid: "-1",
           name: response.message.file_name,
-          status: 'done',
+          status: "done",
           url: response.message.file_url,
-        }
-        listFile.push(obj)
-        setFileListImage(listFile)
-        setFileUploadCheckProduct(prevFileUpload => [...prevFileUpload, response.message]);
+        };
+        listFile.push(obj);
+        setFileListImage(listFile);
+        setFileUploadCheckProduct((prevFileUpload) => [
+          ...prevFileUpload,
+          response.message,
+        ]);
         message.success("Tải ảnh thành công");
       } else {
         message.error("Tải ảnh thất bại");
       }
       return false;
-    }
-  }
+    },
+  };
   const columnProducts: TableColumnsType<DataType> = [
     {
       title: "Mã Sản phẩm",
@@ -339,14 +357,10 @@ export default function Product_SKU() {
       title: "Hành động",
       key: "action",
       render: (_, record) => (
-        <Space size="middle">
-          <a>
-            <EditOutlined onClick={() => handleClickEditProduct(record)}/>
-          </a>
-          <a>
-            <DeleteOutlined onClick={() => handleClickDeleteProduct(record)}/>
-          </a>
-        </Space>
+        <>
+          <EditOutlined className="mr-4" onClick={() => handleClickEditProduct(record)} />
+          <DeleteOutlined onClick={() => handleClickDeleteProduct(record)} />
+        </>
       ),
     },
   ];
@@ -354,7 +368,7 @@ export default function Product_SKU() {
   const rowSelectionProduct = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
       setProductSelected(selectedRows);
-      if(selectedRows.length > 0) setShowDeleteList(true);
+      if (selectedRows.length > 0) setShowDeleteList(true);
       else setShowDeleteList(false);
     },
   };
@@ -364,7 +378,7 @@ export default function Product_SKU() {
     try {
       //setLoading(true);
       let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
-      if(searchCategory != null && searchCategory != ""){
+      if (searchCategory != null && searchCategory != "") {
         let filterComand = `[["category_name", "like", "%${searchCategory}%"]]`;
         urlCategory += `&filters=${filterComand}`;
       }
@@ -372,18 +386,20 @@ export default function Product_SKU() {
       // Kiểm tra xem kết quả từ API có chứa dữ liệu không
       if (response && response.data) {
         // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
-        let dataCategories: TypeCategory[] = response.data.map((item: TypeCategory, index: number) => {
-          return {
-            ...item,
-            key: item.name,
-            hidden: true,
-            selected: index === 0
+        let dataCategories: TypeCategory[] = response.data.map(
+          (item: TypeCategory, index: number) => {
+            return {
+              ...item,
+              key: item.name,
+              hidden: true,
+              selected: index === 0,
+            };
           }
-        })
+        );
         setCategories(dataCategories);
         // Chọn danh mục đầu tiên mặc định
         if (dataCategories.length > 0) {
-              setCategorySelected(dataCategories[0]);
+          setCategorySelected(dataCategories[0]);
         }
       }
     } catch (error) {
@@ -401,40 +417,43 @@ export default function Product_SKU() {
 
   const onChangeFilterCategory = (event) => {
     setSearchCategory(event.target.value);
-  }
+  };
 
   const handleMouseEnterCategory = (event, item) => {
-    setCategories(prevCategories => 
-      prevCategories.map(category => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => {
         if (category.key === item.key) {
           return { ...category, hidden: false };
         }
         return category;
       })
     );
-  }
+  };
 
   const handleMouseLeaveCategory = (event, item) => {
-    setCategories(prevCategories => 
-      prevCategories.map(category => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => {
         if (category.key === item.key) {
           return { ...category, hidden: true };
         }
         return category;
       })
     );
-  }
+  };
 
   const handleDeleteCategoryClick = (item) => {
     let itemModel = {
-      'item': item,
-      'title': "Xóa " + item.category_name,
-      'contentConfirm': "Bạn có chắc muốn xóa " + item.category_name +" ra khỏi hệ thống không?", 
-      'contentRemind': "Khi thực hiện hành động này, sẽ không thể hoàn tác."
-    }
+      item: item,
+      title: "Xóa " + item.category_name,
+      contentConfirm:
+        "Bạn có chắc muốn xóa " +
+        item.category_name +
+        " ra khỏi hệ thống không?",
+      contentRemind: "Khi thực hiện hành động này, sẽ không thể hoàn tác.",
+    };
     setDeleteItemCategory(itemModel);
     setIsModelOpenDeleteCategory(true);
-  }
+  };
 
   const handleDeleteOkCategory = async () => {
     // if(deleteItemCategory != null && deleteItemCategory.item != null){
@@ -448,30 +467,33 @@ export default function Product_SKU() {
     //     message.error("Xóa thất bại");
     //   }
     // }
-      if(deleteItemCategory != null && deleteItemCategory.item != null){
-        let arrIdDelete = []
-        arrIdDelete = [deleteItemCategory.item.name]
-        let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
-         let dataDeletePost = {
-      'doctype': "VGM_Category",
-      'items': JSON.stringify(arrIdDelete)
-    }
-     let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
-    if(res != null && res.message != null && res.message.status == "success"){
-      message.success("Xóa thành công");
-      fetchDataCategories();
-      handleDeleteCancelCategory();
-    }else{
-      message.error("Xóa thất bại, Danh mục này đang được sử dụng");
-    }
+    if (deleteItemCategory != null && deleteItemCategory.item != null) {
+      let arrIdDelete = [];
+      arrIdDelete = [deleteItemCategory.item.name];
+      let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+      let dataDeletePost = {
+        doctype: "VGM_Category",
+        items: JSON.stringify(arrIdDelete),
+      };
+      let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+      if (
+        res != null &&
+        res.message != null &&
+        res.message.status == "success"
+      ) {
+        message.success("Xóa thành công");
+        fetchDataCategories();
+        handleDeleteCancelCategory();
+      } else {
+        message.error("Xóa thất bại, Danh mục này đang được sử dụng");
       }
-   
-  }
+    }
+  };
 
   const handleDeleteCancelCategory = () => {
     setIsModelOpenDeleteCategory(false);
     setDeleteItemCategory({});
-  }
+  };
 
   const handleEditCategoryClick = (item) => {
     formEditCategory.setFieldsValue({
@@ -480,31 +502,31 @@ export default function Product_SKU() {
     });
     setEditItemCategory(item);
     setIsModelOpenEditCategory(true);
-  }
+  };
 
-  const handleOkEditCategory = async ()=> {
+  const handleOkEditCategory = async () => {
     let objCategory = formEditCategory.getFieldsValue();
-    if(editItemCategory != null && editItemCategory.name != null){
+    if (editItemCategory != null && editItemCategory.name != null) {
       let urlPutCategory = `/api/resource/VGM_Category/${editItemCategory.name}`;
       let dataPut = {
-        'category_name': objCategory.name_item,
-        'category_description': objCategory.des
-      }
+        category_name: objCategory.name_item,
+        category_description: objCategory.des,
+      };
       let res = await AxiosService.put(urlPutCategory, dataPut);
-      if(res != null && res.data != null){
+      if (res != null && res.data != null) {
         message.success("Sửa thành công");
         fetchDataCategories();
         handleCancelEditCategory();
-      }else{
+      } else {
         message.error("Sửa thất bại");
       }
     }
-  }
-  
+  };
+
   const handleCancelEditCategory = () => {
     setEditItemCategory({});
     setIsModelOpenEditCategory(false);
-  }
+  };
 
   const showModalCategory = () => {
     setIsModalOpenAddCategory(true);
@@ -515,41 +537,49 @@ export default function Product_SKU() {
     const categoryName = valField.name_item.trim();
 
     if (!categoryName) {
-        message.warning("Vui lòng nhập tên danh mục.");
-        return;
+      message.warning("Vui lòng nhập tên danh mục.");
+      return;
     }
     // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
-    const isCategoryExists = categories.some(cat => cat.category_name.toLowerCase() === categoryName.toLowerCase());
+    const isCategoryExists = categories.some(
+      (cat) => cat.category_name.toLowerCase() === categoryName.toLowerCase()
+    );
     if (isCategoryExists) {
-        message.error("Danh mục đã tồn tại.");
-        return;
+      message.error("Danh mục đã tồn tại.");
+      return;
     }
 
     try {
-        const dataPost = {
-            'doc': JSON.stringify({
-                'doctype': "VGM_Category",
-                'category_name': categoryName,
-                'category_description': valField.des
-            }),
-            'action': "Save"
-        };
+      const dataPost = {
+        doc: JSON.stringify({
+          doctype: "VGM_Category",
+          category_name: categoryName,
+          category_description: valField.des,
+        }),
+        action: "Save",
+      };
 
-        const resCreateCategory = await AxiosService.post('/api/method/frappe.desk.form.save.savedocs', dataPost);
-        if (resCreateCategory && resCreateCategory.docs && resCreateCategory.docs.length > 0) {
-            form.resetFields();
-            message.success("Thêm mới thành công");
-            fetchDataCategories();
-            setIsModalOpenAddCategory(false);
-        } else {
-            message.error("Thêm mới thất bại");
-        }
+      const resCreateCategory = await AxiosService.post(
+        "/api/method/frappe.desk.form.save.savedocs",
+        dataPost
+      );
+      if (
+        resCreateCategory &&
+        resCreateCategory.docs &&
+        resCreateCategory.docs.length > 0
+      ) {
+        form.resetFields();
+        message.success("Thêm mới thành công");
+        fetchDataCategories();
+        setIsModalOpenAddCategory(false);
+      } else {
+        message.error("Thêm mới thất bại");
+      }
     } catch (error) {
-        console.error("Lỗi khi thêm mới danh mục:", error);
-        message.error("Đã xảy ra lỗi khi thêm mới danh mục.");
+      console.error("Lỗi khi thêm mới danh mục:", error);
+      message.error("Đã xảy ra lỗi khi thêm mới danh mục.");
     }
-};
-
+  };
 
   const handleCancelCategory = () => {
     setIsModalOpenAddCategory(false);
@@ -558,34 +588,35 @@ export default function Product_SKU() {
   //Các hàm xử lý danh sách sản phẩm
   const handleSelectedCategory = (item) => {
     setCategorySelected(item);
-    setCategories(prevCategories => 
-        prevCategories.map(category => {
-            if (category.key === item.key) {
-                return { ...category, selected: true };
-            } else {
-                return { ...category, selected: false };
-            }
-        })
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => {
+        if (category.key === item.key) {
+          return { ...category, selected: true };
+        } else {
+          return { ...category, selected: false };
+        }
+      })
     );
-  }
+  };
 
   useEffect(() => {
     initDataProductByCategory();
   }, [categorySelected]);
 
   useEffect(() => {
-    if(barcodeEditProduct != null && barcodeEditProduct != "") renderBarcodeByValue(barcodeEditProduct);
+    if (barcodeEditProduct != null && barcodeEditProduct != "")
+      renderBarcodeByValue(barcodeEditProduct);
   }, [barcodeEditProduct]);
 
   useEffect(() => {
     initDataProductByCategory();
-  }, [searchProduct])
+  }, [searchProduct]);
 
   const initDataProductByCategory = async () => {
     let urlProducts = "";
-    if(searchProduct != null && searchProduct != ""){
+    if (searchProduct != null && searchProduct != "") {
       urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"],["product_name","like","%${searchProduct}%"]]`;
-    }else{
+    } else {
       urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
     }
     let res = await AxiosService.get(urlProducts);
@@ -595,12 +626,12 @@ export default function Product_SKU() {
         return {
           ...item,
           key: item.name,
-          category_name: categorySelected.category_name
-        }
-      })
+          category_name: categorySelected.category_name,
+        };
+      });
       setProducts(dataProducts);
     }
-  }
+  };
 
   const onChangeFilterProduct = (event) => {
     setSearchProduct(event.target.value);
@@ -608,62 +639,72 @@ export default function Product_SKU() {
 
   const showModalAddProduct = () => {
     formAddProduct.resetFields();
-    setFileList([])
+    setFileList([]);
     let barcode = document.getElementById("barcode");
-    if(barcode){
+    if (barcode) {
       barcode.innerHTML = "";
     }
-    if(categorySelected != null && categorySelected.name != null){
+    if (categorySelected != null && categorySelected.name != null) {
       setIsModalOpenAddProduct(true);
     }
   };
 
   const handleOkAddProduct = async () => {
     let objProduct = formAddProduct.getFieldsValue();
-    let productFilter = products.filter(x => x.product_code.toLowerCase() == objProduct.product_code.toLowerCase());
-    if(productFilter.length > 0){
+    let productFilter = products.filter(
+      (x) =>
+        x.product_code.toLowerCase() == objProduct.product_code.toLowerCase()
+    );
+    if (productFilter.length > 0) {
       message.error("Mã sản phẩm đã tồn tại");
       return;
     }
     let arrImages = [];
     for (let i = 0; i < fileUploadAddProduct.length; i++) {
-        arrImages.push(fileUploadAddProduct[i].file_url);
+      arrImages.push(fileUploadAddProduct[i].file_url);
     }
 
     // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
     if (!objProduct.product_name || arrImages.length === 0) {
-        // Hiển thị thông báo lỗi
-        message.error("Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh");
-        return;
+      // Hiển thị thông báo lỗi
+      message.error(
+        "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
+      );
+      return;
     }
 
     let urlAddProduct = "/api/resource/VGM_Product";
     let objProductCreate = {
-        'barcode': objProduct.barcode_product,
-        'product_code': objProduct.product_code != null? objProduct.product_code.trim() : null,
-        'product_name': objProduct.product_name != null? objProduct.product_name.trim() : null,
-        'product_description': objProduct.product_description != null? objProduct.product_description.trim() : null,
-        'category': categorySelected.name,
-        'images': JSON.stringify(arrImages)
+      barcode: objProduct.barcode_product,
+      product_code:
+        objProduct.product_code != null ? objProduct.product_code.trim() : null,
+      product_name:
+        objProduct.product_name != null ? objProduct.product_name.trim() : null,
+      product_description:
+        objProduct.product_description != null
+          ? objProduct.product_description.trim()
+          : null,
+      category: categorySelected.name,
+      images: JSON.stringify(arrImages),
     };
 
     let res = await AxiosService.post(urlAddProduct, objProductCreate);
     if (res != null && res.data != null) {
-        message.success("Thêm mới thành công");
-        formAddProduct.resetFields();
-        let barcode = document.getElementById("barcode");
-        barcode.innerHTML = "";
-        setFileUploadAddProduct([]);
-        initDataProductByCategory();
-        handleCancelAddProduct();
+      message.success("Thêm mới thành công");
+      formAddProduct.resetFields();
+      let barcode = document.getElementById("barcode");
+      barcode.innerHTML = "";
+      setFileUploadAddProduct([]);
+      initDataProductByCategory();
+      handleCancelAddProduct();
     } else {
-        message.error("Thêm mới thất bại");
+      message.error("Thêm mới thất bại");
     }
-};
+  };
 
   const handleRenderBarcodeAddProduct = (event) => {
     renderBarcodeByValue(event.target.value);
-  }
+  };
 
   const handleCancelAddProduct = () => {
     setIsModalOpenAddProduct(false);
@@ -676,17 +717,17 @@ export default function Product_SKU() {
       product_code: item.product_code,
       barcode_product: item.barcode,
       product_name: item.product_name,
-      product_description: item.product_description
+      product_description: item.product_description,
     });
     setBarcodeEditProduct(item.barcode);
     let arrImage = JSON.parse(item.images);
     let arrImageEdit = [];
-    for(let i = 0; i < arrImage.length; i++){
+    for (let i = 0; i < arrImage.length; i++) {
       let objImage = {
-        'uid': i,
-        'url': arrImage[i], //import.meta.env.VITE_BASE_URL
-        'url_base': arrImage[i]
-      }
+        uid: i,
+        url: arrImage[i], //import.meta.env.VITE_BASE_URL
+        url_base: arrImage[i],
+      };
       arrImageEdit.push(objImage);
     }
     setFileListEdit(arrImageEdit);
@@ -694,10 +735,10 @@ export default function Product_SKU() {
 
   const handleRenderBarcodeEditProduct = (event) => {
     renderBarcodeByValue(event.target.value);
-  }
+  };
 
   const renderBarcodeByValue = (val) => {
-    JsBarcode("#barcode",val, {
+    JsBarcode("#barcode", val, {
       width: 4,
       height: 40,
       displayValue: true,
@@ -705,26 +746,35 @@ export default function Product_SKU() {
       text: val,
       textMargin: 10,
       fontSize: 13,
-      background: "#F5F7FA"
+      background: "#F5F7FA",
     });
-  }
+  };
 
   const handleOkEditProduct = async () => {
     let arrImage = [];
     let objProduct = formEditProduct.getFieldsValue();
-    for(let i = 0; i < fileListEdit.length; i++) if(fileListEdit[i].url_base != null && fileListEdit[i].url_base != "") arrImage.push(fileListEdit[i].url_base);
-    if(fileUploadEditProduct != null) for(let i = 0; i < fileUploadEditProduct.length; i++) arrImage.push(fileUploadEditProduct[i].file_url);
+    for (let i = 0; i < fileListEdit.length; i++)
+      if (fileListEdit[i].url_base != null && fileListEdit[i].url_base != "")
+        arrImage.push(fileListEdit[i].url_base);
+    if (fileUploadEditProduct != null)
+      for (let i = 0; i < fileUploadEditProduct.length; i++)
+        arrImage.push(fileUploadEditProduct[i].file_url);
     let urlEditProduct = `/api/resource/VGM_Product/${editItemProduct.name}`;
     let objProductEdit = {
-      'barcode': objProduct.barcode_product,
-      'product_code': objProduct.product_code != null? objProduct.product_code.trim(): null,
-      'product_name': objProduct.product_name != null? objProduct.product_name.trim() : null,
-      'product_description': objProduct.product_description != null? objProduct.product_description.trim() : null,
-      'category': categorySelected.name,
-      'images': JSON.stringify(arrImage)
-    }
+      barcode: objProduct.barcode_product,
+      product_code:
+        objProduct.product_code != null ? objProduct.product_code.trim() : null,
+      product_name:
+        objProduct.product_name != null ? objProduct.product_name.trim() : null,
+      product_description:
+        objProduct.product_description != null
+          ? objProduct.product_description.trim()
+          : null,
+      category: categorySelected.name,
+      images: JSON.stringify(arrImage),
+    };
     let res = await AxiosService.put(urlEditProduct, objProductEdit);
-    if(res != null && res.data != null){
+    if (res != null && res.data != null) {
       message.success("Sửa thành công");
       formEditProduct.resetFields();
       let barcode = document.getElementById("barcode");
@@ -732,22 +782,22 @@ export default function Product_SKU() {
       setFileUploadEditProduct([]);
       initDataProductByCategory();
       handleCancelEditProduct();
-    }else{
+    } else {
       message.error("Sửa thất bại");
     }
   };
 
   const handleCancelEditProduct = () => {
     setIsModelOpenEditProduct(false);
-  }
+  };
 
   const handleClickDeleteProduct = (item) => {
     let itemDeleteProduct = {
-      'item': item,
-      'title': `Xóa ${item.product_name}`,
-      'contentConfirm': `Bạn có chắc muốn xóa ${item.product_name} ra khỏi hệ thống không?`,
-      'contentRemind': "Khi thực hiện hành động này, sẽ không thể hoàn tác."
-    }
+      item: item,
+      title: `Xóa ${item.product_name}`,
+      contentConfirm: `Bạn có chắc muốn xóa ${item.product_name} ra khỏi hệ thống không?`,
+      contentRemind: "Khi thực hiện hành động này, sẽ không thể hoàn tác.",
+    };
     setDeleteItemProduct(itemDeleteProduct);
     setIsModelOpenDeleteProduct(true);
   };
@@ -763,140 +813,153 @@ export default function Product_SKU() {
     // }else{
     //   message.error("Xóa thất bại");
     // }
-    let arrIdDelete = []
-    arrIdDelete = [deleteItemProduct.item.name]
+    let arrIdDelete = [];
+    arrIdDelete = [deleteItemProduct.item.name];
     let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
     let dataDeletePost = {
-      'doctype': "VGM_Product",
-      'items': JSON.stringify(arrIdDelete)
-    }
+      doctype: "VGM_Product",
+      items: JSON.stringify(arrIdDelete),
+    };
     let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
-    if(res != null && res.message != null && res.message.status == "success"){
+    if (res != null && res.message != null && res.message.status == "success") {
       message.success("Xóa thành công");
       setDeleteItemProduct({});
       initDataProductByCategory();
       handleDeleteCancelProduct();
-    }else{
+    } else {
       message.error("Xóa thất bại , Sản phẩm đang được sử dụng");
     }
-  }
+  };
 
   const handleDeleteCancelProduct = () => {
     setIsModelOpenDeleteProduct(false);
-  }
+  };
 
   const handleDeleteByList = () => {
     setIsModelOpenDeleteList(true);
-  }
+  };
 
   const handleDeleteListOkProduct = async () => {
-    let urlDeleteByList =apiUrl + ".api.deleteListByDoctype";
+    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
     let arrIdDelete = [];
-    for(let i = 0; i < productSelected.length; i++) arrIdDelete.push(productSelected[i].name);
+    for (let i = 0; i < productSelected.length; i++)
+      arrIdDelete.push(productSelected[i].name);
     let dataDeletePost = {
-      'doctype': "VGM_Product",
-      'items': JSON.stringify(arrIdDelete)
-    }
+      doctype: "VGM_Product",
+      items: JSON.stringify(arrIdDelete),
+    };
     let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
-    if(res != null && res.message != null && res.message.status == "success"){
+    if (res != null && res.message != null && res.message.status == "success") {
       message.success("Xóa thành công");
       setProductSelected([]);
       setShowDeleteList(false);
       initDataProductByCategory();
       handleDeleteListCancelProduct();
-    }else{
+    } else {
       message.error("Xóa thất bại");
     }
-  }
+  };
 
   const handleDeleteListCancelProduct = () => {
     setIsModelOpenDeleteList(false);
-  }
+  };
 
   const showModalCheckProduct = () => {
     setIsModalOpenCheckProduct(true);
   };
-  
+
   const handleOkCheckProduct = async () => {
     let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
     let objCheckProduct = {
-      'collection_name': categorySelected.name,
-      'linkimages': fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : ""
-    }
+      collection_name: categorySelected.name,
+      linkimages:
+        fileUploadCheckProduct.length > 0
+          ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url
+          : "",
+    };
     let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
     let arrProductDetect = [];
-    for(let i = 0; i < products.length; i++){
-      arrProductDetect.push(
-        {
-          'key': products[i].name,
-          'product_code': products[i].product_code,
-          'product_name': products[i].product_name,
-          'product_count': 0
-        }
-      );
+    for (let i = 0; i < products.length; i++) {
+      arrProductDetect.push({
+        key: products[i].name,
+        product_code: products[i].product_code,
+        product_name: products[i].product_name,
+        product_count: 0,
+      });
     }
-    if(res != null && res.message != null){
-      setUrlImageAI("data:image/png;base64,"+res.message.results.verbose[0].base64_image);
+    if (res != null && res.message != null) {
+      setUrlImageAI(
+        "data:image/png;base64," + res.message.results.verbose[0].base64_image
+      );
       let arrBoxes = [];
-      arrProductDetect.forEach(item => {
-        if(res.message.results.count[item.product_name] != null) item.product_count = res.message.results.count[item.product_name];
+      arrProductDetect.forEach((item) => {
+        if (res.message.results.count[item.product_name] != null)
+          item.product_count = res.message.results.count[item.product_name];
         let locates = res.message.results.verbose[0].locates;
-        
+
         // Lọc các đối tượng có trường label bằng giá trị của item.product_name
         let locatesWithLabel = locates.filter(function (obj) {
-            return obj.label === item.product_name;
+          return obj.label === item.product_name;
         });
-        let newObjectBoxes = locatesWithLabel.map(function(box) {
+        let newObjectBoxes = locatesWithLabel.map(function (box) {
           let bbox = box.bbox;
           return {
-              x: bbox[0],
-              y: bbox[1],
-              width: bbox[2] - bbox[0],
-              height: bbox[3] - bbox[1],
-              label: box.label
+            x: bbox[0],
+            y: bbox[1],
+            width: bbox[2] - bbox[0],
+            height: bbox[3] - bbox[1],
+            label: box.label,
           };
+        });
+        arrBoxes = arrBoxes.concat(newObjectBoxes);
       });
-      arrBoxes = arrBoxes.concat(newObjectBoxes);
-      })
       setObjectBoxes(arrBoxes);
     }
-    
-    setUrlImageCheckProductResult(fileUploadCheckProduct.length > 0? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url : "");  //import.meta.env.VITE_BASE_URL+
+
+    setUrlImageCheckProductResult(
+      fileUploadCheckProduct.length > 0
+        ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url
+        : ""
+    ); //import.meta.env.VITE_BASE_URL+
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
   };
   const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
+      color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
-};
+  };
 
-// Xác định màu viền cho các nhãn và lưu vào đối tượng labelColors
-objectBoxes.forEach((box) => {
+  // Xác định màu viền cho các nhãn và lưu vào đối tượng labelColors
+  objectBoxes.forEach((box) => {
     if (!labelColors[box.label]) {
-        labelColors[box.label] = getRandomColor();
+      labelColors[box.label] = getRandomColor();
     }
-});
+  });
   const handleCancelCheckProduct = () => {
-    setFileListImage([])
+    setFileListImage([]);
     setIsModalOpenCheckProduct(false);
   };
 
   const handleCancelResultCheckProduct = () => {
     setIsModelResultProduct(false);
-  }
-  
+  };
+
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [fileListEdit, setFileListEdit] = useState<UploadFile[]>([]);
 
-  const onChangeImageFormAddProduct: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  const onChangeImageFormAddProduct: UploadProps["onChange"] = ({
+    fileList: newFileList,
+  }) => {
     setFileList(newFileList);
   };
-  const onChangeImageFormEditProduct: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  const onChangeImageFormEditProduct: UploadProps["onChange"] = ({
+    fileList: newFileList,
+  }) => {
     setFileListEdit(newFileList);
   };
 
@@ -915,29 +978,32 @@ objectBoxes.forEach((box) => {
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const handleAddProductFromERP = () =>{
+  const handleAddProductFromERP = () => {
     setIsModalAddProductFromERP(true);
-  }
+  };
 
   const handleCancelAddProductFromERP = () => {
     setIsModalAddProductFromERP(false);
-  }
+  };
 
-  const handleSearchProductFromERP = (event)=>{
+  const handleSearchProductFromERP = (event) => {
     setSearchProductFromERP(event.target.value);
-  }
+  };
   const handleCancelImportExcel = () => {
     setIsModalOpenImportFileExcel(false);
-    setFileListImport([])
-  }
+    setFileListImport([]);
+  };
 
   useEffect(() => {
     //Goi dich vu san pham tu erp theo tu khoa
     initDataProductFromERP();
-  },[searchProductFromERP])
+  }, [searchProductFromERP]);
 
   const hasSelected = productFromERPSelected.length > 0;
-  const onSelectChangeProductERP = (newSelectedRowKeys: React.Key[], selectedRow: TypeProductFromERP[]) => {
+  const onSelectChangeProductERP = (
+    newSelectedRowKeys: React.Key[],
+    selectedRow: TypeProductFromERP[]
+  ) => {
     setProductFromERPSelected(selectedRow);
   };
 
@@ -948,77 +1014,85 @@ objectBoxes.forEach((box) => {
 
   useEffect(() => {
     initDataProductFromERP();
-  },[]);
+  }, []);
 
   const initDataProductFromERP = async () => {
     //Goi dich vu lay danh sach san pham tu erp
     let url = "/api/method/mbw_dms.api.selling.product.list_product";
-    if(searchProductFromERP != null && searchProductFromERP != "") url = `${url}?item_name=${searchProductFromERP.trim()}`;
+    if (searchProductFromERP != null && searchProductFromERP != "")
+      url = `${url}?item_name=${searchProductFromERP.trim()}`;
     let res = await AxiosService.get(url);
     let arrProductERPSource = [];
-    if(res != null && res.result != null && res.result.data != null){
+    if (res != null && res.result != null && res.result.data != null) {
       arrProductERPSource = res.result.data.map((item: TypeProductFromERP) => {
         return {
           ...item,
-          key: item.name
-        }
+          key: item.name,
+        };
       });
     }
     setProductFromERP(arrProductERPSource);
-  }
+  };
 
   const handleSaveProductFromERP = async () => {
     //Goi dich vu luu san pham tu erp
     let arrProductPost = [];
-    for(let i = 0; i < productFromERPSelected.length; i++){
+    for (let i = 0; i < productFromERPSelected.length; i++) {
       let itemProduct = {
-        'product_code': productFromERPSelected[i].item_code,
-        'barcode': productFromERPSelected[i].item_code,
-        'product_name': productFromERPSelected[i].item_name,
-        'product_description': productFromERPSelected[i].description,
-        'url_images': productFromERPSelected[i].image != null && productFromERPSelected[i].image != ""? [productFromERPSelected[i].image] : []
-      }
+        product_code: productFromERPSelected[i].item_code,
+        barcode: productFromERPSelected[i].item_code,
+        product_name: productFromERPSelected[i].item_name,
+        product_description: productFromERPSelected[i].description,
+        url_images:
+          productFromERPSelected[i].image != null &&
+          productFromERPSelected[i].image != ""
+            ? [productFromERPSelected[i].image]
+            : [],
+      };
       arrProductPost.push(itemProduct);
     }
     let dataPost = {
-      'listproduct': JSON.stringify(arrProductPost),
-      'category': categorySelected.name
-    }
+      listproduct: JSON.stringify(arrProductPost),
+      category: categorySelected.name,
+    };
     let urlPostData = apiUrl + ".api.import_product";
     let res = await AxiosService.post(urlPostData, dataPost);
-    if(res != null && res.message != null && res.message.status == "success"){
+    if (res != null && res.message != null && res.message.status == "success") {
       message.success("Thêm mới thành công");
       setProductFromERPSelected([]);
       initDataProductByCategory();
       handleCancelAddProductFromERP();
-    }else{
+    } else {
       message.error("Thêm mới thất bại");
     }
-  }
+  };
   const handleImportFileProduct = () => {
     setIsModalOpenImportFileExcel(true);
-    setFileListImport([])
-  }
-  const handleOkImportExcel = async() => {
-    if(lstProductImport && lstProductImport.length > 0){
+    setFileListImport([]);
+  };
+  const handleOkImportExcel = async () => {
+    if (lstProductImport && lstProductImport.length > 0) {
       let dataPost = {
-        'listproduct': JSON.stringify(lstProductImport),
-        'category': categorySelected.name
-      }
+        listproduct: JSON.stringify(lstProductImport),
+        category: categorySelected.name,
+      };
       let urlPostData = apiUrl + ".api.import_product";
       let res = await AxiosService.post(urlPostData, dataPost);
-      if(res != null && res.message != null && res.message.status == "success"){
+      if (
+        res != null &&
+        res.message != null &&
+        res.message.status == "success"
+      ) {
         message.success("Thêm mới thành công");
         initDataProductByCategory();
         setIsModalOpenImportFileExcel(false);
-      }else{
+      } else {
         message.error("Thêm mới thất bại");
       }
-    }else{
+    } else {
       message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
     }
-  
-  }
+  };
   return (
     <>
       <HeaderPage
@@ -1031,21 +1105,23 @@ objectBoxes.forEach((box) => {
             size: "20px",
             className: "flex items-center mr-2",
             danger: true,
-            action: handleDeleteByList
+            action: handleDeleteByList,
           },
           {
             label: "Nhập file",
             icon: <LuUploadCloud className="text-xl" />,
             size: "20px",
-            className: "flex items-center mr-2",
-            action: handleImportFileProduct
+            className:
+              "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+            action: handleImportFileProduct,
           },
           {
             label: "Thêm sản phẩm từ ERP",
-            icon: <VscAdd className="text-xl"/>,
+            icon: <VscAdd className="text-xl" />,
             size: "20px",
-            className: "flex items-center mr-2",
-            action: handleAddProductFromERP
+            className:
+              "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+            action: handleAddProductFromERP,
           },
           {
             label: "Kiểm tra sản phẩm",
@@ -1067,9 +1143,11 @@ objectBoxes.forEach((box) => {
       />
       <Row gutter={16}>
         <Col span={18} push={6}>
-          <div className="bg-white rounded-xl">
+          <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
             <FormItemCustom className="w-[320px] border-none p-4">
-              <Input value={searchProduct} onChange={onChangeFilterProduct}
+              <Input
+                value={searchProduct}
+                onChange={onChangeFilterProduct}
                 placeholder="Tìm kiếm sản phẩm"
                 prefix={<SearchOutlined />}
               />
@@ -1088,49 +1166,67 @@ objectBoxes.forEach((box) => {
         </Col>
 
         <Col span={6} pull={18}>
-          <div className="bg-white rounded-xl p-4">
+          <div className="bg-white rounded-xl p-4 border-[#DFE3E8] border-[0.2px] border-solid">
             <div className="flex justify-between items-center">
-              <div><p className="text-base leading-5 font-medium text-[#212B36]">Danh mục</p></div>
+              <div>
+                <p className="text-base leading-5 font-medium text-[#212B36]">
+                  Danh mục
+                </p>
+              </div>
               <div className="cursor-pointer" onClick={showModalCategory}>
                 <PlusOutlined />
               </div>
             </div>
             <div className="py-3">
-              <FormItemCustom className="w-full border-none" name="filter_category">
-                <Input onChange={onChangeFilterCategory} value={searchCategory}
+              <FormItemCustom
+                className="w-full border-none"
+                name="filter_category"
+              >
+                <Input
+                  onChange={onChangeFilterCategory}
+                  value={searchCategory}
                   placeholder="Tìm kiếm danh mục"
                   prefix={<SearchOutlined />}
                 />
               </FormItemCustom>
             </div>
-            <List 
-              style={{maxHeight: 'calc(100vh - 500px)', overflow: 'auto', paddingRight:'10px'}}
+            <List
+              style={{
+                maxHeight: "calc(100vh - 500px)",
+                overflow: "auto",
+                paddingRight: "10px",
+              }}
               header={false}
               footer={false}
               bordered={false}
               dataSource={categories}
               renderItem={(item: any) => (
-                <List.Item 
-                
-                 onMouseEnter={(event) => handleMouseEnterCategory(event, item)}
-                 onMouseLeave={(event) => handleMouseLeaveCategory(event, item)}
-                 onClick={() => handleSelectedCategory(item)}>
+                <List.Item
+                  onMouseEnter={(event) =>
+                    handleMouseEnterCategory(event, item)
+                  }
+                  onMouseLeave={(event) =>
+                    handleMouseLeaveCategory(event, item)
+                  }
+                  onClick={() => handleSelectedCategory(item)}
+                >
                   <div className={"item_category"}>
-                    <span className={`${item.selected ? 'selected' : ''}`}>
+                    <span className={`${item.selected ? "selected" : ""}`}>
                       <Typography.Text></Typography.Text> {item.category_name}
                     </span>
-                    <span  style={{display: item.hidden? 'none' : 'block'}}>
-                    <a>
-                    <span  style={{marginRight: "10px"}}>
-                        <EditOutlined key="edit" onClick={() => handleEditCategoryClick(item)}/>
-                      </span>
-                    </a>
-                    <a>
-                    <span onClick={() => handleDeleteCategoryClick(item)}>
-                <DeleteOutlined key="delete" />
-            </span>
-                    </a>
-              
+                    <span style={{ display: item.hidden ? "none" : "block" }}>
+                     
+                        <span style={{ marginRight: "10px" }}>
+                          <EditOutlined
+                            key="edit"
+                            onClick={() => handleEditCategoryClick(item)}
+                          />
+                        </span>
+                      
+                        <span onClick={() => handleDeleteCategoryClick(item)}>
+                          <DeleteOutlined key="delete" />
+                        </span>
+                    
                     </span>
                   </div>
                 </List.Item>
@@ -1144,7 +1240,7 @@ objectBoxes.forEach((box) => {
         title="Kiểm tra ảnh sản phẩm"
         open={isModalOpenCheckProduct}
         width={777}
-        afterClose = {handleCancelCheckProduct}
+        afterClose={handleCancelCheckProduct}
         onOk={handleOkCheckProduct}
         onCancel={handleCancelCheckProduct}
         footer={[
@@ -1174,53 +1270,91 @@ objectBoxes.forEach((box) => {
         onCancel={handleCancelResultCheckProduct}
         footer={null}
       >
-        <div style={{marginBottom: "20px",display:'flex'}}>
-          <img src={urlImageCheckProductResult} style={{ width: '450px', height: '450px', marginRight: '20px' }} />
+        <div style={{ marginBottom: "20px", display: "flex" }}>
+          <img
+            src={urlImageCheckProductResult}
+            style={{ width: "450px", height: "450px", marginRight: "20px" }}
+          />
           <ObjectDetectionResult
-                            imageSrc={urlImageAI}
-                            objectBoxes={objectBoxes}
-                            labelColors={labelColors} />
+            imageSrc={urlImageAI}
+            objectBoxes={objectBoxes}
+            labelColors={labelColors}
+          />
         </div>
-        
+
         <div>
           <div>Kết quả kiểm tra hình ảnh:</div>
-          <Table dataSource={resultProductCheck} columns={[
-                  { title: 'Mã sản phẩm', dataIndex: 'product_code', key: 'product_code' },
-                  { title: 'Tên sản phẩm', dataIndex: 'product_name', key: 'product_name' },
-                  { title: 'Số lượng', dataIndex: 'product_count', key: 'product_count' },
-                ]} pagination={false} />
+          <Table
+            dataSource={resultProductCheck}
+            columns={[
+              {
+                title: "Mã sản phẩm",
+                dataIndex: "product_code",
+                key: "product_code",
+              },
+              {
+                title: "Tên sản phẩm",
+                dataIndex: "product_name",
+                key: "product_name",
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "product_count",
+                key: "product_count",
+              },
+            ]}
+            pagination={false}
+          />
         </div>
       </Modal>
 
       <Modal
-          width={990}
-          title="Thêm sản phẩm từ ERP"
-          open={isModalAddProductFromERP}
-          onCancel={handleCancelAddProductFromERP}
-          footer={false}
-        >
-          <div className="flex items-center justify-between">
-            <FormItemCustom className="w-[320px] border-none pt-4">
-              <Input value={searchProductFromERP} onChange={handleSearchProductFromERP}
-                placeholder="Tìm kiếm sản phẩm"
-                prefix={<SearchOutlined />}
-              />
-            </FormItemCustom>
-            <div>
-              <span style={{ marginRight: 8 }}>
-                {hasSelected ? `Đã chọn ${productFromERPSelected.length} danh mục` : ""}
-              </span>
-              <Button type="primary" onClick={handleSaveProductFromERP}>Thêm</Button>
-            </div>
+        width={990}
+        title="Thêm sản phẩm từ ERP"
+        open={isModalAddProductFromERP}
+        onCancel={handleCancelAddProductFromERP}
+        footer={false}
+      >
+        <div className="flex items-center justify-between">
+          <FormItemCustom className="w-[320px] border-none pt-4">
+            <Input
+              value={searchProductFromERP}
+              onChange={handleSearchProductFromERP}
+              placeholder="Tìm kiếm sản phẩm"
+              prefix={<SearchOutlined />}
+            />
+          </FormItemCustom>
+          <div>
+            <span style={{ marginRight: 8 }}>
+              {hasSelected
+                ? `Đã chọn ${productFromERPSelected.length} danh mục`
+                : ""}
+            </span>
+            <Button type="primary" onClick={handleSaveProductFromERP}>
+              Thêm
+            </Button>
           </div>
-          <div className="pt-4">
-            <TableCustom rowSelection={rowSelectionProductFromERP} columns={[
-                { title: "Mã sản phẩm", dataIndex: "item_code", key: "item_code" },
-                { title: "Tên sản phẩm", dataIndex: "item_name", key: "item_name" },
-                { title: "Danh mục", dataIndex: "item_group", key: "item_group" }
-              ]} dataSource={productFromERP} />
-          </div>
-        </Modal>
+        </div>
+        <div className="pt-4">
+          <TableCustom
+            rowSelection={rowSelectionProductFromERP}
+            columns={[
+              {
+                title: "Mã sản phẩm",
+                dataIndex: "item_code",
+                key: "item_code",
+              },
+              {
+                title: "Tên sản phẩm",
+                dataIndex: "item_name",
+                key: "item_name",
+              },
+              { title: "Danh mục", dataIndex: "item_group", key: "item_group" },
+            ]}
+            dataSource={productFromERP}
+          />
+        </div>
+      </Modal>
 
       <Modal
         title={"Thêm mới sản phẩm"}
@@ -1248,26 +1382,29 @@ objectBoxes.forEach((box) => {
               name="barcode_product"
               required
             >
-              <Input onChange={(event) => handleRenderBarcodeAddProduct(event)}/>
+              <Input
+                onChange={(event) => handleRenderBarcodeAddProduct(event)}
+              />
             </FormItemCustom>
             <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                  marginTop: "10px",
-                  backgroundColor: "#F5F7FA",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  borderColor: "#d9d9d9",
-                  borderRadius: "6px",
-                  height: "85px"
-                }}
-              >
-                <svg id="barcode"></svg></div>
-            
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: "10px",
+                marginTop: "10px",
+                backgroundColor: "#F5F7FA",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "#d9d9d9",
+                borderRadius: "6px",
+                height: "85px",
+              }}
+            >
+              <svg id="barcode"></svg>
+            </div>
+
             <FormItemCustom
               className="pt-3"
               label="Tên sản phẩm"
@@ -1276,8 +1413,16 @@ objectBoxes.forEach((box) => {
             >
               <Input />
             </FormItemCustom>
-            <FormItemCustom className="pt-3" label="Mô tả" name="product_description" required>
-              <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} />
+            <FormItemCustom
+              className="pt-3"
+              label="Mô tả"
+              name="product_description"
+              required
+            >
+              <TextArea
+                className="bg-[#F5F7FA]"
+                autoSize={{ minRows: 3, maxRows: 5 }}
+              />
             </FormItemCustom>
             <FormItemCustom
               className="pt-3"
@@ -1285,7 +1430,8 @@ objectBoxes.forEach((box) => {
               name="img"
               required
             >
-              <Upload {...propUploadAddProducts}
+              <Upload
+                {...propUploadAddProducts}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
                 accept="image/png, image/jpeg"
@@ -1326,26 +1472,29 @@ objectBoxes.forEach((box) => {
               name="barcode_product"
               required
             >
-              <Input onChange={(event) => handleRenderBarcodeEditProduct(event)}/>
+              <Input
+                onChange={(event) => handleRenderBarcodeEditProduct(event)}
+              />
             </FormItemCustom>
             <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                  marginTop: "10px",
-                  backgroundColor: "#F5F7FA",
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  borderColor: "#d9d9d9",
-                  borderRadius: "6px",
-                  height: "85px"
-                }}
-              >
-                <svg id="barcode"></svg></div>
-            
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: "10px",
+                marginTop: "10px",
+                backgroundColor: "#F5F7FA",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: "#d9d9d9",
+                borderRadius: "6px",
+                height: "85px",
+              }}
+            >
+              <svg id="barcode"></svg>
+            </div>
+
             <FormItemCustom
               className="pt-3"
               label="Tên sản phẩm"
@@ -1354,8 +1503,16 @@ objectBoxes.forEach((box) => {
             >
               <Input />
             </FormItemCustom>
-            <FormItemCustom className="pt-3" label="Mô tả" name="product_description" required>
-              <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} />
+            <FormItemCustom
+              className="pt-3"
+              label="Mô tả"
+              name="product_description"
+              required
+            >
+              <TextArea
+                className="bg-[#F5F7FA]"
+                autoSize={{ minRows: 3, maxRows: 5 }}
+              />
             </FormItemCustom>
             <FormItemCustom
               className="pt-3"
@@ -1363,7 +1520,8 @@ objectBoxes.forEach((box) => {
               name="img"
               required
             >
-              <Upload {...propUploadEditProducts}
+              <Upload
+                {...propUploadEditProducts}
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
                 accept="image/png, image/jpeg"
@@ -1371,7 +1529,7 @@ objectBoxes.forEach((box) => {
                 onChange={onChangeImageFormEditProduct}
                 onPreview={onPreview}
               >
-                 {"+ Upload"}
+                {"+ Upload"}
               </Upload>
             </FormItemCustom>
           </Form>
@@ -1398,7 +1556,10 @@ objectBoxes.forEach((box) => {
         okText="Xác nhận"
         cancelText="Hủy"
       >
-        <div>Bạn có chắc muốn xóa {productSelected.length} sản phẩm ra khỏi hệ thống không?</div>
+        <div>
+          Bạn có chắc muốn xóa {productSelected.length} sản phẩm ra khỏi hệ
+          thống không?
+        </div>
         <div>Khi thực hiện hành động này, sẽ không thể hoàn tác.</div>
       </Modal>
 
@@ -1419,7 +1580,6 @@ objectBoxes.forEach((box) => {
       >
         <div className="pt-4">
           <Form layout="vertical" form={form}>
-
             <FormItemCustom
               className="pt-3"
               label="Tên danh mục"
@@ -1429,9 +1589,11 @@ objectBoxes.forEach((box) => {
               <Input />
             </FormItemCustom>
             <FormItemCustom className="pt-3" label="Mô tả" name="des">
-              <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} />
+              <TextArea
+                className="bg-[#F5F7FA]"
+                autoSize={{ minRows: 3, maxRows: 5 }}
+              />
             </FormItemCustom>
-            
           </Form>
         </div>
       </Modal>
@@ -1453,19 +1615,21 @@ objectBoxes.forEach((box) => {
       >
         <div className="pt-4">
           <Form layout="vertical" form={formEditCategory}>
-
             <FormItemCustom
               className="pt-3"
               label="Tên danh mục"
               name="name_item"
               required
             >
-              <Input value={editItemCategory.category_name}/>
+              <Input value={editItemCategory.category_name} />
             </FormItemCustom>
             <FormItemCustom className="pt-3" label="Mô tả" name="des">
-              <TextArea className="bg-[#F5F7FA]" autoSize={{ minRows: 3, maxRows: 5 }} value={editItemCategory.category_description}/>
+              <TextArea
+                className="bg-[#F5F7FA]"
+                autoSize={{ minRows: 3, maxRows: 5 }}
+                value={editItemCategory.category_description}
+              />
             </FormItemCustom>
-            
           </Form>
         </div>
       </Modal>
@@ -1498,7 +1662,11 @@ objectBoxes.forEach((box) => {
         ]}
       >
         <p className="text-[#637381] font-normal text-sm">
-          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/product_sample.xlsx">tại đây</a>
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ
+          liệu mẫu{" "}
+          <a target="_blank" href="/mbw_audit/data_sample/product_sample.xlsx">
+            tại đây
+          </a>
         </p>
         <Dragger {...propUploadImportFileExcel} fileList={fileListImport}>
           <p className="ant-upload-drag-icon">

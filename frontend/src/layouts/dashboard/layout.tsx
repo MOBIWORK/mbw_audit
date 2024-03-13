@@ -1,139 +1,50 @@
 import React from "react";
-// import Header from './header'
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import useCookie from "../../hooks/useCookie";
-import "./layout.css";
-import { Dropdown, Avatar, Row, Col } from "antd";
-import {
-  UserOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  LogoutOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
-import { Layout, Menu, theme, Button } from "antd";
+import Header from "./header";
 import MenuLeft from "./menu";
-import logo from "../../../public/mbw_audit/assets/logo.png";
+import { Layout, Menu } from "antd";
 
-const { Header, Sider } = Layout;
 type Props = {
   children: React.ReactNode;
 };
-
+const { Content, Sider, theme } = Layout;
 export default function DashboardLayout({ children }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
-  const {
-    isLoading,
-    currentUser,
-    login,
-  }: { isLoading: boolean; currentUser: any; login: any } = useCookie();
-  useEffect(() => {
-    // Define your handleLogin function
-    const handleLogin = async () => {
-      try {
-        // Call the login function
-        const response = await login({
-          username: "administrator",
-          password: "123",
-        }); // Assuming login returns a promise
-        console.log(response); // Log the response from the login function
-      } catch (error) {
-        console.error(error); // Log any errors that occur during login
-      }
-    };
-
-    // Call handleLogin when the component mounts
-    handleLogin();
-
-    // Clean up function (optional)
-    return () => {
-      // Perform any cleanup if needed
-    };
-  }, []);
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-  const UserProfileMenu = (
-    <Menu>
-      <Menu.Item key="profile" icon={<UserOutlined />}>
-        <a href="/app/user-profile">Thông tin cá nhân</a>
-      </Menu.Item>
-      <Menu.Item key="setting" icon={<SettingOutlined />}>
-        <a href="/">Cài đặt</a>
-      </Menu.Item>
-      <Menu.Item key="logout" icon={<LogoutOutlined />}>
-        <a href="/">Đăng xuất</a>
-      </Menu.Item>
-    </Menu>
-  );
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        style={{ background: colorBgContainer }}
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
+    // <div className="bg-[#F5F7FA] w-screen min-h-screen">
+    //   <Header />
+    //   <div className="flex">
+    //     <MenuLeft />
+    //     {/* <div className='max-w-full w-[80%] mx-auto'><div  className="rounded-md">{children}</div></div> */}
+    //   </div>
+    // </div>
+    <Layout>
+      <Content
+        style={{ padding: "0 0px" }}
+        className="!bg-[#fff] w-screen min-h-screen"
       >
-        <div className="container_logo">
-          <img src={logo} className="icon_logo"/>
-        </div>
-       <MenuLeft/>
-      </Sider>
-      <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
-          <Row justify="space-between" align="middle">
-            <Col md={18}>
-              <Button
-                type="text"
-                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                onClick={() => setCollapsed(!collapsed)}
-                style={{
-                  fontSize: "16px",
-                  width: 64,
-                  height: 64,
-                }}
-              />
-            </Col>
-            <Col
-              md={6}
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                paddingRight: "20px",
-                height: "35px",
-              }}
-            >
-              <Dropdown
-                overlay={UserProfileMenu}
-                trigger={["click"]}
-                placement="bottomRight"
-                overlayStyle={{ marginTop: "8px" }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Avatar icon={<UserOutlined />} />
-                  <span style={{ marginLeft: "8px" }}>
-                    {currentUser ? currentUser : "Administrator"}
-                  </span>
-                </div>
-              </Dropdown>
-            </Col>
-          </Row>
-        </Header>
-        {/* <Header style={{ padding: 0, background: colorBgContainer }} /> */}
-        <div style={{ margin: "0px 16px 0px 35px" }}>
-          {children}
-        </div>
-        {/* <Footer style={{ textAlign: 'center' }}>
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
-      </Footer> */}
-      </Layout>
+        <Header />
+        <Layout
+          style={{
+            padding: "24px 0",
+            background: "#fff",
+            borderRadius: "8px",
+            width: "80%",
+            margin: "0 auto",
+          }}
+        >
+          <Sider style={{ background: "#fff" }} width={250}>
+            <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[12px] mx-2 pb-4">
+              Audit
+            </div>
+            <MenuLeft />
+          </Sider>
+          <Content
+            className="round"
+            style={{ padding: "0 24px", minHeight: 280 }}
+          >
+            <div>{children}</div>
+          </Content>
+        </Layout>
+      </Content>
     </Layout>
   );
 }
