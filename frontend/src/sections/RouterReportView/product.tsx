@@ -21,7 +21,7 @@ export default function Product(props) {
   const sumProductByCategory = {};
   console.log(props.recordData)
   // Tính tổng sum_product cho từng danh mục
-  props.recordData?.detail.forEach(detailItem => {
+  props.recordData?.detail_skus.forEach(detailItem => {
       const categoryCode = detailItem.category;
       const sumProduct = 1;
   
@@ -29,7 +29,10 @@ export default function Product(props) {
       sumProductByCategory[categoryCode] = (sumProductByCategory[categoryCode] || 0) + sumProduct;
   });
   
+
   // Xây dựng dữ liệu cho mainTableData và number_product
+  console.log(props.recordData?.category_names);
+  console.log(sumProductByCategory);
   const mainTableData = props.recordData?.category_names.map((category, index) => {
       const categoryCode = Object.keys(category)[0];
       return {
@@ -59,7 +62,7 @@ const mainColumns = [
 // Xây dựng dữ liệu mở rộng cho mỗi danh mục sản phẩm
 const expandedRowData = props.recordData?.category_names.map((category, index) => {
   const categoryCode = Object.keys(category)[0];
-  const details = props.recordData?.detail.filter(item => item.category === categoryCode);
+  const details = props.recordData?.detail_skus.filter(item => item.category === categoryCode);
   return details.map((detailItem, detailIndex) => ({
       key: `${index}-${detailIndex}`,
       stt: `${(detailIndex + 1).toString().padStart(2, '0')}`,

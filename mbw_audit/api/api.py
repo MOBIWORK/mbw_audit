@@ -203,7 +203,9 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                         'category': category_id,
                         'sum_product': num_product_recog,
                         'product': info_product.get("name"),
-                        'scoring_machine': is_exist_product
+                        'scoring_machine': is_exist_product,
+                        'sum_product_human': num_product_recog,
+                        'scoring_human': is_exist_product
                     })
                     child_doc.insert()
                 if resultExistProduct.get("status") == "completed":
@@ -213,8 +215,10 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps([]))
             if setting_score_audit is not None:
                 frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
+                frappe.db.set_value('VGM_Report', name, 'scoring_human', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
             else:
                 frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
+                frappe.db.set_value('VGM_Report', name, 'scoring_human', -1)
     except Exception as e:
         print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
 
@@ -246,6 +250,110 @@ def sequence_of_product_by_category(category_name, image_paths, lst_product_sequ
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
     return result
+
+@frappe.whitelist(methods=["GET"])
+def get_reports_by_filter():
+    campaign_code = frappe.form_dict.get('campaign_code')
+    start_date = frappe.form_dict.get('start_date')
+    end_date = frappe.form_dict.get('end_date')
+    employee_id = frappe.form_dict.get('employee_id')
+    status_scoring = frappe.form_dict.get('status_scoring')
+    try:
+        filters = {}
+        if campaign_code is not None:
+            filters["campaign_code"] = campaign_code
+        if start_date is not None and end_date is not None:
+            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            start_date_in = int(start_date)
+            end_date_in = int(end_date)
+            start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
+            end_date_in = datetime.fromtimestamp(end_date_in).strftime(date_format_with_time)
+            filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
+        if employee_id is not None:
+            filters["employee_code"] = employee_id
+        if status_scoring is not None:
+            filters["scoring_machine"] = status_scoring
+        report_sources = frappe.get_all("VGM_Report",
+            filters=filters,
+            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
+        )
+        lst_report = []
+        for report_source in report_sources:
+            customer_name = frappe.get_value("Customer", filters={"name": report_source.get("retail_code")}, fieldname="customer_name")
+            employee_name = frappe.get_value("Employee", filters={"name": report_source.get("employee_code")}, fieldname="employee_name")
+            campaign_name = frappe.get_value("VGM_Campaign", filters={"name": report_source.get("campaign_code")}, fieldname="campaign_name")
+            category_names = []
+            categories = report_source.get("categories")
+            if categories is not None:
+                categories_code = json.loads(categories)
+                for code in categories_code:
+                    # Lấy tên tương ứng của mã từ doctype VGM_Category
+                    name = frappe.get_value("VGM_Category", {"name": code}, "category_name")
+                    category_names.append({code: name})
+            report_skus = frappe.get_all("VGM_ReportDetailSKU", filters={"parent": report_source.get("name")}, fields=["*"])
+            info_products_ai = []
+            info_products_human = []
+            detail_skus = []
+            for report_sku in report_skus:
+                product_name = frappe.get_value("VGM_Product", {"name": report_sku.get("product")}, "product_name")
+                info_products_ai.append({"report_sku_id": report_sku.get("name"), "product_name": product_name, "sum": report_sku.get("sum_product")})
+                info_products_human.append({"report_sku_id": report_sku.get("name"), "product_name": product_name, "sum": report_sku.get("sum_product_human")})
+                detail_sku = {
+                    "name": report_sku.get("name"),
+                    "category": report_sku.get("category"),
+                    "product": report_sku.get("product"),
+                    "sum_product": report_sku.get("sum_product"),
+                    "scoring_machine": report_sku.get("scoring_machine"),
+                    "sum_product_human": report_sku.get("sum_product_human"),
+                    "scoring_human": report_sku.get("scoring_human"),
+                    "product_name": product_name
+                }
+                detail_skus.append(detail_sku);
+            report = {
+                "name": report_source.get("name"),
+                "customer_name": customer_name,
+                "employee_name": employee_name,
+                "campaign_name": campaign_name,
+                "categories": report_source.get("categories"),
+                "info_products_ai": info_products_ai,
+                "info_products_human": info_products_human,
+                "images": report_source.get("images"),
+                "images_ai":  report_source.get("image_ai"),
+                "images_time": report_source.get("images_time"),
+                "scoring_machine": report_source.get("scoring_machine"),
+                "scoring_human": report_source.get("scoring_human"),
+                "detail_skus": detail_skus,
+                "category_names": category_names
+            }
+            lst_report.append(report)
+        return gen_response(200, "ok", {"data" : lst_report})
+    except Exception as e:
+        return gen_response(500, "error", {"data" : str(e)})
+
+@frappe.whitelist(methods=["POST"])
+def update_report(*args,**kwargs):
+    name = kwargs.get('name')
+    scoring = kwargs.get('scoring')
+    arr_product = kwargs.get('arr_product')
+    try:
+        frappe.db.set_value('VGM_Report', name, 'scoring_human', scoring)
+        for product in arr_product:
+            print("DÒng 318 ", product.get("report_sku_id"))
+            frappe.db.set_value('VGM_ReportDetailSKU', product.get("report_sku_id"), {
+                'sum_product_human': product.get("sum_product_human"),
+                'scoring_human': product.get("scoring_human")
+            })
+        return gen_response(200, "ok", {"data": "success"})
+    except Exception as e:
+        return gen_response(500, "error", {"data": str(e)})
+
+@frappe.whitelist(methods=["GET"])
+def get_all_campaigns():
+    try:
+        campaign_sources = frappe.get_all("VGM_Campaign", fields=["name","campaign_name"])
+        return gen_response(200, "ok", {"data": campaign_sources})
+    except Exception as e:
+        return gen_response(500, "error", {"data": str(e)})
 
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):

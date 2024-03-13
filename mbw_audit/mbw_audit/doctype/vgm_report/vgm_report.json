@@ -20,7 +20,8 @@
   "images",
   "images_time",
   "scoring_machine",
-  "image_ai"
+  "image_ai",
+  "scoring_human"
  ],
  "fields": [
   {
@@ -105,11 +106,16 @@
    "fieldname": "image_ai",
    "fieldtype": "JSON",
    "label": "Image AI"
+  },
+  {
+   "fieldname": "scoring_human",
+   "fieldtype": "Int",
+   "label": "Scoring By Human"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-08 09:50:52.199966",
+ "modified": "2024-03-13 07:05:36.902419",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Report",
@@ -131,5 +137,8 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
 }

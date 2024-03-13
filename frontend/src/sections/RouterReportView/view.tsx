@@ -30,7 +30,8 @@ export default function  ReportView() {
   
   useEffect(() => {
     // Lấy record từ local storage khi component được mount
-    const storedRecordData = localStorage.getItem('recordData');
+    let storedRecordData = localStorage.getItem('recordData');
+    console.log(JSON.parse(storedRecordData));
     if (storedRecordData) {
       setRecordData(JSON.parse(storedRecordData));
     }
@@ -41,7 +42,7 @@ export default function  ReportView() {
   const renderTitle = () => {
     if (recordData) {
       // Tiêu đề bao gồm tên cửa hàng và chiến dịch từ storedRecordData
-      return `${recordData.retail_code} - ${recordData.campaign_name}`;
+      return `${recordData.customer_name} - ${recordData.campaign_name}`;
     }
     // Nếu không có dữ liệu, hiển thị một tiêu đề mặc định
     return 'Tiêu đề';

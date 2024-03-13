@@ -27,7 +27,7 @@ export default function GeneralInformation({ form,recordData }) {
     console.log(recordData);
     if (recordData) {
       form.setFieldsValue({
-        store: recordData.retail_code,
+        store: recordData.customer_name,
         campaign_name: recordData.campaign_name,
         employee_code: recordData.employee_name,
         quatity: recordData.quantity_cate,

@@ -9,7 +9,9 @@
   "category",
   "product",
   "sum_product",
-  "scoring_machine"
+  "scoring_machine",
+  "sum_product_human",
+  "scoring_human"
  ],
  "fields": [
   {
@@ -36,12 +38,22 @@
    "fieldname": "scoring_machine",
    "fieldtype": "Int",
    "label": "Scoring Machine"
+  },
+  {
+   "fieldname": "sum_product_human",
+   "fieldtype": "Int",
+   "label": "Sum Product By Human"
+  },
+  {
+   "fieldname": "scoring_human",
+   "fieldtype": "Int",
+   "label": "Scoring By Human"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-06 06:48:39.185094",
+ "modified": "2024-03-13 03:22:38.239148",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_ReportDetailSKU",

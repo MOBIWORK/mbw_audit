@@ -1,7 +1,6 @@
 
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import  {AxiosService} from '../../services/server';
-import { VscAdd } from "react-icons/vsc";
 import * as XLSX from 'xlsx';
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
 import {
@@ -9,28 +8,38 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType,DatePicker,Select,Upload } from "antd";
+import { Input, TableColumnsType, DatePicker, Select } from "antd";
 import { useState,useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
-interface DataType {
+interface DataTypeReport {
   key: React.Key;
   stt: string;
   name: string;
-  status: string;
-  start: string;
-  end: string;
-  sum : string;
+  customer_name: string;
+  employee_name: string;
+  campaign_name: string;
+  categories : string;
+  info_products_ai: Array<any>;
+  info_products_human: Array<any>;
+  images: string;
+  images_ai: string;
+  images_time: string;
+  scoring_machine: number;
+  scoring_human: number;
+  quantity_cate: number;
+  detail_skus: Array<any>;
+  category_names: Array<any>;
 }
 const { RangePicker } = DatePicker;
-const columns: TableColumnsType<DataType> = [
+const columns: TableColumnsType<DataTypeReport> = [
   {
     title: "STT",
     dataIndex: "stt",
   },
   {
     title: "Khách hàng",
-    dataIndex: "retail_code",
+    dataIndex: "customer_name",
   },
   {
     title: "Tên chiến dịch",
@@ -71,51 +80,57 @@ const rowSelection = {
 };
 const apiUrl = paths.apiUrl;
 export default function ReportDetail() {
-  const [searchCampaign, setSearchCampaign] = useState('');
-  const [searchTime, setSearchTime] = useState(null); // Sử dụng state để lưu giá trị thời gian thực hiện
+  const [searchCampaign, setSearchCampaign] = useState('all');
+  const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
   const [searchEmployee, setSearchEmployee] = useState('all'); // Mặc định là 'all'
-  const [filteredDataReport, setFilteredDataReport] =  useState<any[]>([]);
 
   const navigate = useNavigate();
-  const [dataReport, setDataReport] = useState<any[]>([]);
+  const [dataReports, setDataReports] = useState<any[]>([]);
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
-  const [dataCustomer, setDataCustomer] = useState<any[]>([]);
-  const [selectionType, setSelectionType] = useState<"checkbox" | "radio">(
-    "checkbox"
-  );
+  const [campaignSources, setCampaignSources] = useState<any[]>([]);
+
   const handleRowClick = (record) => {
     // Lưu record vào local storage
     localStorage.setItem('recordData', JSON.stringify(record));
     navigate(`/report-view`);
   };
   useEffect(() => {
-     fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
+    initDataEmployee();
+    initDataCampaigns();
+    fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
 }, []);
 
 const fetchDataReport = async () => {
-   let arr =  await initDataEmployee();
-    try {
-        let urlReport = apiUrl + '.api.get_list_reports';
-        const response = await AxiosService.get(urlReport);
-        if (response && response.message && response.message.data) {
-            let dataReport: DataType[] = response.message.data.map((item: DataType, index: number) => {
-              let stt: string = (index + 1).toString().padStart(2, '0'); // Chuyển stt thành chuỗi và thêm số 0 nếu nhỏ hơn 10
-              let quantity_cate: string = JSON.parse(item.categories).length.toString().padStart(2, '0'); // Số lượng danh mục với số 0 nếu nhỏ hơn 10
-                return {
-                    ...item,
-                    key: item.name,
-                    stt: stt,
-                    quantity_cate: quantity_cate,
-                    employee_name: findEmployeeName(arr,item.employee_code)
-                };
-            });
-
-            setDataReport(dataReport);
-            setFilteredDataReport(dataReport);
-        }
-    } catch (error) {
-        console.error("Error fetching report data:", error);
-    }
+  let urlReports = "/api/method/mbw_audit.api.api.get_reports_by_filter";
+  if(searchCampaign != null && searchCampaign != "" && searchCampaign != "all"){
+    urlReports = `${urlReports}?campaign_code=${searchCampaign}`;
+  }
+  if(searchTime != null && searchTime.length == 2){
+    let start_date = new Date(searchTime[0]).getTime()/1000;
+    let end_date = new Date(searchTime[1]).getTime()/1000;
+    if(urlReports.includes("?")) urlReports = `${urlReports}&start_date=${start_date}&end_date=${end_date}`;
+    else urlReports = `${urlReports}?start_date=${start_date}&end_date=${end_date}`;
+  }
+  if(searchEmployee != null && searchEmployee != "" && searchEmployee != "all"){
+    if(urlReports.includes("?")) urlReports = `${urlReports}&employee_id=${searchEmployee}`;
+    else urlReports = `${urlReports}?employee_id=${searchEmployee}`;
+  }
+  let res = await AxiosService.get(urlReports);
+  if(res != null && res.message == "ok" && res.result != null && res.result.data != null){
+    let dataSources = res.result.data.map((item: DataTypeReport, index: number) => {
+      let stt: string = (index + 1).toString().padStart(2, '0');
+      let quantity_cate: string = JSON.parse(item.categories).length.toString().padStart(2, '0');
+      return {
+        ...item,
+        key: item.name,
+        stt: stt,
+        quantity_cate: quantity_cate
+      }
+    })
+    setDataReports(dataSources);
+  }else{
+    setDataReports([]);
+  }
 };
 
 const initDataEmployee = async () => {
@@ -123,44 +138,28 @@ const initDataEmployee = async () => {
         let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
         const res = await AxiosService.get(urlEmployee);
         if (res && res.result && res.result.data) {
-            setDataEmployee(res.result.data)
-            return (res.result.data);
+          setDataEmployee(res.result.data)
         }
     } catch (error) {
         console.error("Error fetching employee data:", error);
     }
 };
 
-// Hàm tìm kiếm tên nhân viên dựa trên employee_code
-const findEmployeeName = (arr: [],employeeCode: string) => {
-    const matchedEmployee = arr.find(employee => employee.name === employeeCode);
-    return matchedEmployee ? matchedEmployee.employee_name : ''; 
-};
+const initDataCampaigns = async () => {
+  let urlCampaign = "/api/method/mbw_audit.api.api.get_all_campaigns";
+  const res = await AxiosService.get(urlCampaign);
+  if(res != null && res.message == "ok" && res.result != null){
+    setCampaignSources(res.result.data);
+  }else{
+    setCampaignSources([]);
+  }
+}
+
 
   useEffect(() => {
-    // Lọc dữ liệu báo cáo dựa trên các trường tìm kiếm khi có sự thay đổi
-    const filteredData = dataReport.filter(record => {
-      const matchCampaign = record.campaign_name.toLowerCase().includes(searchCampaign.toLowerCase());
-      // Xử lý lọc theo thời gian nếu cần
-      // const matchTime = true; // Đặt điều kiện mặc định
-      // Xử lý lọc theo nhân viên
-      // const matchTime = searchTime && searchTime[0] && searchTime[1] ?
-      // new Date(record.date_check_in) >= searchTime[0] && new Date(record.date_check_in) <= searchTime[1] : true;
-      const startOfDay = searchTime && searchTime[0] ? new Date(searchTime[0]) : null;
-      const endOfDay = searchTime && searchTime[1] ? new Date(searchTime[1]) : null;
-      
-      const matchTime =
-          startOfDay && endOfDay
-              ? (
-                  new Date(record.images_time) >= new Date(startOfDay.setHours(0, 0, 0, 0)) &&
-                  new Date(record.images_time) <= new Date(endOfDay.setHours(23, 59, 59, 999))
-                )
-              : true;
-      const matchEmployee = searchEmployee === 'all' || record.employee_code === searchEmployee;
-      return matchCampaign && matchEmployee && matchTime; // && matchTime nếu cần thêm điều kiện thời gian
-    });
-    setFilteredDataReport(filteredData);
-  }, [searchCampaign, searchTime, searchEmployee, dataReport]);
+    fetchDataReport();
+  }, [searchCampaign, searchTime, searchEmployee]);
+  
   const transformDataSourceForExcel = (dataSource) => {
     return dataSource.map(item => ({
       ...item,
@@ -168,11 +167,12 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
       // Thêm các chuyển đổi khác nếu cần
     }));
   };
-  const exportToExcel = (columns, dataSource, fileName) => {
+
+  const exportToExcel = (columns, fileName) => {
     const boldCellStyle = { font: { bold: true } };
 
     // Tạo dữ liệu từ dataSource
-    const transformedDataSource = transformDataSourceForExcel(filteredDataReport);
+    const transformedDataSource = transformDataSourceForExcel(dataReports);
     const data = transformedDataSource.map((item) =>
         columns.map((column) => item[column.dataIndex])
     );
@@ -212,18 +212,24 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
-             action: () => exportToExcel(columns,filteredDataReport,'Danh sách báo cáo'),
+             action: () => exportToExcel(columns,'Danh sách báo cáo'),
           },
         ]}
       />
       <div className="bg-white rounded-xl">
         <div className="flex p-4" style={{ alignItems: 'flex-end' }}>
-      <FormItemCustom className="w-[320px] border-none mr-4 " >
-        <Input placeholder="Tìm kiếm theo chiến dịch" 
-         value={searchCampaign}
-         onChange={(e) => setSearchCampaign(e.target.value)}
-         prefix={<SearchOutlined />} />
-      </FormItemCustom>
+        <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '15px' }}>
+          <label style={{paddingBottom: '5px'}}>Chiến dịch:</label>
+          <Select className="w-[200px] h-[36px]" value={searchCampaign}
+                    onChange={(value) => setSearchCampaign(value)} defaultValue="all">
+            <Select.Option value="all">Tất cả</Select.Option>
+            {campaignSources.map(campaign => (
+              <Select.Option key={campaign.name} value={campaign.name}>
+                {campaign.campaign_name}
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
       <FormItemCustom className="w-[250px] border-none mr-4" label="Thời gian thực hiện">
         <RangePicker  value={searchTime}
              onChange={(dates) => setSearchTime(dates)}/>
@@ -245,7 +251,7 @@ const findEmployeeName = (arr: [],employeeCode: string) => {
         <div>
           <TableCustom
             columns={columns}
-            dataSource={filteredDataReport}
+            dataSource={dataReports}
             onRow={(record, rowIndex) => {
               return {
                 onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
