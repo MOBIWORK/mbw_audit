@@ -6,6 +6,7 @@ import { Button, Result } from 'antd';
 import useCookie from '../../hooks/useCookie';
 import CampaignEdit from "../../sections/CampaignEdit/view";
 
+const RouterDashboard= lazy(()=> import('@/pages/RouterDashboard'))
 const RouterReportDetail= lazy(()=> import('@/pages/RouteReportDetail'))
 const RouterProduct_SKU= lazy(()=> import('@/pages/RouterProduct_SKU'))
 const Campaign = lazy(()=> import('@/pages/Campaign'))
@@ -24,7 +25,7 @@ export const dashboardRoutes = [
         ),
         children: [
             {
-                index: true, element: <RouterReportDetail />
+                index: true, element: <RouterDashboard />
             },
             {
                 path: 'reports', element: <RouterReportDetail />
