@@ -40,18 +40,17 @@ export default function CampaignCreate() {
         let objSettingScore = {};
         let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
         if (checkExistProduct) {
-            let objMinProduct = {};
-            propertiesSettingScore.forEach(item => {
-                let valSettingScore = scoreSelected[item];
-                objMinProduct[item] = valSettingScore.min_product;
-            })
-            objSettingScore["min_product"] = objMinProduct;
+            // let objMinProduct = {};
+            // propertiesSettingScore.forEach(item => {
+            //     let valSettingScore = scoreSelected[item];
+            //     objMinProduct[item] = valSettingScore.min_product;
+            // })
+            objSettingScore["min_product"] = scoreSelected.min_product;
         }
 
         if(checkSequenceProduct){
           objSettingScore["sequence_product"] = sequenceProducts;
         }
-
         let arrCategory = categoriesSelected.map((x) => x.name);
         let arrEmployee = employeesSelected.map((x) => x.name);
         let arrCustomer = customersSelected.map((x) => x.name);
@@ -103,18 +102,24 @@ export default function CampaignCreate() {
 
   const handleChangeCategory = (val) => {
     setCategoriesSelected(val);
-        // Khởi tạo biến kết quả
-        let result = {};
-        for (let i = 0; i < val.length; i++) {
-          // Duyệt qua mảng products và tạo biến kết quả
-          val[i].products.forEach((product) => {
-            result[product.key] = {
-              min_product: parseInt(product.product_num),
-            };
-          });
-        }
+    const min_product = {};
 
-        setScoreSelected(result);
+    // Duyệt qua mỗi phần tử trong mảng data
+    val.forEach(item => {
+        // Duyệt qua mỗi sản phẩm trong mảng products của mỗi phần tử
+        item.products.forEach(product => {
+            // Kiểm tra nếu key của sản phẩm đã tồn tại trong min_product và giá trị mới nhỏ hơn giá trị hiện tại
+            if (min_product.hasOwnProperty(product.key)) {
+                min_product[product.key] = Math.min(min_product[product.key], parseInt(product.product_num));
+            } else {
+                // Nếu key chưa tồn tại, thêm key mới vào min_product
+                min_product[product.key] = parseInt(product.product_num);
+            }
+        });
+    });
+    
+    const result = { "min_product": min_product };
+    setScoreSelected(result);
   };
 
   const handleChangeEmployee = (val) => {

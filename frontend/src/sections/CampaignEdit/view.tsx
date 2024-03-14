@@ -28,7 +28,8 @@ export default function CampaignEdit() {
   const [productEdit, setProductEdit] = useState({});
   const [checkExistProduct, setCheckExistProduct] = useState(false);
   const [settingSequenceProduct, setSettingSequenceProduct] = useState([]);
-  
+  const [sequenceProducts, setSequenceProducts] = useState([]);
+  const [checkSequenceProduct, setCheckSequenceProduct] = useState(false);
 
   useEffect(() => {
     initDataByIdCampaign();
@@ -53,6 +54,7 @@ export default function CampaignEdit() {
         if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){
           let objSettingScoreAudit = JSON.parse(res.data.setting_score_audit);
           if(objSettingScoreAudit.sequence_product != null) setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
+          
         }
         let objSettingScore = JSON.parse(res.data.setting_score_audit);
         if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
@@ -90,7 +92,9 @@ export default function CampaignEdit() {
             })
             objSettingScore["min_product"] = objMinProduct;
         }
-
+        if(checkSequenceProduct){
+          objSettingScore["sequence_product"] = sequenceProducts;
+        }
         let objFrm = form.getFieldsValue();
 
         // Kiểm tra nếu start_date bé hơn end_date
@@ -163,7 +167,9 @@ export default function CampaignEdit() {
 
       setProductEdit(result);
   }
-
+  const handleChangeSequenceProducts = (val) => {
+    setSequenceProducts(val);
+  }
   const handleChangeEmployee = (val) => {
     setEmployeesSelected(val);
   }
@@ -175,7 +181,9 @@ export default function CampaignEdit() {
   const handleChangeExistProduct = (val) => {
     setCheckExistProduct(val);
   }
-
+  const handleChangeCheckSequenceProduct = (val) => {
+    setCheckSequenceProduct(val);
+  }
   return (
     <>
       <HeaderPage
@@ -214,7 +222,7 @@ export default function CampaignEdit() {
                 key: "2",
                 children: (
                   <ProductCampaignEdit onChangeCategory={handleChangeCategory} categoryEdit={categoryEdit} productEdit={productEdit} objSettingSequenceProduct={settingSequenceProduct}
-                      onChangeCheckExistProduct={handleChangeExistProduct}
+                      onChangeCheckExistProduct={handleChangeExistProduct} onChangeCheckSequenceProduct={handleChangeCheckSequenceProduct} onChangeSequenceProducts={handleChangeSequenceProducts}
                   />
                 ),
               },

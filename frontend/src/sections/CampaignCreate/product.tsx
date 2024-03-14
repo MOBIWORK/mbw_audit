@@ -154,7 +154,6 @@ export default function Product({
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeCategory[]
   ) => {
-    console.log(newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const onSelectChangeProduct = (
@@ -172,7 +171,6 @@ export default function Product({
   };
   //   const onSelectAllCategory = (selected: boolean, selectedRows: TypeCategory[], changeRows: TypeCategory[]) => {
   //     const keys = selected ? categories.map(row => row.key) : [];
-  //     console.log(keys);
   //     setSelectedRowKeys(keys);
   // };
   const rowSelectionCategory = {
@@ -217,11 +215,9 @@ export default function Product({
     const result = arrProductCategory.filter((item) =>
       selectedProductRowKeys.includes(item.name)
     );
-    console.log(result);
     let arrSequenceProduct = result.map((x) => x.name);
     onChangeSequenceProducts(arrSequenceProduct);
     setProductSort(result);
-    console.log(arrProductCategory);
     handleCancelProduct();
   };
 
@@ -362,7 +358,7 @@ export default function Product({
     onChangeCategory(categoriesSelected);
   };
   const handleQuantityChangeProduct = (index: number, newValue: number) => {
-    console.log(index, newValue);
+  
   };
   const handleDragRowEvent = (data: any) => {
     let arrSequenceProduct = data.map((x) => x.name);
