@@ -3,6 +3,7 @@ import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import  {AxiosService} from '../../services/server';
 import * as XLSX from 'xlsx';
 import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import * as FileSaver from 'file-saver';
 import {
   SearchOutlined,
   CheckCircleOutlined,
@@ -32,42 +33,6 @@ interface DataTypeReport {
   category_names: Array<any>;
 }
 const { RangePicker } = DatePicker;
-const columns: TableColumnsType<DataTypeReport> = [
-  {
-    title: "STT",
-    dataIndex: "stt",
-  },
-  {
-    title: "Khách hàng",
-    dataIndex: "customer_name",
-  },
-  {
-    title: "Tên chiến dịch",
-    dataIndex: "campaign_name",
-  },
-  {
-    title: "Nhân viên thực hiện",
-    dataIndex: "employee_name",
-  },
-  {
-    title: "Số lượng danh mục sản phẩm",
-    dataIndex: "quantity_cate",
-  },
-  {
-    title: "Thời gian thực hiện",
-    dataIndex: "images_time",
-  },
-  {
-    title: "Chấm điểm trưng bày",
-    dataIndex: "scoring_machine",
-    render: (scoring_machine: number) => (
-      <>
-        {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
-        {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
-      </>
-    )
-  },
-];
 // rowSelection object indicates the need for row selection
 const rowSelection = {
   onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -98,7 +63,92 @@ export default function ReportDetail() {
     initDataEmployee();
     initDataCampaigns();
     fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
-}, []);
+  }, []);
+
+  const handleShowImage = (image) => {
+    console.log(image)
+  }
+
+  const columns: TableColumnsType<DataTypeReport> = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer_name",
+    },
+    {
+      title: "Tên chiến dịch",
+      dataIndex: "campaign_name",
+    },
+    {
+      title: "Nhân viên thực hiện",
+      dataIndex: "employee_name",
+    },
+    {
+      title: "Số lượng danh mục",
+      dataIndex: "quantity_cate",
+    },
+    {
+      title: "Ảnh gian hàng",
+      dataIndex: "images",
+      render: (item) => (
+        <>
+          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
+        </>
+      )
+    },
+    {
+      title: "Ảnh gian hàng AI",
+      dataIndex: "images",
+      render: (item) => (
+        <>
+          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
+        </>
+      )
+    },
+    {
+      title: "Thời gian thực hiện",
+      dataIndex: "images_time",
+    },
+    {
+      title: "Điểm trưng bày AI chấm",
+      dataIndex: "scoring_machine",
+      render: (scoring_machine: number) => (
+        <>
+          {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+          {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+        </>
+      )
+    },
+    {
+      title: "Điểm trưng bày giám sát chấm",
+      dataIndex: "scoring_human",
+      render: (scoring_human: number) => (
+        <>
+          {scoring_human === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+          {scoring_human === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+        </>
+      )
+    }
+  ];
+
+  const expandedColumns = [
+    // { title: "STT", dataIndex: "stt" },
+    { title: "Tên sản phẩm", dataIndex: "product_name" },
+    { title: "Số lượng sản phẩm AI đếm", dataIndex: "sum_product" },
+    {
+      title: "Số lượng sản phẩm giám sát đếm",
+      dataIndex: "sum_product_human"
+    },
+    { title: "Điểm trưng bày AI chấm", dataIndex: "scoring_machine", render: (scoring_machine: number) => (
+      <>
+        {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+        {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+      </>
+    ) }
+];
 
 const fetchDataReport = async () => {
   let urlReports = "/api/method/mbw_audit.api.api.get_reports_by_filter";
@@ -128,6 +178,7 @@ const fetchDataReport = async () => {
       }
     })
     setDataReports(dataSources);
+    console.log(dataSources);
   }else{
     setDataReports([]);
   }
@@ -160,46 +211,76 @@ const initDataCampaigns = async () => {
     fetchDataReport();
   }, [searchCampaign, searchTime, searchEmployee]);
   
-  const transformDataSourceForExcel = (dataSource) => {
-    return dataSource.map(item => ({
-      ...item,
-      scoring_machine: item.scoring_machine === 1 ? "Đạt" : "Không đạt"
-      // Thêm các chuyển đổi khác nếu cần
-    }));
+  const exportToExcel = () => {
+    onExportDataToExcel(dataReports, "Báo cáo chấm điểm trưng bày");
   };
 
-  const exportToExcel = (columns, fileName) => {
-    const boldCellStyle = { font: { bold: true } };
+  const onExportDataToExcel = async (table, title) => {
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Sheet1');
+    sheet.properties.defaultColWidth = 20;
+    sheet.getColumn('A').width = 30;
+    sheet.mergeCells('A2:J2');
+    sheet.getCell('A2').value = title;
+    sheet.getCell('A2').style = { font: { bold: true, name: 'Times New Roman', size: 12 } };
+    sheet.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center' };
+    let rowHeader = sheet.getRow(4);
+    let rowHeader_Next = sheet.getRow(5);
+    let fieldsMerge = [
+      {"title": "Khách hàng", "field": "customer_name"},
+      {"title": "Tên chiến dịch", "field": "campaign_name"},
+      {"title": "Nhân viên thực hiện", "field": "employee_name"},
+      {"title": "Số lượng danh mục", "field": "categories"},
+      {"title": "Ảnh gian hàng", "field": "images"},
+      {"title": "Ảnh gian hàng AI", "field": "images_ai"},
+      {"title": "Thời gian thực hiện", "field": "images_time"},
+      {"title": "Điểm trưng bày AI chấm", "field": "scoring_machine"},
+      {"title": "Điểm trưng bày giám sát chấm", "field": "scoring_human"}
+    ]
+    for(let i = 0; i < fieldsMerge.length; i++){
+      let cellStart = rowHeader.getCell(i+1);
+      let cellEnd = rowHeader_Next.getCell(i+1);
+      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
+      rowHeader.getCell(i+1).style = { font: { bold: true, name: 'Times New Roman', size: 12, italic: true } };
+      rowHeader.getCell(i+1).alignment = { vertical: 'middle', horizontal: 'center' };
+      rowHeader.getCell(i+1).value = fieldsMerge[i].title;
+    }
+    for(let i = 0; i < table.length; i++){
+      let rowStart = 6;
+      let row = sheet.getRow(i + rowStart);
+      let cellStart = 1;
+      for(let j = 0; j < fieldsMerge.length; j++){
+        row.getCell(cellStart).style = { font: { name: 'Times New Roman', size: 12, italic: true } };
+        let valCell = "";
+        if(fieldsMerge[j].field == "categories"){
+          if(table[i][fieldsMerge[j].field] != null && table[i][fieldsMerge[j].field] != "") {
+            let categories = JSON.parse(table[i][fieldsMerge[j].field]);
+            valCell = categories.length;
+          }
+        }else if(fieldsMerge[j].field == "scoring_machine" || fieldsMerge[j].field == "scoring_human"){
+          if(table[i][fieldsMerge[j].field] == 0) valCell = "Không đạt";
+          else valCell = "Đạt";
+        }
+        else{
+          valCell = table[i][fieldsMerge[j].field];
+        }
+        row.getCell(cellStart).value = valCell;
+        cellStart += 1;
+      }
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "report");
+  }
 
-    // Tạo dữ liệu từ dataSource
-    const transformedDataSource = transformDataSourceForExcel(dataReports);
-    const data = transformedDataSource.map((item) =>
-        columns.map((column) => item[column.dataIndex])
-    );
-
-    // Tạo sheet từ dữ liệu
-    const ws = XLSX.utils.aoa_to_sheet([
-        columns.map((column) => column.title),
-        ...data,
-    ]);
-
-    // Thiết lập các cấu hình cho các ô trong sheet
-    ws['!cols'] = columns.map(() => ({ width: 20 })); // Thiết lập độ rộng cột
-    ws['!rows'] = [{ hpx: 30 }]; // Thiết lập chiều cao dòng
-
-    // Thiết lập các cấu hình cho từng ô trong hàng đầu tiên (tên cột)
-    columns.forEach((column, colIndex) => {
-        const cell = XLSX.utils.encode_cell({ r: 0, c: colIndex }); // Tên ô
-        ws[cell].s = boldCellStyle; // Áp dụng kiểu cho ô
+  const saveAsExcelFile = (buffer: any, fileName: string) => {
+    let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    let EXCEL_EXTENSION = '.xlsx';
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE
     });
-
-    // Tạo workbook và append sheet vào workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-    // Xuất file Excel
-    XLSX.writeFile(wb, fileName + '.xlsx');
-};
+    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
 
   return (
     <>
@@ -212,7 +293,7 @@ const initDataCampaigns = async () => {
             icon: <VerticalAlignBottomOutlined className="text-xl" />,
             size: "20px",
             className: "flex items-center",
-             action: () => exportToExcel(columns,'Danh sách báo cáo'),
+             action: exportToExcel
           },
         ]}
       />
@@ -258,6 +339,17 @@ const initDataCampaigns = async () => {
               };
             }}
             rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
+            expandable={{
+              expandedRowRender: (record, index) => (
+                <div style={{ margin: 5 }}>
+                  <TableCustom
+                      columns={expandedColumns}
+                      dataSource={record.detail_skus}
+                      pagination={false}
+                  />
+                </div>
+              )
+          }}
           />
         </div>
       </div>

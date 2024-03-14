@@ -62,9 +62,9 @@ export default function Product(props) {
   const expandedColumns = [
     { title: "STT", dataIndex: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name_product" },
-    { title: "Số lượng sản phẩm máy chấm", dataIndex: "sum_product" },
+    { title: "Số lượng sản phẩm AI đếm", dataIndex: "sum_product" },
     {
-      title: "Số lượng người chấm",
+      title: "Số lượng sản phẩm giám sát đếm",
       dataIndex: "sum_product_human",
       render: (
         item: number,

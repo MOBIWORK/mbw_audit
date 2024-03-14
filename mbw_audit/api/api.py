@@ -355,6 +355,41 @@ def get_all_campaigns():
     except Exception as e:
         return gen_response(500, "error", {"data": str(e)})
 
+@frappe.whitelist(methods=["GET"])
+def summary_overview_dashboard():
+    start_date = frappe.form_dict.get('start_date')
+    end_date = frappe.form_dict.get('end_date')
+    try:
+        filters = {}
+        if start_date is not None and end_date is not None:
+            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            start_date_in = int(start_date)
+            end_date_in = int(end_date)
+            start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
+            end_date_in = datetime.fromtimestamp(end_date_in).strftime(date_format_with_time)
+            filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
+        report_sources = frappe.get_all("VGM_Report",
+            filters=filters,
+            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
+        )
+        campaign_sources = frappe.get_all("VGM_Campaign", fields=["name","campaign_name"])
+        campaign_start = 0
+        for campaign in campaign_sources:
+            for report in report_sources:
+                if(campaign.name == report.campaign_code):
+                    campaign_start += 1
+                    break
+        employees = []
+        customers = []
+        for report in report_sources:
+            if report.get("employee_code") not in employees:
+                employees.append(report.get("employee_code"))
+            if report.get("retail_code") not in customers:
+                customers.append(report.get("retail_code"))
+        return gen_response(200, "ok", {"data": {"campaign_start": campaign_start, "campaign_all": len(campaign_sources), "employee": len(employees), "customer": len(customers)}})
+    except Exception as e:
+        return gen_response(500, "error", {"data": str(e)})
+
 @frappe.whitelist(methods=["POST"],allow_guest=True)
 def search_vgm_reports(*args,**kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'

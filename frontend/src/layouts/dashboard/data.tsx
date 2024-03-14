@@ -19,6 +19,17 @@ import {
       key: "dashboard",
     },
     {
+      label: (
+        <Link className={""} to="/reports">
+          <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
+            Báo cáo
+          </p>
+        </Link>
+      ),
+      icon: <ReconciliationOutlined style={{ fontSize: "22px" }} />,
+      key: "report",
+    },
+    {
         label: (
           <Link className={""} to="/product_sku">
             <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
@@ -39,17 +50,6 @@ import {
         ),
         icon: <SolutionOutlined style={{ fontSize: "22px" }} />,
         key: "campaign",
-      },
-      {
-        label: (
-          <Link className={""} to="/">
-            <p className="text-[#212B36] text-custom font-normal text-sm leading-[22px]">
-              Báo cáo
-            </p>
-          </Link>
-        ),
-        icon: <ReconciliationOutlined style={{ fontSize: "22px" }} />,
-        key: "report",
-      },
+      }
   ];
   

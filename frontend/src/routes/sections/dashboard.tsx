@@ -27,6 +27,9 @@ export const dashboardRoutes = [
                 index: true, element: <RouterReportDetail />
             },
             {
+                path: 'reports', element: <RouterReportDetail />
+            },
+            {
                 path: 'product_sku', element: <RouterProduct_SKU />
             },
             {
