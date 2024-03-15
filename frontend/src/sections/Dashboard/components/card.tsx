@@ -45,7 +45,24 @@ export const InfoCard =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-           <TableCustom
+           <TableCustom 
+            columns={data.data.columns}
+            dataSource={data.data.source}
+          />
+    </WrapperCard2>
+}
+export const InfoCardEmploy =({data}: {data:any}) => {
+    return <WrapperCard2 >
+          <p className="text-base font-medium pl-2" style={{
+      fontSize: '15px',
+      fontWeight: 600,
+      lineHeight: '21px',
+      letterSpacing: '0em',
+      textAlign: 'left',color:'rgba(33, 43, 54, 1)',alignSelf:'center'
+    }}>
+            {data.title}
+            </p>
+           <TableCustom pagination={{ pageSize: 5 }} scroll={{ y: 450 }} size="small"
             columns={data.data.columns}
             dataSource={data.data.source}
           />
