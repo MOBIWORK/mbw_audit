@@ -226,22 +226,21 @@ export default function Product_SKU() {
       const formData = new FormData();
       const fields = {
         file,
-        is_private: "0",
-        folder: "Home",
+        'category_name': categorySelected.name
       };
 
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
       const response = await AxiosService.post(
-        "/api/method/upload_file",
+        "/api/method/mbw_audit.api.api.upload_file_for_product",
         formData
       );
-      if (response.message) {
+      if (response.message == "ok") {
         //fileListUpload.push(response.message);
         setFileUploadAddProduct((prevFileUpload) => [
           ...prevFileUpload,
-          response.message,
+          response.result.file_url,
         ]);
         message.success("Tải ảnh thành công");
       } else {
@@ -269,22 +268,21 @@ export default function Product_SKU() {
       const formData = new FormData();
       const fields = {
         file,
-        is_private: "0",
-        folder: "Home",
+        'category_name': categorySelected.name
       };
 
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
       const response = await AxiosService.post(
-        "/api/method/upload_file",
+        "/api/method/mbw_audit.api.api.upload_file_for_product",
         formData
       );
-      if (response.message) {
+      if (response.message == "ok") {
         //fileListUpload.push(response.message);
         setFileUploadEditProduct((prevFileUpload) => [
           ...prevFileUpload,
-          response.message,
+          response.result.file_url,
         ]);
         message.success("Tải ảnh thành công");
       } else {
@@ -312,32 +310,30 @@ export default function Product_SKU() {
 
       const formData = new FormData();
       const fields = {
-        file,
-        is_private: "0",
-        folder: "Home",
+        file
       };
 
       for (const [key, value] of Object.entries(fields)) {
         formData.append(key, value);
       }
       const response = await AxiosService.post(
-        "/api/method/upload_file",
+        "/api/method/mbw_audit.api.api.upload_file_for_checking",
         formData
       );
-      if (response.message) {
+      if (response.message == "ok") {
         //fileListUpload.push(response.message);
         let listFile = [];
         let obj = {
           uid: "-1",
-          name: response.message.file_name,
+          name: response.result.date_time,
           status: "done",
-          url: response.message.file_url,
+          url: response.result.file_url,
         };
         listFile.push(obj);
         setFileListImage(listFile);
         setFileUploadCheckProduct((prevFileUpload) => [
           ...prevFileUpload,
-          response.message,
+          response.result.file_url,
         ]);
         message.success("Tải ảnh thành công");
       } else {

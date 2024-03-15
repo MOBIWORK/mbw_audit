@@ -13,7 +13,7 @@ from mbw_audit.api.common import (post_images, gen_response, base64_to_cv2, draw
 from frappe.utils.file_manager import (
     save_file
 )
-from frappe.utils import get_site_path
+from frappe.utils import get_site_path, now_datetime
 from datetime import datetime
 import base64
 import cv2
@@ -235,7 +235,9 @@ def render_image_ai(verbose):
         # Mã hóa hình ảnh thành chuỗi Base64
         _, buffer = cv2.imencode('.jpg', image)
         base64_image_encoded = base64.b64encode(buffer).decode("utf-8")
-        fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "Home")
+        current_datetime = now_datetime()
+        path_folder = create_folder(f"{current_datetime.month}", f"booth_product_ai/{frappe.session.user}/{current_datetime.year}")
+        fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_product_ai", path_folder)
         arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
     return arr_image_ai
 
@@ -575,7 +577,56 @@ def import_product(*args, **kwargs):
         return {'status': 'success', 'message': 'Products imported successfully'}
     except Exception as e:
         return {'status': 'failed', 'message': str(e)}
-    
+
+@frappe.whitelist(methods="POST")
+def upload_file_for_product():
+    try:
+        if "file" not in frappe.request.files:
+            raise ValueError("No file found in form data")
+
+        # Lấy dữ liệu từ form data
+        file_info = frappe.request.files["file"]
+        category_name = frappe.form_dict.get("category_name")
+        
+        # Kiểm tra loại dữ liệu của file_info
+        if isinstance(file_info, str):
+            raise ValueError("Invalid file data")
+
+        filename = file_info.filename
+        filedata = file_info.stream.read()
+        path_folder = create_folder(category_name, f"product_trainning/{frappe.session.user}")
+        # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
+        fileInfo = save_file(filename, filedata, "File", f"{frappe.session.user}", path_folder)
+        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url,
+                                        "date_time" : str(datetime.now().timestamp())})
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
+        return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
+
+@frappe.whitelist(methods="POST")
+def upload_file_for_checking():
+    try:
+        if "file" not in frappe.request.files:
+            raise ValueError("No file found in form data")
+
+        # Lấy dữ liệu từ form data
+        file_info = frappe.request.files["file"]
+        
+        # Kiểm tra loại dữ liệu của file_info
+        if isinstance(file_info, str):
+            raise ValueError("Invalid file data")
+
+        filename = file_info.filename
+        filedata = file_info.stream.read()
+        path_folder = create_folder("product_checking")
+        # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
+        fileInfo = save_file(filename, filedata, "File", "product_checking", path_folder)
+        return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url,
+                                        "date_time" : str(datetime.now().timestamp())})
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
+        return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
+
 @frappe.whitelist(methods="POST")
 def upload_file():
     try:
@@ -592,35 +643,15 @@ def upload_file():
         filename = file_info.filename
         filedata = file_info.stream.read()
 
+        current_datetime = now_datetime()
+        path_folder = create_folder(f"{current_datetime.month}", f"booth_product/{frappe.session.user}/{current_datetime.year}")
         # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
-        fileInfo = save_file(filename, filedata, "File", "Home")
+        fileInfo = save_file(filename, filedata, "File", "booth_product", path_folder)
         return gen_response(200, "ok", {"file_url" : frappe.utils.get_request_site_address() + fileInfo.file_url,
                                         "date_time" : str(datetime.now().timestamp())})
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Failed to upload file"))
         return gen_response(500, "error", {"file_url" : _("Failed to upload file: {0}").format(str(e))})
-
-@frappe.whitelist(methods="GET")
-def test_folder():
-    path_folder = create_folder("user_1", "user_1/category_1")
-    return path_folder
-
-
-
-
-def save_tmp_file(filename, filedata):
-    site_path = get_site_path()
-    tmp_dir = os.path.join(site_path, "private", "tmp")
-    
-    # Tạo thư mục tạm nếu nó không tồn tại
-    if not os.path.exists(tmp_dir):
-        os.makedirs(tmp_dir)
-    
-    tmp_file_path = os.path.join(tmp_dir, filename)
-    with open(tmp_file_path, 'wb') as f:
-        f.write(filedata)
-    return tmp_file_path
-
 
 @frappe.whitelist(methods="POST")
 def import_campaign(*args, **kwargs):

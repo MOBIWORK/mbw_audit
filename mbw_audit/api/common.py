@@ -60,8 +60,10 @@ def create_folder(folder_name, parent_folder=None):
     current_path = "Home"
     if parent_folder is not None:
         folder_names = parent_folder.split("/")
-        for folder_name in folder_names:
-            exist_folder = frappe.db.exists({"doctype": "File", "file_name": folder_name})
+        print("Dong 63 ", folder_names)
+        for folder_name_s in folder_names:
+            exist_folder = frappe.db.exists({"doctype": "File", "file_name": folder_name_s, "folder": current_path})
+            print("Dong 66 ", exist_folder)
             if exist_folder is not None:
                 current_path = exist_folder
             else:
@@ -69,9 +71,13 @@ def create_folder(folder_name, parent_folder=None):
                     "doctype": "File",
                     "is_folder": 1,
                     "folder": current_path,
-                    "file_name": folder_name
+                    "file_name": folder_name_s
                 })
                 new_folder.insert()
+                current_path = f"{current_path}/{folder_name_s}"
+    exist_folder = frappe.db.exists({"doctype": "File", "file_name": folder_name, "folder": current_path})
+    if exist_folder is not None:
+        current_path = exist_folder
     else:
         new_folder = frappe.get_doc({
             "doctype": "File",
@@ -80,5 +86,6 @@ def create_folder(folder_name, parent_folder=None):
             "file_name": folder_name
         })
         new_folder.insert()
+        current_path = f"{current_path}/{folder_name}"
     frappe.db.commit()
     return current_path
