@@ -18,6 +18,24 @@ export default function Dashboard() {
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
   const navigate = useNavigate();
   const [dataChienDich, setDataChienDich] = useState([]); 
+  const dataChienDichThucHien = {
+    color:'rgba(24, 119, 242, 1)',
+    tong:50,
+    tyle:25,
+
+  }
+  const dataKhachHangThamGia = {
+    color:'rgba(34, 197, 94, 1)',
+    tong:75,
+    tyle:25,
+
+  }
+  const dataNhanVienThucHien = {
+    color:'rgba(142, 51, 255, 1)',
+    tong:30,
+    tyle:25,
+
+  }
   const colTableTyLe = {
     columns: [{
       title: "STT",
@@ -84,19 +102,19 @@ export default function Dashboard() {
         <Col span={8}>
           <Overview  data={{
             title :"Chiến dịch được thực hiện",
-            data: dataChienDich
+            data: dataChienDichThucHien
           }}/>
         </Col>
         <Col span={8}>
         <Overview  data={{
             title :"Khách hàng tham gia ",
-            data: dataChienDich
+            data: dataKhachHangThamGia
           }}/>
         </Col>
         <Col span={8}>
         <Overview  data={{
             title :"Nhân viên thực hiện",
-            data: dataChienDich
+            data: dataNhanVienThucHien
           }}/>
         </Col>
        

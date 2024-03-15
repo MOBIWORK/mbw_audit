@@ -29,30 +29,26 @@ ChartJS.register(
   Legend
 );
 
-export const ChartCustom = ({ data }: { data: any[] }) => {  
+export const ChartCustom = ({ data }: { data: any[] }) => {
+    const dataone = [data.data.tyle];
+    const total = dataone.reduce((acc, curr) => acc + curr, 0);
+    const totalText = `${total}/${data.data.tong}`;
+    
     const dataChart = {
         datasets: [{
-            label: 'My First Dataset',
-            data: [15, 25 - 15],
+            data: [total, data.data.tong - total],
             backgroundColor: [
-                'rgba(24, 119, 242, 1)', // Màu cho số đã hoàn thành
+                 data.data.color, // Màu cho số đã hoàn thành
                 'rgba(196, 205, 213, 1)', // Màu cho số còn lại
             ],
             borderColor: [
-                'rgba(24, 119, 242, 1)',
+                data.data.color,
                 'rgba(196, 205, 213, 1)',
             ],
             borderWidth: 2,
         }],
     };
-    const total = dataChart.datasets && dataChart.datasets[0] && dataChart.datasets[0].data
-    ? dataChart.datasets[0].data.reduce((acc, curr) => acc + curr, 0)
-    : 0;
-    // Kiểm tra nếu dataChart.labels không tồn tại hoặc là undefined, thì gán cho nó là một mảng rỗng
-dataChart.labels = dataChart.labels || [];
 
-// Thêm nhãn tổng vào mảng labels
-dataChart.labels.push(`Total: ${total}`);
     const options = {
         responsive: true,
         plugins: {
@@ -60,31 +56,39 @@ dataChart.labels.push(`Total: ${total}`);
                 display: false,
             },
             datalabels: {
-                color: '#ffffff',
-                formatter: (value, context) => {
-                    if (context.chart.data.labels.indexOf(context.label) === context.chart.data.labels.length - 1) {
-                        return value;
-                    }
-                    return '';
-                },
-                anchor: 'center',
-                align: 'center',
-                font: {
-                    size: 16,
-                }
+                display: false, // Tắt hiển thị nhãn trên các phần tử dữ liệu
             },
         },
-        cutout: '70%',
+        hover: {
+            enabled: false, // Tắt tính năng hover
+        },
+        cutout: '85%',
+        cornerRadius: 10,
+    };
+
+    const chartContainerStyle = {
+        position: 'relative',
+        width: '100px',
+        height: '100px',
+        padding: '10px',
+    };
+
+    const totalTextStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontSize: '16px',
+        fontWeight:'700'
     };
 
     return (
-        <div style={{ width: '100px', height: '100px', padding: '10px' }}>
-            <Doughnut data={dataChart} options={options} />
+        <div style={chartContainerStyle}>
+            <Doughnut data={dataChart} options={options} plugins={[ChartDataLabels]} />
+            <div style={totalTextStyle}>{totalText}</div>
         </div>
     );
-  
-  }
-
+    }
   export const HorizontalBarChart = ({ data }) => {
     // Dữ liệu mẫu
     const sampleData = {
