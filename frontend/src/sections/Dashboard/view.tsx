@@ -1,6 +1,7 @@
 import { LuUploadCloud } from "react-icons/lu";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { VscAdd } from "react-icons/vsc";
+import { Flex, Progress ,Avatar} from 'antd';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -47,29 +48,59 @@ export default function Dashboard() {
     },
     {
       title: "Tỷ lệ AI chấm",
-      dataIndex: "campaign_name",
+      dataIndex: "tyle_ai",
+      render: (percent) => <Progress percent={percent} strokeColor={percent > 50 ? '#52c41a' : '#f5222d'} />,
     },
     {
       title: "Tỷ lệ giám sát chấm",
-      dataIndex: "campaign_name",
+      dataIndex: "tyle_giamsat",
+      render: (percent) => <Progress percent={percent} strokeColor={percent > 50 ? '#52c41a' : '#f5222d'} />,
+    },],
+    source: [{
+      stt: "01",
+      campaign_name: 'Chiến dịch 1',
+      tyle_ai: 30,
+      tyle_giamsat: 50,
+    },
+    {
+      stt: "02",
+      campaign_name: 'Chiến dịch 2',
+      tyle_ai: 45,
+      tyle_giamsat: 60,
     },]
   }
-  const colTableTienDoTyLe = 
-  {
-    columns: [{
-      title: "STT",
-      dataIndex: "stt"
-    },
-    {
-      title: "Chiến dịch",
-      dataIndex: "campaign_name",
-    },
-    {
-      title: "Tỷ lệ",
-      dataIndex: "campaign_name",
-    },
-   ]
-  }
+  const colTableTienDoTyLe = {
+    columns: [
+      {
+        title: "STT",
+        dataIndex: "stt"
+      },
+      {
+        title: "Chiến dịch",
+        dataIndex: "campaign_name",
+      },
+      {
+        title: "Tỷ lệ",
+        dataIndex: "tyle",
+        render: (percent) => (
+          <Progress percent={percent} strokeColor={percent > 50 ? '#52c41a' : '#f5222d'} />
+        ),
+      },
+    ],
+    source: [
+      {
+        stt: "01",
+        campaign_name: "Chiến dịch 1",
+        tyle: 30,
+      },
+      {
+        stt: "02",
+        campaign_name: "Chiến dịch 2",
+        tyle: 70,
+      },
+      // Thêm dữ liệu khác nếu cần
+    ],
+  };
   const colTableNhanVienChupAnh= 
   {
     columns: [{
@@ -78,13 +109,45 @@ export default function Dashboard() {
     },
     {
       title: "Nhân viên",
-      dataIndex: "campaign_name",
+      dataIndex: "customer_name",
+      render: (text, record) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar shape="square" size={50} src={record.https} /> {/* Avatar nhân viên */}
+          <div style={{ marginLeft: "8px" }}>
+            <p>{text}</p> {/* Tên nhân viên */}
+            <p>{record.employee_id}</p> {/* Mã nhân viên */}
+          </div>
+        </div>
+      )
     },
     {
       title: "Số lượng",
-      dataIndex: "campaign_name",
+      dataIndex: "quantity",
     },
-   ]
+   ],
+   source : [
+    {
+      stt: "01",
+      customer_name: "Nguyễn Văn A",
+      employee_id: "NV001",
+      quantity: 10,
+      https:"//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png"
+    },
+    {
+      stt: "02",
+      customer_name: "Trần Thị B",
+      employee_id: "NV002",
+      quantity: 15,
+      https:"//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png"
+    },
+    {
+      stt: "03",
+      customer_name: "Lê Văn C",
+      employee_id: "NV003",
+      quantity: 20,
+      https:"//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png"
+    },
+  ]
   }
   
   return (

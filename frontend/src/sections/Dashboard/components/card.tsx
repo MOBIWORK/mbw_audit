@@ -47,7 +47,7 @@ export const InfoCard =({data}: {data:any}) => {
             </p>
            <TableCustom
             columns={data.data.columns}
-            dataSource={data?.source}
+            dataSource={data.data.source}
           />
     </WrapperCard2>
 }

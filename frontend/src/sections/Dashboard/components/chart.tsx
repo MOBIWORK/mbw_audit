@@ -96,11 +96,11 @@ export const ChartCustom = ({ data }: { data: any[] }) => {
         datasets: [
             {
                 label: 'Chiến dịch',
-                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Màu nền cột
-                borderColor: 'rgba(54, 162, 235, 1)', // Màu viền cột
-                borderWidth: 1,
-                hoverBackgroundColor: 'rgba(54, 162, 235, 0.8)', // Màu nền cột khi hover
-                hoverBorderColor: 'rgba(54, 162, 235, 1)', // Màu viền cột khi hover
+                backgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột
+                borderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột
+                borderWidth: 0.5, // Giảm kích thước của các cột
+                hoverBackgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột khi hover
+                hoverBorderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột khi hover
                 data: [65, 59, 80, 81, 56, 55, 40], // Dữ liệu cột
             },
         ],
