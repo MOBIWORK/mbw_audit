@@ -7,16 +7,68 @@ import {
   SearchOutlined,
   PlusOutlined
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType, Tag, Modal, message, Button, UploadProps,DatePicker } from "antd";
+import { Overview, InfoCard, WrapperCard,InfoCardChart } from "./components/card";
+import { Input, Space, Table, TableColumnsType, Tag, Modal, message, Button, UploadProps,DatePicker,Row,Col } from "antd";
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AxiosService } from "../../services/server";
-
+import "./dashboard.css";
 const { RangePicker } = DatePicker;
 export default function Dashboard() {
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
   const navigate = useNavigate();
-
+  const [dataChienDich, setDataChienDich] = useState([]); 
+  const colTableTyLe = {
+    columns: [{
+      title: "STT",
+      dataIndex: "stt"
+    },
+    {
+      title: "Chiến dịch",
+      dataIndex: "campaign_name",
+    },
+    {
+      title: "Tỷ lệ AI chấm",
+      dataIndex: "campaign_name",
+    },
+    {
+      title: "Tỷ lệ giám sát chấm",
+      dataIndex: "campaign_name",
+    },]
+  }
+  const colTableTienDoTyLe = 
+  {
+    columns: [{
+      title: "STT",
+      dataIndex: "stt"
+    },
+    {
+      title: "Chiến dịch",
+      dataIndex: "campaign_name",
+    },
+    {
+      title: "Tỷ lệ",
+      dataIndex: "campaign_name",
+    },
+   ]
+  }
+  const colTableNhanVienChupAnh= 
+  {
+    columns: [{
+      title: "",
+      dataIndex: "stt"
+    },
+    {
+      title: "Nhân viên",
+      dataIndex: "campaign_name",
+    },
+    {
+      title: "Số lượng",
+      dataIndex: "campaign_name",
+    },
+   ]
+  }
+  
   return (
     <>
     <div style={{width:'100%',display: 'flex', justifyContent: 'space-between', alignItems:'center',textAlign:'center'}}>
@@ -28,7 +80,57 @@ export default function Dashboard() {
              onChange={(dates) => setSearchTime(dates)}/>
       </FormItemCustom>
     </div>
-      
+    <Row gutter={20} style={{marginTop:'20px'}}>
+        <Col span={8}>
+          <Overview  data={{
+            title :"Chiến dịch được thực hiện",
+            data: dataChienDich
+          }}/>
+        </Col>
+        <Col span={8}>
+        <Overview  data={{
+            title :"Khách hàng tham gia ",
+            data: dataChienDich
+          }}/>
+        </Col>
+        <Col span={8}>
+        <Overview  data={{
+            title :"Nhân viên thực hiện",
+            data: dataChienDich
+          }}/>
+        </Col>
+       
+      </Row>
+      <Row gutter={20} style={{marginTop:'20px'}}>
+        <Col span={16} >
+          <InfoCard style={{height: '450px', overflow:'auto'}} data={{
+            title :"Tỷ lệ đạt của chấm điểm trưng bày",
+            data: colTableTyLe
+          }}/>
+        </Col>
+        <Col span={8}>
+        <InfoCard style={{height: '450px', overflow:'auto'}} data={{
+            title :"Tỷ lệ tiến độ chiến dịch",
+            data: colTableTienDoTyLe
+          }}/>
+        </Col>
+       
+      </Row>
+      <Row gutter={20} style={{marginTop:'20px'}}>
+        <Col span={16}>
+          <InfoCardChart  data={{
+            title :"Chiến dịch được thực hiện",
+            data: dataChienDich
+          }}/>
+        </Col>
+        <Col span={8}>
+        <InfoCard style={{height: '450px', overflow:'auto'}} data={{
+            title :"Top nhân viên chụp nhiều ảnh",
+            data: colTableNhanVienChupAnh
+          }}/>
+        </Col>
+       
+      </Row>
     </>
   );
 }
