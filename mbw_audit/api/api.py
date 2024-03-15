@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService)
 from datetime import datetime
-from mbw_audit.api.common import (post_images, post_images_check, gen_response, base64_to_cv2, draw_detections, create_folder)
+from mbw_audit.api.common import (post_images, gen_response, base64_to_cv2, draw_detections, create_folder)
 from frappe.utils.file_manager import (
     save_file
 )
@@ -43,7 +43,7 @@ def deleteListByDoctype(*args,**kwargs):
         return {"status": "success"}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to delete Product: {0}").format(str(e))}
-@frappe.whitelist(methods=["POST"],allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
     deep_vision: DeepVision = DeepVision()
@@ -64,7 +64,7 @@ def checkImageProductExist(*args,**kwargs):
     else:
         return {"status": "error", 'message': response}
         # self.set('sum', self.sum)
-@frappe.whitelist(methods=["POST"],allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
     deep_vision: DeepVision = DeepVision()
@@ -78,7 +78,7 @@ def deleteCategory(*args,**kwargs):
     else:
         return {"status": "error"}
 
-@frappe.whitelist(methods=["POST"],allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def get_campaign_info(*args,**kwargs):
     """
     Trả về thông tin chiến dịch (campaign) dựa trên customer_code và e_name,
@@ -110,7 +110,7 @@ def get_campaign_info(*args,**kwargs):
     return gen_response(200, "ok", {"data" : valid_campaigns})
 
 
-@frappe.whitelist(methods=["POST"],allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     images_time = float(kwargs.get('images_time'))
@@ -483,7 +483,7 @@ def summary_user_by_picture():
     except Exception as e:
         return gen_response(500, "error", {"data": str(e)})
 
-@frappe.whitelist(methods=["POST"],allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def search_vgm_reports(*args,**kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
     campaign_code = kwargs.get('campaign_code')
@@ -517,7 +517,7 @@ def search_vgm_reports(*args,**kwargs):
     except Exception as e:
         return {"status": "fail", "message": _("Failed to retrieve VGM Reports: {0}").format(str(e))}
     
-@frappe.whitelist(methods=["GET"], allow_guest=True)
+@frappe.whitelist(methods=["GET"])
 def get_list_reports():
     try:
         # Lấy danh sách các bản ghi VGM_Report
@@ -555,7 +555,7 @@ def get_list_reports():
         # Trả về thông báo lỗi nếu có lỗi xảy ra
         return {"status": "fail", "message": _("Failed to retrieve VGM Reports with campaign names: {0}").format(str(e))}
 
-@frappe.whitelist(methods=["POST"], allow_guest=True)
+@frappe.whitelist(methods=["POST"])
 def import_product(*args, **kwargs):
     try:
         list_products = json.loads(kwargs.get('listproduct'))
@@ -602,8 +602,11 @@ def upload_file():
 
 @frappe.whitelist(methods="GET")
 def test_folder():
-    create_folder("Thư mục test", "Thư mục test/1")
-    return "ok"
+    path_folder = create_folder("user_1", "user_1/category_1")
+    return path_folder
+
+
+
 
 def save_tmp_file(filename, filedata):
     site_path = get_site_path()

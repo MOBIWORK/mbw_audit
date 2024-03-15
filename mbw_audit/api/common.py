@@ -57,29 +57,28 @@ def draw_detections(img, box, label):
     cv2.putText(img, label, (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
 
 def create_folder(folder_name, parent_folder=None):
+    current_path = "Home"
     if parent_folder is not None:
         folder_names = parent_folder.split("/")
-        current_path = "Home"
         for folder_name in folder_names:
-            if folder_name:
-                folder_doc = frappe.db.exists({"doctype": "File", "file_name": folder_name, "is_folder": 1})
-                if not folder_doc:
-                    print("Dòng 67 ", current_path)
-                    folder_doc = frappe.create_folder(folder_name, parent=current_path)
-                current_path = f"{current_path}/{folder_name}"
-        new_folder = frappe.get_doc({
-            "doctype": "File",
-            "is_folder": 1,
-            "folder": parent_folder or "Home",
-            "file_name": folder_name
-        })
-        new_folder.insert()
+            exist_folder = frappe.db.exists({"doctype": "File", "file_name": folder_name})
+            if exist_folder is not None:
+                current_path = exist_folder
+            else:
+                new_folder = frappe.get_doc({
+                    "doctype": "File",
+                    "is_folder": 1,
+                    "folder": current_path,
+                    "file_name": folder_name
+                })
+                new_folder.insert()
     else:
         new_folder = frappe.get_doc({
             "doctype": "File",
             "is_folder": 1,
-            "folder": parent_folder or "Home",
+            "folder": current_path,
             "file_name": folder_name
         })
         new_folder.insert()
     frappe.db.commit()
+    return current_path
