@@ -66,4 +66,15 @@
 			"date_check_out" : "1708824208",
 			"e_name" : ""
 		}
-	
+** API lấy thông tin chiến dịch, nhân viên thực hiện, khách hàng tham gia
+	Url: {{domain}}/api/method/mbw_audit.api.api.summary_overview_dashboard
+	Method: GET
+	params: start_date=1233223232&end_date=12223333 (Dạng timestamp nếu có)
+** API lấy thông tin tỷ lệ chấm đạt AI, giám sát và tiến độ
+	Url: {{domain}}/api/method/mbw_audit.api.api.summary_campaign
+	Method: GET
+	params: start_date=1233223232&end_date=12223333 (Dạng timestamp nếu có)
+** API lấy thông tin người dùng chụp nhiều ảnh
+	Url: {{domain}}/api/method/mbw_audit.api.api.summary_user_by_picture
+	Method: GET
+	params: start_date=1233223232&end_date=12223333 (Dạng timestamp nếu có)
