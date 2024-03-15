@@ -68,8 +68,8 @@ export const ChartCustom = ({ data }: { data: any[] }) => {
 
     const chartContainerStyle = {
         position: 'relative',
-        width: '100px',
-        height: '100px',
+        width: '135px',
+        height: '135px',
         padding: '10px',
     };
 
