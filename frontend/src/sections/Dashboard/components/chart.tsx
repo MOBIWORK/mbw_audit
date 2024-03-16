@@ -91,26 +91,34 @@ export const ChartCustom = ({ data }: { data: any[] }) => {
     }
   export const HorizontalBarChart = ({ data }) => {
     // Dữ liệu mẫu
-    const sampleData = {
-        labels: ['Chiến dịch 1', 'Chiến dịch 1', 'Chiến dịch 1', 'Chiến dịch 1', 'Chiến dịch 1', 'Chiến dịch 1', 'Chiến dịch 1'],
-        datasets: [
-            {
-                label: 'Chiến dịch',
-                backgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột
-                borderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột
-                borderWidth: 0.5, // Giảm kích thước của các cột
-                hoverBackgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột khi hover
-                hoverBorderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột khi hover
-                data: [65, 59, 80, 81, 56, 55, 40], // Dữ liệu cột
-            },
-        ],
-    };
-
+    let properties = Object.getOwnPropertyNames(data);
+    if(properties.length == 0 ){
+        data = {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Chiến dịch',
+                    backgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột
+                    borderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột
+                    borderWidth: 0.5, // Giảm kích thước của các cột
+                    hoverBackgroundColor: 'rgba(24, 119, 242, 1)', // Màu nền cột khi hover
+                    hoverBorderColor: 'rgba(24, 119, 242, 1)', // Màu viền cột khi hover
+                    data: [], // Dữ liệu cột
+                },
+            ],
+        };
+    }
     return (
         <div style={{ width: '100%', height: '400px' }}> {/* Đặt kích thước cho biểu đồ */}
             <Bar
-                data={sampleData}
+                data={data}
                 options={{
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
                     indexAxis: 'y', // Chuyển biểu đồ sang nằm ngang
                     maintainAspectRatio: false, // Cho phép thay đổi kích thước không tự động duy trì tỷ lệ
                     scales: {

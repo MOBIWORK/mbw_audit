@@ -79,7 +79,7 @@ export const InfoCardChart =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-            <HorizontalBarChart data={data.chartData}/>
+            <HorizontalBarChart data={data.data}/>
             
     </WrapperCard2>
 }

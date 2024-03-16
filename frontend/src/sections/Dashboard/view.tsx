@@ -29,15 +29,15 @@ import "./dashboard.css";
 const { RangePicker } = DatePicker;
 export default function Dashboard() {
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
-  const navigate = useNavigate();
-  const [dataChienDich, setDataChienDich] = useState([]);
   const [dataChienDichThucHien, setDataChienDichThucHien] = useState({});
   const [dataKhachHangThamGia, setDataKhachHangThamGia] = useState({});
   const [dataNhanVienThucHien, setDataNhanVienThucHien] = useState({});
 
   const [colTableTyLeDat, setColTableTyLeDat] = useState({});
   const [colTableTienDoTyLe, setColTableTienDoTyLe] = useState({});
-  
+  const [chienDichThucHien, setChienDichThucHien] = useState({});
+
+  const [dataNhanVienChup, setDataNhanVienChup] = useState({});
 
   const colTableTyLe = {
     columns: [
@@ -70,57 +70,8 @@ export default function Dashboard() {
         ),
       },
     ],
- 
-    // source: [
-    //   {
-    //     stt: "01",
-    //     campaign_name: "Chiến dịch 1",
-    //     tyle_ai: 30,
-    //     tyle_giamsat: 50,
-    //   },
-    //   {
-    //     stt: "02",
-    //     campaign_name: "Chiến dịch 2",
-    //     tyle_ai: 45,
-    //     tyle_giamsat: 60,
-    //   },
-    // ],
   };
-  // const colTableTienDoTyLe = {
-  //   columns: [
-  //     {
-  //       title: "STT",
-  //       dataIndex: "stt",
-  //     },
-  //     {
-  //       title: "Chiến dịch",
-  //       dataIndex: "campaign_name",
-  //     },
-  //     {
-  //       title: "Tỷ lệ",
-  //       dataIndex: "tyle",
-  //       render: (percent) => (
-  //         <Progress
-  //           percent={percent}
-  //           strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
-  //         />
-  //       ),
-  //     },
-  //   ],
-  //   source: [
-  //     {
-  //       stt: "01",
-  //       campaign_name: "Chiến dịch 1",
-  //       tyle: 30,
-  //     },
-  //     {
-  //       stt: "02",
-  //       campaign_name: "Chiến dịch 2",
-  //       tyle: 70,
-  //     },
-  //     // Thêm dữ liệu khác nếu cần
-  //   ],
-  // };
+
   const colTableNhanVienChupAnh = {
     columns: [
       {
@@ -320,100 +271,144 @@ export default function Dashboard() {
         dataIndex: "quantity",
       },
     ],
-    source: [
-      {
-        stt: "",
-        customer_name: "Nguyễn Văn A",
-        employee_id: "NV001",
-        quantity: 10,
-        https:
-          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
-      },
-      {
-        stt: "",
-        customer_name: "Trần Thị B",
-        employee_id: "NV002",
-        quantity: 15,
-        https:
-          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
-      },
-      {
-        stt: "",
-        customer_name: "Lê Văn C",
-        employee_id: "NV003",
-        quantity: 20,
-        https:
-          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
-      },
-      {
-        stt: "",
-        customer_name: "Lê Văn C",
-        employee_id: "NV003",
-        quantity: 20,
-        https:
-          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
-      },
-      {
-        stt: "",
-        customer_name: "Lê Văn C",
-        employee_id: "NV003",
-        quantity: 20,
-        https:
-          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
-      },
-    ],
+    // source: [
+    //   {
+    //     stt: "",
+    //     customer_name: "Nguyễn Văn A",
+    //     employee_id: "NV001",
+    //     quantity: 10,
+    //     https:
+    //       "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+    //   },
+    //   {
+    //     stt: "",
+    //     customer_name: "Trần Thị B",
+    //     employee_id: "NV002",
+    //     quantity: 15,
+    //     https:
+    //       "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+    //   },
+    //   {
+    //     stt: "",
+    //     customer_name: "Lê Văn C",
+    //     employee_id: "NV003",
+    //     quantity: 20,
+    //     https:
+    //       "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+    //   },
+    //   {
+    //     stt: "",
+    //     customer_name: "Lê Văn C",
+    //     employee_id: "NV003",
+    //     quantity: 20,
+    //     https:
+    //       "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+    //   },
+    //   {
+    //     stt: "",
+    //     customer_name: "Lê Văn C",
+    //     employee_id: "NV003",
+    //     quantity: 20,
+    //     https:
+    //       "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+    //   },
+    // ],
   };
   useEffect(() => {
     initDataDashboard();
-  }, []);
+  }, [searchTime]);
   const initDataDashboard = async () => {
+    let startDateTimestamp = null;
+    let endDateTimestamp = null;
+    console.log(searchTime);
+    if (searchTime && searchTime.length === 2 && searchTime[0] && searchTime[1]) {
+      console.log('1');
+        const startDate = new Date(searchTime[0]);
+        startDate.setUTCHours(0, 0, 0, 0);
+        startDateTimestamp = Math.floor(startDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
+
+        const endDate = new Date(searchTime[1]);
+        endDate.setUTCHours(23, 59, 59, 999);
+        endDateTimestamp = Math.floor(endDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
+        if (startDate >= endDate) {
+          message.error("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.");
+          return; // Dừng hàm nếu có lỗi
+      }
+    }
     let urlOverviewDashboard = `/api/method/mbw_audit.api.api.summary_overview_dashboard`;
     let urlDashboardCampaign = `/api/method/mbw_audit.api.api.summary_campaign`;
-    
-    let res = await AxiosService.get(urlOverviewDashboard);
-    let resCampaign = await AxiosService.get(urlDashboardCampaign);
-    console.log(resCampaign);
-    if(resCampaign.message =="ok"){
-      colTableTyLe['source'] = resCampaign.result.data.map((item, index) => {
+    let urlDashboardEmployeeTakePicture = `/api/method/mbw_audit.api.api.summary_user_by_picture`;
+
+   // Thêm tham số start_date và end_date nếu có
+   if (startDateTimestamp !== null && endDateTimestamp !== null) {
+    urlOverviewDashboard += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+    urlDashboardCampaign += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+    urlDashboardEmployeeTakePicture += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+}
+let res = await AxiosService.get(urlOverviewDashboard);
+let resCampaign = await AxiosService.get(urlDashboardCampaign);
+let resEmployeeTakePic = await AxiosService.get(
+  urlDashboardEmployeeTakePicture
+);
+    if (resCampaign.message == "ok") {
+      colTableTyLe["source"] = resCampaign.result.data.map((item, index) => {
         return {
-            stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
-            campaign_name: item.campaign_name,
-            tyle_ai: item.ratio_ai_evaluate, // Bạn cần tính toán tỷ lệ AI dựa trên dữ liệu của mình
-            tyle_giamsat: item.ratio_human_evaluate // Tương tự, bạn cần tính toán tỷ lệ giám sát
+          stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
+          campaign_name: item.campaign_name,
+          tyle_ai: item.ratio_ai_evaluate, // Bạn cần tính toán tỷ lệ AI dựa trên dữ liệu của mình
+          tyle_giamsat: item.ratio_human_evaluate, // Tương tự, bạn cần tính toán tỷ lệ giám sát
         };
-    });
-    let colTableTienDoTyLe = {
-      columns: [
+      });
+      let colTableTienDoTyLe = {
+        columns: [
           {
-              title: "STT",
-              dataIndex: "stt",
+            title: "STT",
+            dataIndex: "stt",
+            width: "10%",
           },
           {
-              title: "Chiến dịch",
-              dataIndex: "campaign_name",
+            title: "Chiến dịch",
+            dataIndex: "campaign_name",
+            width: "35%",
           },
           {
-              title: "Tỷ lệ",
-              dataIndex: "tyle",
-              render: (percent) => (
-                  <Progress
-                      percent={percent}
-                      strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
-                  />
-              ),
+            title: "Tỷ lệ",
+            dataIndex: "tyle",
+            width: "55%",
+            render: (percent) => (
+              <Progress
+                percent={percent}
+                strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
+              />
+            ),
           },
-      ],
-      source: resCampaign.result.data.map((item, index) => {
+        ],
+        source: resCampaign.result.data.map((item, index) => {
           return {
-              stt: ("0" + (index + 1)).slice(-2),
-              campaign_name: item.campaign_name,
-              tyle: item.processing,
+            stt: ("0" + (index + 1)).slice(-2),
+            campaign_name: item.campaign_name,
+            tyle: item.processing,
           };
-      }),
-  };
-    setColTableTyLeDat(colTableTyLe)
-    setColTableTienDoTyLe(colTableTienDoTyLe)
-      
+        }),
+      };
+      let sampleData = {
+        labels: resCampaign.result.data.map((entry) => entry.campaign_name),
+        datasets: [
+          {
+            label: "Chiến dịch",
+            backgroundColor: "rgba(24, 119, 242, 1)",
+            borderColor: "rgba(24, 119, 242, 1)",
+            borderWidth: 0.5,
+            hoverBackgroundColor: "rgba(24, 119, 242, 1)",
+            hoverBorderColor: "rgba(24, 119, 242, 1)",
+            data: resCampaign.result.data.map((entry) => entry.num_picture),
+          },
+        ],
+      };
+
+      setColTableTyLeDat(colTableTyLe);
+      setColTableTienDoTyLe(colTableTienDoTyLe);
+      setChienDichThucHien(sampleData);
     }
     if (res.message == "ok") {
       let objChienDichThucHien = {
@@ -435,7 +430,26 @@ export default function Dashboard() {
       setDataKhachHangThamGia(dataKhachHangThamGia);
       setDataNhanVienThucHien(dataNhanVienThucHien);
     }
+    if (resEmployeeTakePic.message == "ok") {
+      const sortedData = resEmployeeTakePic.result.data.sort(
+        (a, b) => b.num_picture - a.num_picture
+      );
+
+      // Chuyển đổi mảng đã sắp xếp thành định dạng mới
+      const result = sortedData.map((entry, index) => ({
+        stt: "",
+        customer_name: entry.employee_name,
+        employee_id: entry.id,
+        quantity: entry.num_picture,
+        https:
+          entry.employee_picture ||
+          "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
+      }));
+      colTableNhanVienChupAnh["source"] = result;
+      setDataNhanVienChup(colTableNhanVienChupAnh)
+    }
   };
+
   return (
     <>
       <div
@@ -509,7 +523,7 @@ export default function Dashboard() {
           <InfoCardChart
             data={{
               title: "Chiến dịch được thực hiện",
-              data: dataChienDich,
+              data: chienDichThucHien,
             }}
           />
         </Col>
@@ -517,7 +531,7 @@ export default function Dashboard() {
           <InfoCardEmploy
             data={{
               title: "Top nhân viên chụp nhiều ảnh",
-              data: colTableNhanVienChupAnh,
+              data: dataNhanVienChup,
             }}
           />
         </Col>
