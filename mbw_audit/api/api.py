@@ -43,6 +43,7 @@ def deleteListByDoctype(*args,**kwargs):
         return {"status": "success"}
     except Exception as e:
         return {'status': 'fail', 'message': _("Failed to delete Product: {0}").format(str(e))}
+
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
@@ -64,6 +65,7 @@ def checkImageProductExist(*args,**kwargs):
     else:
         return {"status": "error", 'message': response}
         # self.set('sum', self.sum)
+
 @frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
@@ -109,7 +111,6 @@ def get_campaign_info(*args,**kwargs):
             valid_campaigns.append(campaign_record)
     return gen_response(200, "ok", {"data" : valid_campaigns})
 
-
 @frappe.whitelist(methods=["POST"])
 def record_report_data(*args, **kwargs):
     date_format_with_time = '%Y/%m/%d %H:%M:%S'
@@ -145,7 +146,6 @@ def record_report_data(*args, **kwargs):
 def process_report_sku(name, report_images, category, setting_score_audit):
     try:
         products_by_category = []
-        arr_score_audit = []
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
             products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["*"])
@@ -338,12 +338,15 @@ def update_report(*args,**kwargs):
     scoring = kwargs.get('scoring')
     arr_product = kwargs.get('arr_product')
     try:
-        frappe.db.set_value('VGM_Report', name, 'scoring_human', scoring)
+        doc = frappe.get_doc('VGM_Report', name)
+        doc.scoring_human = scoring
         for product in arr_product:
-            frappe.db.set_value('VGM_ReportDetailSKU', product.get("report_sku_id"), {
-                'sum_product_human': product.get("sum_product_human"),
-                'scoring_human': product.get("scoring_human")
-            })
+            for report_sku in doc.report_sku:
+                if product.get("report_sku_id") == report_sku.get("name"):
+                    report_sku.sum_product_human = product.get("sum_product_human")
+                    report_sku.scoring_human = product.get("scoring_human")
+                    break
+        doc.save(ignore_permissions=True)
         return gen_response(200, "ok", {"data": "success"})
     except Exception as e:
         return gen_response(500, "error", {"data": str(e)})
