@@ -473,45 +473,56 @@ let resEmployeeTakePic = await AxiosService.get(
         </Form.Item>
       </div>
       <Row gutter={20} style={{ marginTop: "20px" }}>
-        <Col span={4}>
-          <Overview
-            data={{
-              title: "Tổng chiến dịch viếng thăm",
-              data: dataChienDichThucHien,
-            }}
-          />
-        </Col>
-        <Col span={4}>
-          <Overview
-            data={{
-              title: "Số báo cáo AI chấm đạt",
-              data: dataKhachHangThamGia,
-            }}
-          />
-        </Col>
-        <Col span={4}>
-          <Overview
-            data={{
-              title: "Số báo cáo giám sát chấm đạt",
-              data: dataNhanVienThucHien,
-            }}
-          />
-        </Col>
-        <Col span={4}>
-          <Overview
-            data={{
-              title: "Tổng khách hàng tham gia",
-              data: dataChienDichThucHien,
-            }}
-          />
-        </Col>
-        <Col span={4}>
-          <Overview
-            data={{
-              title: "Tổng nhân viên thực hiện",
-              data: dataChienDichThucHien,
-            }}
-          />
+        <Col span={24}>
+          <Row gutter={20}>
+            <Col span={5} className="card-container">
+              <Overview
+                data={{
+                  title: "Tổng chiến dịch viếng thăm",
+                  data: 10,
+                  show_ratio: false
+                }}
+              />
+            </Col>
+            <Col span={5} className="card-container">
+              <Overview
+                data={{
+                  title: "Số báo cáo AI chấm đạt",
+                  data: 30,
+                  show_ratio: true,
+                  ratio: 50
+                }}
+              />
+            </Col>
+            <Col span={5} className="card-container">
+              <Overview
+                data={{
+                  title: "Số báo cáo giám sát chấm đạt",
+                  data: 40,
+                  show_ratio: true,
+                  ratio: 70
+                }}
+              />
+            </Col>
+            <Col span={5} className="card-container">
+              <Overview
+                data={{
+                  title: "Tổng khách hàng tham gia",
+                  data: 20,
+                  show_ratio: false
+                }}
+              />
+            </Col>
+            <Col span={4} className="card-container">
+              <Overview
+                data={{
+                  title: "Tổng nhân viên thực hiện",
+                  data: 10,
+                  show_ratio: false
+                }}
+              />
+            </Col>
+          </Row>
         </Col>
       </Row>
       <Row gutter={20} style={{ marginTop: "20px" }}>
@@ -521,6 +532,7 @@ let resEmployeeTakePic = await AxiosService.get(
             data={{
               title: "Tỷ lệ chấm điểm đạt theo từng chiến dịch",
               data: colTableTyLeDat,
+              height: 450
             }}
           />
         </Col>
@@ -530,6 +542,7 @@ let resEmployeeTakePic = await AxiosService.get(
             data={{
               title: "Tỷ lệ tiến độ chiến dịch theo cửa hàng viếng thăm",
               data: colTableTienDoTyLe,
+              height: 450
             }}
           />
         </Col>

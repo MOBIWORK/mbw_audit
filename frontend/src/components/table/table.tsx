@@ -35,8 +35,6 @@ export const TableCustom = styled(Table)`
 
     .ant-table-tbody {
       .ant-table-row {
-        cursor: pointer;
-
         .ant-table-cell {
           user-select: none;
         }

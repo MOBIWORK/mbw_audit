@@ -5,9 +5,10 @@ import { MenuCustom } from "../../components/menu-item/menu-item";
 
 export default function MenuLeft() {
   const [current, setCurrent] = useState(
-    localStorage.getItem("selectedKey") || "1"
+    localStorage.getItem("selectedKey") || "dashboard"
   );
   const onClick: MenuProps["onClick"] = (e) => {
+    console.log(e);
     setCurrent(e.key);
     localStorage.setItem("selectedKey", e.key);
   };

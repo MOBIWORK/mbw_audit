@@ -351,7 +351,7 @@ export default function Product_SKU() {
     {
       title: "Mã Sản phẩm",
       dataIndex: "product_code",
-      render: (text: string) => <div>{text}</div>,
+      render: (text: string, record: any) => <a href="javascript:;" onClick={() => handleClickEditProduct(record)}>{text}</a>,
     },
     {
       title: "Tên sản phẩm",

@@ -40,7 +40,10 @@ export default function Campaign() {
   const columnCampaigns: TableColumnsType<TypeCampaign> = [
     {
       title: "Tên chiến dịch",
-      dataIndex: "campaign_name"
+      dataIndex: "campaign_name",
+      render: (_, record) => (
+        <a href="javascript:;" onClick={() => handleEditCampaign(record)}>{record.campaign_name}</a>
+      )
     },
     {
       title: "Trạng thái",

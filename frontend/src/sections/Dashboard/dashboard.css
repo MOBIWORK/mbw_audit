@@ -5,3 +5,7 @@
     vertical-align: middle;
    
 }
+
+.card-container {
+    display: flex;
+  }
