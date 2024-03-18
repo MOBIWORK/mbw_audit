@@ -1,6 +1,6 @@
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 
-import { Flex, Progress, Avatar } from "antd";
+import { Flex, Progress, Avatar,Form } from "antd";
 import {
   Overview,
   InfoCard,
@@ -462,7 +462,7 @@ let resEmployeeTakePic = await AxiosService.get(
         }}
       >
         <HeaderPage title="Dashboard" />
-        <FormItemCustom
+        <Form.Item
           className="border-none mr-4"
           label="Thời gian thực hiện"
         >
@@ -470,7 +470,7 @@ let resEmployeeTakePic = await AxiosService.get(
             value={searchTime}
             onChange={(dates) => setSearchTime(dates)}
           />
-        </FormItemCustom>
+        </Form.Item>
       </div>
       <Row gutter={20} style={{ marginTop: "20px" }}>
         <Col span={8}>
