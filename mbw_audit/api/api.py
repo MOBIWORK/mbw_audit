@@ -261,7 +261,8 @@ def get_reports_by_filter():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
     employee_id = frappe.form_dict.get('employee_id')
-    status_scoring = frappe.form_dict.get('status_scoring')
+    status_scoring_ai = frappe.form_dict.get('status_scoring_ai')
+    status_scoring_human = frappe.form_dict.get('status_scoring_human')
     try:
         filters = {}
         if campaign_code is not None:
@@ -275,8 +276,10 @@ def get_reports_by_filter():
             filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
         if employee_id is not None:
             filters["employee_code"] = employee_id
-        if status_scoring is not None:
-            filters["scoring_machine"] = status_scoring
+        if status_scoring_ai is not None:
+            filters["scoring_machine"] = status_scoring_ai
+        if status_scoring_human is not None:
+            filters["scoring_human"] = status_scoring_human
         report_sources = frappe.get_all("VGM_Report",
             filters=filters,
             fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]

@@ -48,6 +48,15 @@ export default function ReportDetail() {
   const [searchCampaign, setSearchCampaign] = useState('all');
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
   const [searchEmployee, setSearchEmployee] = useState('all'); // Mặc định là 'all'
+  const [searchAIEvalue, setSearchAIEvalue] = useState('all');
+  const [searchHumanEvalue, setSearchHumanEvalue] = useState('all');
+  const [arrSourceEvalue, setArrSourceEvalue] = useState<any[]>(
+    [
+      {'label': "Đạt", 'value': 1},
+      {'label': "Không đạt", 'value': 0}
+    ]
+  );
+  
 
   const navigate = useNavigate();
   const [dataReports, setDataReports] = useState<any[]>([]);
@@ -165,6 +174,15 @@ const fetchDataReport = async () => {
     if(urlReports.includes("?")) urlReports = `${urlReports}&employee_id=${searchEmployee}`;
     else urlReports = `${urlReports}?employee_id=${searchEmployee}`;
   }
+  if(searchAIEvalue != null && searchAIEvalue != "all"){
+    if(urlReports.includes("?")) urlReports = `${urlReports}&status_scoring_ai=${searchAIEvalue}`;
+    else urlReports = `${urlReports}?status_scoring_ai=${searchAIEvalue}`;
+    console.log(urlReports);
+  }
+  if(searchHumanEvalue != null && searchHumanEvalue != "all"){
+    if(urlReports.includes("?")) urlReports = `${urlReports}&status_scoring_human=${searchHumanEvalue}`;
+    else urlReports = `${urlReports}?status_scoring_human=${searchHumanEvalue}`;
+  }
   let res = await AxiosService.get(urlReports);
   if(res != null && res.message == "ok" && res.result != null && res.result.data != null){
     let dataSources = res.result.data.map((item: DataTypeReport, index: number) => {
@@ -178,7 +196,6 @@ const fetchDataReport = async () => {
       }
     })
     setDataReports(dataSources);
-    console.log(dataSources);
   }else{
     setDataReports([]);
   }
@@ -209,7 +226,7 @@ const initDataCampaigns = async () => {
 
   useEffect(() => {
     fetchDataReport();
-  }, [searchCampaign, searchTime, searchEmployee]);
+  }, [searchCampaign, searchTime, searchEmployee, searchAIEvalue, searchHumanEvalue]);
   
   const exportToExcel = () => {
     onExportDataToExcel(dataReports, "Báo cáo chấm điểm trưng bày");
@@ -301,7 +318,7 @@ const initDataCampaigns = async () => {
         <div className="flex p-4" style={{ alignItems: 'flex-end' }}>
         <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '15px' }}>
           <label style={{paddingBottom: '5px'}}>Chiến dịch:</label>
-          <Select className="w-[200px] h-[36px]" value={searchCampaign}
+          <Select className="w-[150px] h-[36px]" value={searchCampaign}
                     onChange={(value) => setSearchCampaign(value)} defaultValue="all">
             <Select.Option value="all">Tất cả</Select.Option>
             {campaignSources.map(campaign => (
@@ -315,18 +332,42 @@ const initDataCampaigns = async () => {
         <RangePicker  value={searchTime}
              onChange={(dates) => setSearchTime(dates)}/>
       </FormItemCustom>
-  <div style={{ display: 'flex', flexDirection: 'column' }}>
-  <label style={{paddingBottom: '5px'}}>Nhân viên:</label>
-  <Select className="w-[200px] h-[36px]" value={searchEmployee}
-            onChange={(value) => setSearchEmployee(value)} defaultValue="all">
-    <Select.Option value="all">Tất cả</Select.Option>
-    {dataEmployee.map(employee => (
-      <Select.Option key={employee.name} value={employee.name}>
-        {employee.employee_name}
-      </Select.Option>
-    ))}
-  </Select>
-</div>
+  <div style={{ display: 'flex', flexDirection: 'column' }} className="mr-4">
+    <label style={{paddingBottom: '5px'}}>Nhân viên:</label>
+    <Select className="w-[150px] h-[36px]" value={searchEmployee}
+              onChange={(value) => setSearchEmployee(value)} defaultValue="all">
+      <Select.Option value="all">Tất cả</Select.Option>
+      {dataEmployee.map(employee => (
+        <Select.Option key={employee.name} value={employee.name}>
+          {employee.employee_name}
+        </Select.Option>
+      ))}
+    </Select>
+  </div>
+  <div style={{ display: 'flex', flexDirection: 'column' }} className="mr-4">
+    <label style={{paddingBottom: '5px'}}>Điểm AI chấm:</label>
+    <Select className="w-[150px] h-[36px]" value={searchAIEvalue}
+              onChange={(value) => setSearchAIEvalue(value)} defaultValue="all">
+      <Select.Option value="all">Tất cả</Select.Option>
+      {arrSourceEvalue.map(source => (
+        <Select.Option key={source.value} value={source.value}>
+          {source.label}
+        </Select.Option>
+      ))}
+    </Select>
+  </div>
+  <div style={{ display: 'flex', flexDirection: 'column' }} className="mr-4">
+    <label style={{paddingBottom: '5px'}}>Điểm giám sát chấm:</label>
+    <Select className="w-[150px] h-[36px]" value={searchHumanEvalue}
+              onChange={(value) => setSearchHumanEvalue(value)} defaultValue="all">
+      <Select.Option value="all">Tất cả</Select.Option>
+      {arrSourceEvalue.map(source => (
+        <Select.Option key={source.value} value={source.value}>
+          {source.label}
+        </Select.Option>
+      ))}
+    </Select>
+  </div>
 
     </div>
         <div>
