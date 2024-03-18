@@ -97,7 +97,7 @@ export default function  ReportView() {
         title={renderTitle()}
         icon={
           <p
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/reports")}
             className="mr-2 cursor-pointer"
           >
             <LeftOutlined />

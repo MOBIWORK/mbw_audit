@@ -53,7 +53,7 @@ def checkImageProductExist(*args,**kwargs):
     collection_name = kwargs.get('collection_name')
     link_image = kwargs.get('linkimages')
     # url_images = post_images_check(image_base64)
-    image_path = [base_url + link_image]
+    image_path = [link_image]
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)

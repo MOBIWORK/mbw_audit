@@ -146,6 +146,9 @@ export default function Product_SKU() {
   const propUploadImportFileExcel: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
+    onRemove: () => {
+      setFileListImport([]);
+    },
     beforeUpload: async (file) => {
       try {
         const fileName = file.name.toLowerCase();
@@ -208,7 +211,6 @@ export default function Product_SKU() {
     },
   };
   const propUploadAddProducts: UploadProps = {
-    onRemove: (file) => {},
     beforeUpload: async (file) => {
       const isJpgOrPng =
         file.type === "image/jpeg" || file.type === "image/png";
@@ -292,6 +294,9 @@ export default function Product_SKU() {
     },
   };
   const propUploadCheckProducts: UploadProps = {
+    onRemove: () => {
+      setFileListImage([]);
+    },
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     accept: "image/png, image/jpeg",
     beforeUpload: async (file) => {
@@ -553,6 +558,7 @@ export default function Product_SKU() {
     );
     if (isCategoryExists) {
       message.error("Danh mục đã tồn tại.");
+      setLoadingAddCategory(false);
       return;
     }
 
@@ -585,7 +591,6 @@ export default function Product_SKU() {
         setLoadingAddCategory(false);
       }
     } catch (error) {
-      console.error("Lỗi khi thêm mới danh mục:", error);
       message.error("Đã xảy ra lỗi khi thêm mới danh mục.");
     }
   };
@@ -649,6 +654,7 @@ export default function Product_SKU() {
   const showModalAddProduct = () => {
     formAddProduct.resetFields();
     setFileList([]);
+    setLoadingAddProduct(false)
     let barcode = document.getElementById("barcode");
     if (barcode) {
       barcode.innerHTML = "";
@@ -671,9 +677,9 @@ export default function Product_SKU() {
     }
     let arrImages = [];
     for (let i = 0; i < fileUploadAddProduct.length; i++) {
-      arrImages.push(fileUploadAddProduct[i].file_url);
+      arrImages.push(fileUploadAddProduct[i]);
     }
-
+    
     // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
     if (!objProduct.product_name || arrImages.length === 0) {
       // Hiển thị thông báo lỗi
@@ -682,7 +688,6 @@ export default function Product_SKU() {
       );
       return;
     }
-
     let urlAddProduct = "/api/resource/VGM_Product";
     let objProductCreate = {
       barcode: objProduct.barcode_product,
@@ -886,11 +891,12 @@ export default function Product_SKU() {
   const handleOkCheckProduct = async () => {
     setLoadingCheckProduct(true);
     let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
+    console.log(fileUploadCheckProduct);
     let objCheckProduct = {
       collection_name: categorySelected.name,
       linkimages:
         fileUploadCheckProduct.length > 0
-          ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url
+          ? fileUploadCheckProduct[fileUploadCheckProduct.length -1]
           : "",
     };
     let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
@@ -934,7 +940,7 @@ export default function Product_SKU() {
 
     setUrlImageCheckProductResult(
       fileUploadCheckProduct.length > 0
-        ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1].file_url
+        ? fileUploadCheckProduct[fileUploadCheckProduct.length-1]
         : ""
     ); //import.meta.env.VITE_BASE_URL+
     setLoadingCheckProduct(false);
