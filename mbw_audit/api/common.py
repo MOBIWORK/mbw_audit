@@ -11,6 +11,8 @@ from frappe.utils.file_manager import (
 
 import cv2
 import numpy as np
+from mbw_sfc_integrations.sfc_integrations.utils import create_sfc_log
+from mbw_audit.utils import appconst
 
 BASE_URL = frappe.utils.get_request_site_address()
 
@@ -55,6 +57,20 @@ def draw_detections(img, box, label):
     cv2.rectangle(img, (label_x, label_y - label_height), (label_x + label_width, label_y + label_height), (255,255,255),
                 cv2.FILLED)
     cv2.putText(img, label, (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+
+def process_request(data, event):
+
+	# create log
+	log = create_sfc_log(method=appconst.EVENT_MAPPER[event], request_data=data)
+
+	# enqueue backround job
+	frappe.enqueue(
+		method=appconst.EVENT_MAPPER[event],
+		queue="short",
+		timeout=300,
+		is_async=True,
+		**{"payload": data, "request_id": log.name},
+	)
 
 def create_folder(folder_name, parent_folder=None):
     current_path = "Home"

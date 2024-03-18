@@ -20,16 +20,7 @@ export const Overview =({data}: {data:any}) => {
     return <WrapperCard>
        
          <div className="text-center" style={{display:'flex'}}>
-         <ChartCustom data={data}/>
-            <p className="text-base font-medium" style={{
-      fontSize: '15px',
-      fontWeight: 600,
-      lineHeight: '21px',
-      letterSpacing: '0em',
-      textAlign: 'left',color:'rgba(33, 43, 54, 1)',alignSelf:'center'
-    }}>
-            {data.title}
-            </p>
+            
             
         </div>
     </WrapperCard>

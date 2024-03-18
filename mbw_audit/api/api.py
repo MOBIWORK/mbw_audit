@@ -137,8 +137,10 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
+        #process_request({'name': doc.name, 'report_images': images, 'category': category, 'setting_score_audit': setting_score_audit}, "process_report_sku")
         #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
         process_report_sku(doc.name, images, category, setting_score_audit)
+
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
