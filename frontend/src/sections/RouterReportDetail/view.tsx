@@ -13,6 +13,8 @@ import { Input, TableColumnsType, DatePicker, Select } from "antd";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
+import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+
 interface DataTypeReport {
   key: React.Key;
   stt: string;
@@ -56,8 +58,92 @@ export default function ReportDetail() {
       {'label': "Không đạt", 'value': 0}
     ]
   );
-  
+  const [isGroupByCampaign, setIsGroupByCampaign] = useState(false);
+  const [columnsReportByCampaign, setColumnsReportByCampaign] = useState([
+    {
+      title: "STT",
+      dataIndex: "stt",
+      fixed: 'left',
+      width: 100
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "customer_name",
+      fixed: 'left'
+    },
+    {
+      title: "Tên chiến dịch",
+      dataIndex: "campaign_name",
+      fixed: 'left'
+    },
+    {
+      title: "Nhân viên thực hiện",
+      dataIndex: "employee_name"
+    },
+    {
+      title: "Số lượng danh mục",
+      dataIndex: "quantity_cate",
+    },
+    {
+      title: "Số lượng sản phẩm AI đếm",
+      children: []
+    },
+    {
+      title: "Số lượng sản phẩm giám sát đếm",
+      children: []
+    },
+    {
+      title: "Ảnh gian hàng",
+      dataIndex: "images",
+      render: (item) => (
+        <>
+          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
+        </>
+      )
+    },
+    {
+      title: "Ảnh gian hàng AI",
+      dataIndex: "images",
+      render: (item) => (
+        <>
+          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
+        </>
+      )
+    },
+    {
+      title: "Thời gian thực hiện",
+      dataIndex: "images_time",
+    },
+    {
+      title: "Điểm trưng bày AI chấm",
+      dataIndex: "scoring_machine",
+      render: (scoring_machine: number) => (
+        <>
+          {scoring_machine === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+          {scoring_machine === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+        </>
+      )
+    },
+    {
+      title: "Điểm trưng bày giám sát chấm",
+      dataIndex: "scoring_human",
+      render: (scoring_human: number) => (
+        <>
+          {scoring_human === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
+          {scoring_human === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
+        </>
+      )
+    }
+  ]);
+  const [dataReportsByCampaign, setDataReportsByCampaign] = useState([]);
 
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const campaign = params.get('campaign');
+  console.log(campaign);
+  // if(campaign != null && campaign != "" && campaign != "all"){
+  //   setSearchCampaign(campaign);
+  // }
   const navigate = useNavigate();
   const [dataReports, setDataReports] = useState<any[]>([]);
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
@@ -82,18 +168,21 @@ export default function ReportDetail() {
     {
       title: "STT",
       dataIndex: "stt",
+      fixed: 'left'
     },
     {
       title: "Khách hàng",
       dataIndex: "customer_name",
+      fixed: 'left'
     },
     {
       title: "Tên chiến dịch",
       dataIndex: "campaign_name",
+      fixed: 'left'
     },
     {
       title: "Nhân viên thực hiện",
-      dataIndex: "employee_name",
+      dataIndex: "employee_name"
     },
     {
       title: "Số lượng danh mục",
@@ -142,6 +231,8 @@ export default function ReportDetail() {
       )
     }
   ];
+
+
 
   const expandedColumns = [
     // { title: "STT", dataIndex: "stt" },
@@ -195,9 +286,54 @@ const fetchDataReport = async () => {
         quantity_cate: quantity_cate
       }
     })
-    setDataReports(dataSources);
+    if(!isGroupByCampaign){
+      setDataReports(dataSources);
+    } else{
+      let isRenderHeader = false;
+      let arrChildColsProductAI = [];
+      let arrChildColsProductHuman = [];
+      for(let j = 0; j < dataSources.length; j++){
+        for(let i = 0; i < dataSources[j].info_products_ai.length; i++){
+          if(!isRenderHeader){
+            let objColProductAI = {
+              'title': dataSources[j].info_products_ai[i].product_name,
+              'dataIndex': `${dataSources[j].info_products_ai[i].product_name}_ai`,
+              'key': `${dataSources[j].info_products_ai[i].product_name}_ai`,
+              'width': 100
+            }
+            let objColProductHuman = {
+              'title': dataSources[j].info_products_ai[i].product_name,
+              'dataIndex': `${dataSources[j].info_products_ai[i].product_name}_human`,
+              'key': `${dataSources[j].info_products_ai[i].product_name}_human`,
+              'width': 100
+            }
+            arrChildColsProductAI.push(objColProductAI);
+            arrChildColsProductHuman.push(objColProductHuman);
+          }
+          dataSources[j][`${dataSources[j].info_products_ai[i].product_name}_ai`] = dataSources[j].info_products_ai[i].sum;
+          dataSources[j][`${dataSources[j].info_products_human[i].product_name}_human`] = dataSources[j].info_products_human[i].sum;
+        }
+        if(arrChildColsProductAI.length > 0) isRenderHeader = true;
+      }
+      setColumnsReportByCampaign(preValue => {
+        preValue[5].children = arrChildColsProductAI;
+        preValue[6].children = arrChildColsProductHuman;
+        return preValue;
+      })
+      setDataReportsByCampaign(dataSources);
+      
+    }
   }else{
-    setDataReports([]);
+    if(isGroupByCampaign){
+      setColumnsReportByCampaign(preValue => {
+        preValue[5].children = [];
+        preValue[6].children = [];
+        return preValue;
+      })
+      setDataReportsByCampaign([]);
+    }else{
+      setDataReports([]);
+    }
   }
 };
 
@@ -299,6 +435,15 @@ const initDataCampaigns = async () => {
     FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
   }
 
+  const onChangeCampaign = (val) => {
+    setSearchCampaign(val);
+    if(val == "all") {
+      setIsGroupByCampaign(false);
+    }else{
+      setIsGroupByCampaign(true);
+    }
+  }
+
   return (
     <>
       <HeaderPage
@@ -319,7 +464,7 @@ const initDataCampaigns = async () => {
         <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '15px' }}>
           <label style={{paddingBottom: '5px'}}>Chiến dịch:</label>
           <Select className="w-[150px] h-[36px]" value={searchCampaign}
-                    onChange={(value) => setSearchCampaign(value)} defaultValue="all">
+                    onChange={(value) => onChangeCampaign(value)} defaultValue="all">
             <Select.Option value="all">Tất cả</Select.Option>
             {campaignSources.map(campaign => (
               <Select.Option key={campaign.name} value={campaign.name}>
@@ -371,27 +516,44 @@ const initDataCampaigns = async () => {
 
     </div>
         <div>
-          <TableCustom
-            columns={columns}
-            dataSource={dataReports}
-            onRow={(record, rowIndex) => {
-              return {
-                onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
-              };
-            }}
-            rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
-            expandable={{
-              expandedRowRender: (record, index) => (
-                <div style={{ margin: 5 }}>
-                  <TableCustom
-                      columns={expandedColumns}
-                      dataSource={record.detail_skus}
-                      pagination={false}
-                  />
-                </div>
-              )
-          }}
-          />
+          {
+            isGroupByCampaign? (
+              <TableCustom
+                columns={columnsReportByCampaign}
+                dataSource={dataReportsByCampaign}
+                scroll={{ y: 540, x: 2000 }}
+                onRow={(record, rowIndex) => {
+                  return {
+                    onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
+                  };
+                }}
+                rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
+              />
+            ) : (
+              <TableCustom
+                columns={columns}
+                dataSource={dataReports}
+                scroll={{ y: 540, x: 1300 }}
+                onRow={(record, rowIndex) => {
+                  return {
+                    onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
+                  };
+                }}
+                rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
+                expandable={{
+                  expandedRowRender: (record, index) => (
+                    <div style={{ margin: 5 }}>
+                      <TableCustom
+                          columns={expandedColumns}
+                          dataSource={record.detail_skus}
+                          pagination={false}
+                      />
+                    </div>
+                  )
+                }}
+              />
+            )
+          }
         </div>
       </div>
     </>

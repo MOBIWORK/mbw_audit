@@ -21,8 +21,9 @@ from mbw_audit.utils import appconst
 
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
-def deleteListByDoctype(*args,**kwargs): 
-    deep_vision: DeepVision = DeepVision()
+def deleteListByDoctype(*args,**kwargs):
+    vectordb_dir = frappe.get_site_path()
+    deep_vision: DeepVision = DeepVision(vectordb_dir)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     try:
@@ -47,7 +48,8 @@ def deleteListByDoctype(*args,**kwargs):
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args,**kwargs):
-    deep_vision: DeepVision = DeepVision()
+    vectordb_dir = frappe.get_site_path()
+    deep_vision: DeepVision = DeepVision(vectordb_dir)
     recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
     base_url = frappe.utils.get_request_site_address()
     collection_name = kwargs.get('collection_name')
@@ -69,7 +71,8 @@ def checkImageProductExist(*args,**kwargs):
 @frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
-    deep_vision: DeepVision = DeepVision()
+    vectordb_dir = frappe.get_site_path()
+    deep_vision: DeepVision = DeepVision(vectordb_dir)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     collection_name = kwargs.get('collection_name')
@@ -244,13 +247,15 @@ def render_image_ai(verbose):
     return arr_image_ai
 
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
-    deep_vision: DeepVision = DeepVision()
+    vectordb_dir = frappe.get_site_path()
+    deep_vision: DeepVision = DeepVision(vectordb_dir)
     on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
     return result
 
 def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
-    deep_vision: DeepVision = DeepVision()
+    vectordb_dir = frappe.get_site_path()
+    deep_vision: DeepVision = DeepVision(vectordb_dir)
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
     return result

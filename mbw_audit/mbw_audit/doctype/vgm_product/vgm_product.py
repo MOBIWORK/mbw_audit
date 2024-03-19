@@ -27,7 +27,8 @@ class VGM_Product(Document):
             # Kiểm tra và thêm sản phẩm
             self.check_and_add_product()
     def update_product(self):
-        deep_vision: DeepVision = DeepVision()
+        vectordb_dir = frappe.get_site_path()
+        deep_vision: DeepVision = DeepVision(vectordb_dir)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
         custom_field = json.loads(self.get('custom_field'))
@@ -56,7 +57,8 @@ class VGM_Product(Document):
                 
     def check_and_add_product(self):
         # Sử dụng self để truy cập trường product_name
-        deep_vision: DeepVision = DeepVision()
+        vectordb_dir = frappe.get_site_path()
+        deep_vision: DeepVision = DeepVision(vectordb_dir)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         product_name = self.product_name
         json_string = self.images

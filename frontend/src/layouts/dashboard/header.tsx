@@ -5,7 +5,7 @@ import {} from "frappe-react-sdk";
 import { useFrappeAuth } from "frappe-react-sdk";
 
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/react.svg";
 import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 
@@ -60,7 +60,7 @@ export default function Header() {
     <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
       <Row className="justify-between max-w-full w-[80%] mx-auto">
         <Col>
-          <Link to="/" style={{paddingTop: "15px"}}>
+          <Link to="/">
             <img src={logo} className="object-contain w-[32px] h-[32px]" />
           </Link>
         </Col>
