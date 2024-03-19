@@ -4,11 +4,13 @@ import { Downicon, Upicon } from "./icons";
 import { ChartCustom,HorizontalBarChart } from "./chart";
 import { TableCustom } from "../../../components";
 
-export const WrapperCard = ({children,type="card"}: {children: ReactNode | string,type?: "map" | "card"}) => {
-    return <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden ",type=="card" && "p-4")} style={{backgroundColor:'#FBFBFB'}}>
-    {children}
-    </div>
-}
+export const WrapperCard = ({ children, type = "card" }: { children: ReactNode | string, type?: "map" | "card" }) => {
+    return (
+      <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden", type == "card" && "p-4")} style={{ backgroundColor: '#FBFBFB', height: '100%' }}>
+        {children}
+      </div>
+    );
+  }
 export const WrapperCard2 = ({children,type="card"}: {children: ReactNode | string,type?: "map" | "card"}) => {
     return <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden ",type=="card")}>
     {children}
@@ -26,7 +28,7 @@ export const Overview =({data}: {data:any}) => {
         <span style={{ fontWeight: '400',fontSize:'1rem',lineHeight:'1.5rem' }}>{data.title}</span>
     </div>
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-    <span className="text-4xl font-medium flex items-center justify-center p-1">{data.data}</span>
+    <span className="text-[20px]  flex items-center justify-center p-1" style={{ fontWeight: 'bold' }}>{data.data}</span>
     {data.show_ratio && (
         <span className="text-[14px] flex items-center justify-center py-2" style={{ marginTop: '5px' }}> 
             <span className="text-[16px]" style={{ color: data.ratio >= 50 ? '#01B3A3' : 'rgba(255, 86, 48, 1)', marginRight: '5px', fontWeight: "bold" }}>{data.ratio}%</span>

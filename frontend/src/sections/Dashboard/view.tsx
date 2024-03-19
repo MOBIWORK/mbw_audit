@@ -478,17 +478,17 @@ let resEmployeeTakePic = await AxiosService.get(
           />
         </Form.Item>
       </div>
-      <Row gutter={8} justify="space-evenly" style={{ marginTop: "20px" }}>
-  <Col span={4} className="card-container">
+      <Row gutter={10} style={{ marginTop: "20px" }}>
+  <Col flex={1} className="card-container">
     <Overview
       data={{
-        title: "Tổng chiến dịch viếng thăm",
+        title: "Tổng số chiến dịch đã viếng thăm",
         data: 10,
         show_ratio: false
       }}
     />
   </Col>
-  <Col span={4} className="card-container">
+  <Col flex={1} className="card-container">
     <Overview
       data={{
         title: "Số báo cáo AI chấm đạt",
@@ -498,7 +498,7 @@ let resEmployeeTakePic = await AxiosService.get(
       }}
     />
   </Col>
-  <Col span={4} className="card-container">
+  <Col flex={1} className="card-container">
     <Overview
       data={{
         title: "Số báo cáo giám sát chấm đạt",
@@ -508,7 +508,7 @@ let resEmployeeTakePic = await AxiosService.get(
       }}
     />
   </Col>
-  <Col span={4} className="card-container">
+  <Col flex={1} className="card-container">
     <Overview
       data={{
         title: "Tổng khách hàng tham gia",
@@ -517,7 +517,7 @@ let resEmployeeTakePic = await AxiosService.get(
       }}
     />
   </Col>
-  <Col span={4} className="card-container">
+  <Col flex={1} className="card-container">
     <Overview
       data={{
         title: "Tổng nhân viên thực hiện",
@@ -541,7 +541,7 @@ let resEmployeeTakePic = await AxiosService.get(
         <Col span={8} style={{ minHeight: '450px' }}>
           <InfoCard
             data={{
-              title: "Tỷ lệ tiến độ chiến dịch theo cửa hàng viếng thăm",
+              title: "Tỷ lệ viếng thăm khách hàng theo chiến dịch",
               data: colTableTienDoTyLe,
               height: 450
             }}
@@ -552,7 +552,7 @@ let resEmployeeTakePic = await AxiosService.get(
         <Col span={16}>
           <InfoCardChart
             data={{
-              title: "Số lượng ảnh theo chiến dịch thực hiện",
+              title: "Số lượng ảnh chụp theo chiến dịch",
               data: chienDichThucHien,
             }}
           />
@@ -560,7 +560,7 @@ let resEmployeeTakePic = await AxiosService.get(
         <Col span={8}>
           <InfoCardEmploy
             data={{
-              title: "Top nhân viên chụp nhiều ảnh",
+              title: "Danh sách nhân viên chụp ảnh nhiều nhất",
               data: dataNhanVienChup,
             }}
           />
