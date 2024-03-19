@@ -6,7 +6,7 @@ import { TableCustom } from "../../../components";
 
 export const WrapperCard = ({ children, type = "card" }: { children: ReactNode | string, type?: "map" | "card" }) => {
     return (
-      <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden", type == "card" && "p-4")} style={{ backgroundColor: '#FBFBFB', height: '100%' }}>
+      <div className={classNames("border border-solid border-[#DFE3E8] rounded-2xl overflow-hidden", type == "card" && "p-4")} style={{ backgroundColor: '#FBFBFB', height: '100%',width:'100%' }}>
         {children}
       </div>
     );

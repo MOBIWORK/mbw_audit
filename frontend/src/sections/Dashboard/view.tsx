@@ -29,9 +29,13 @@ import "./dashboard.css";
 const { RangePicker } = DatePicker;
 export default function Dashboard() {
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
-  const [dataChienDichThucHien, setDataChienDichThucHien] = useState({});
-  const [dataKhachHangThamGia, setDataKhachHangThamGia] = useState({});
+  const [dataChienDichViengTham, setDataChienDichViengTham] = useState({});
+  const [dataBaoCaoAI, setDataBaoCaoAI] = useState({});
+  const [dataGiamSat, setDataGiamSat] = useState({});
+  const [dataKhachHangThamgia, setDataKhachHangThamgia] = useState({});
   const [dataNhanVienThucHien, setDataNhanVienThucHien] = useState({});
+
+
 
   const [colTableTyLeDat, setColTableTyLeDat] = useState({});
   const [colTableTienDoTyLe, setColTableTienDoTyLe] = useState({});
@@ -417,25 +421,48 @@ let resEmployeeTakePic = await AxiosService.get(
       setChienDichThucHien(sampleData);
     }
     if (res.message == "ok") {
-      let objChienDichThucHien = {
-        color: "rgba(24, 119, 242, 1)",
-        tong: res.result.data.campaign_all,
-        tyle: res.result.data.campaign_start,
-      };
-      let dataKhachHangThamGia = {
-        color: "rgba(34, 197, 94, 1)",
-        tong: res.result.data.customer_all,
-        tyle: res.result.data.customer,
-      };
-      let dataNhanVienThucHien = {
-        color: "rgba(142, 51, 255, 1)",
-        tong: res.result.data.employee_all,
-        tyle: res.result.data.employee,
-      };
-      setDataChienDichThucHien(objChienDichThucHien);
-      setDataKhachHangThamGia(dataKhachHangThamGia);
-      setDataNhanVienThucHien(dataNhanVienThucHien);
+      const campaign_start = res.result.data.campaign_start;
+      const report_pass_ai = res.result.data.report_pass_ai;
+      const report_pass_human = res.result.data.report_pass_human;
+      const num_reports = res.result.data.num_reports;
+      const customer = res.result.data.customer;
+      const employee = res.result.data.employee;
+    
+      setDataChienDichViengTham({
+        title: "Tổng số chiến dịch đã viếng thăm",
+        data: campaign_start,
+        show_ratio: false
+      });
+    
+      setDataBaoCaoAI({
+        title: "Số báo cáo AI chấm đạt",
+        data: report_pass_ai,
+        show_ratio: true,
+        ratio: Math.round((report_pass_ai / num_reports) * 100)
+      });
+    
+      setDataGiamSat(
+        {
+          title: "Số báo cáo giám sát chấm đạt",
+          data: report_pass_human,
+          show_ratio: true,
+          ratio: Math.round((report_pass_human / num_reports) * 100)
+        }
+      )
+    
+      setDataKhachHangThamgia({
+        title: "Tổng khách hàng tham gia",
+        data: customer,
+        show_ratio: false
+      })
+    
+      setDataNhanVienThucHien({
+        title: "Tổng nhân viên thực hiện",
+        data: employee,
+        show_ratio: false
+      })
     }
+    
     if (resEmployeeTakePic.message == "ok") {
       const sortedData = resEmployeeTakePic.result.data.sort(
         (a, b) => b.num_picture - a.num_picture
@@ -479,51 +506,33 @@ let resEmployeeTakePic = await AxiosService.get(
         </Form.Item>
       </div>
       <Row gutter={10} style={{ marginTop: "20px" }}>
-  <Col flex={1} className="card-container">
+  <Col span={5} className="card-container">
     <Overview
-      data={{
-        title: "Tổng số chiến dịch đã viếng thăm",
-        data: 10,
-        show_ratio: false
-      }}
+      data={dataChienDichViengTham}
     />
   </Col>
-  <Col flex={1} className="card-container">
+ 
+  <Col span={5} className="card-container">
     <Overview
-      data={{
-        title: "Số báo cáo AI chấm đạt",
-        data: 30,
-        show_ratio: true,
-        ratio: 50
-      }}
+      data={dataBaoCaoAI}
     />
   </Col>
-  <Col flex={1} className="card-container">
+ 
+  <Col span={5} className="card-container">
     <Overview
-      data={{
-        title: "Số báo cáo giám sát chấm đạt",
-        data: "40",
-        show_ratio: true,
-        ratio: 70
-      }}
+      data={dataGiamSat}
     />
   </Col>
-  <Col flex={1} className="card-container">
+  
+  <Col span={5} className="card-container">
     <Overview
-      data={{
-        title: "Tổng khách hàng tham gia",
-        data: 20,
-        show_ratio: false
-      }}
+      data={dataKhachHangThamgia}
     />
   </Col>
-  <Col flex={1} className="card-container">
+ 
+  <Col span={4} className="card-container">
     <Overview
-      data={{
-        title: "Tổng nhân viên thực hiện",
-        data: 10,
-        show_ratio: false
-      }}
+      data={dataNhanVienThucHien}
     />
   </Col>
 </Row>
