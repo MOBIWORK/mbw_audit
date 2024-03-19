@@ -373,6 +373,7 @@ def get_all_campaigns():
 def summary_overview_dashboard():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
+    
     try:
         filters = {}
         if start_date is not None and end_date is not None:
