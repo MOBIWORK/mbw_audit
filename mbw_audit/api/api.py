@@ -20,6 +20,19 @@ import cv2
 from mbw_audit.utils import appconst
 
 @frappe.whitelist(methods=["POST"])
+def test_queue(*args,**kwargs):
+    #process_queue('Test label')
+    frappe.enqueue(process_queue, queue='short', timeout=500)
+
+def process_queue():
+    print("Dòng 28")
+    # doc = frappe.new_doc('VGM_DocTest')
+    # doc.label = val
+    # doc.insert(ignore_permissions=True)
+    # print("Dòng 35 ", doc)
+
+
+@frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
@@ -373,7 +386,6 @@ def get_all_campaigns():
 def summary_overview_dashboard():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
-    
     try:
         filters = {}
         if start_date is not None and end_date is not None:
