@@ -29,8 +29,8 @@ export const Overview =({data}: {data:any}) => {
     <span className="text-4xl font-medium flex items-center justify-center p-1">{data.data}</span>
     {data.show_ratio && (
         <span className="text-[14px] flex items-center justify-center py-2" style={{ marginTop: '5px' }}> 
-            <span className="text-[16px]" style={{ color: data.ratio >= 50 ? '#01B3A3' : 'rgba(255, 86, 48, 1)', marginRight: '5px' }}>{data.ratio}%</span>
-            <span className="text-[#637381]">tổng số báo cáo</span>
+            <span className="text-[16px]" style={{ color: data.ratio >= 50 ? '#01B3A3' : 'rgba(255, 86, 48, 1)', marginRight: '5px', fontWeight: "bold" }}>{data.ratio}%</span>
+            <span className="text-[#637381]"> trên tổng số báo cáo</span>
         </span>
     )}
 </div>
