@@ -397,12 +397,18 @@ def summary_overview_dashboard():
                     break
         employees = []
         customers = []
+        report_pass_ai = 0
+        report_pass_human = 0
         for report in report_sources:
+            if report.get("scoring_machine") == 1:
+                report_pass_ai += 1
+            if report.get("scoring_human") == 1:
+                report_pass_human += 1
             if report.get("employee_code") not in employees:
                 employees.append(report.get("employee_code"))
             if report.get("retail_code") not in customers:
                 customers.append(report.get("retail_code"))
-        return gen_response(200, "ok", {"data": {"campaign_start": campaign_start, "campaign_all": len(campaign_sources), "employee": len(employees), "employee_all": len(employee_sources), "customer": len(customers), "customer_all": len(customer_sources)}})
+        return gen_response(200, "ok", {"data": {"campaign_start": campaign_start, "employee": len(employees), "customer": len(customers), "report_pass_ai": report_pass_ai, "report_pass_human": report_pass_human, "num_reports": len(report_sources)}})
     except Exception as e:
         return gen_response(500, "error", {"data": str(e)})
 
