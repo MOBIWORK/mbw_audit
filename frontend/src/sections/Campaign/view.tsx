@@ -90,6 +90,9 @@ export default function Campaign() {
   };
   const [fileListImport, setFileListImport] = useState<UploadFile[]>([])
   const propUploadImportFileExcel: UploadProps = {
+    onRemove: () => {
+      setFileListImport([]);
+    },
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
     beforeUpload: async (file) => {
