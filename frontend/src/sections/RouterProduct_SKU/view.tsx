@@ -404,7 +404,6 @@ export default function Product_SKU() {
             };
           }
         );
-        dataCategories = 
         setCategories(dataCategories);
         // Chọn danh mục đầu tiên mặc định
         if (dataCategories.length > 0) {
