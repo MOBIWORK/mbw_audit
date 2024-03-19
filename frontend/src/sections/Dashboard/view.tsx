@@ -44,10 +44,13 @@ export default function Dashboard() {
       {
         title: "STT",
         dataIndex: "stt",
+        width:'10%'
       },
       {
         title: "Chiến dịch",
         dataIndex: "campaign_name",
+        width:'40%'
+
       },
       {
         title: "Tỷ lệ AI chấm",
@@ -320,9 +323,7 @@ export default function Dashboard() {
   const initDataDashboard = async () => {
     let startDateTimestamp = null;
     let endDateTimestamp = null;
-    console.log(searchTime);
     if (searchTime && searchTime.length === 2 && searchTime[0] && searchTime[1]) {
-      console.log('1');
         const startDate = new Date(searchTime[0]);
         startDate.setUTCHours(0, 0, 0, 0);
         startDateTimestamp = Math.floor(startDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
@@ -364,17 +365,17 @@ let resEmployeeTakePic = await AxiosService.get(
           {
             title: "STT",
             dataIndex: "stt",
-            width: "10%",
+            width: "20%",
           },
           {
             title: "Chiến dịch",
             dataIndex: "campaign_name",
-            width: "35%",
+            width: "55%",
           },
           {
             title: "Tỷ lệ",
             dataIndex: "tyle",
-            width: "55%",
+            width: "25%",
             render: (percent) => (
               <Progress
                 percent={percent}
@@ -383,13 +384,17 @@ let resEmployeeTakePic = await AxiosService.get(
             ),
           },
         ],
-        source: resCampaign.result.data.map((item, index) => {
-          return {
+        source: resCampaign.result.data
+          .map((item, index) => ({
             stt: ("0" + (index + 1)).slice(-2),
             campaign_name: item.campaign_name,
             tyle: item.processing,
-          };
-        }),
+          }))
+          .sort((a, b) => b.tyle - a.tyle)
+          .map((item, index) => ({
+            ...item,
+            stt: ("0" + (index + 1)).slice(-2),
+          })),
       };
       let sampleData = {
         labels: resCampaign.result.data.map((entry) => entry.campaign_name),
@@ -472,63 +477,59 @@ let resEmployeeTakePic = await AxiosService.get(
           />
         </Form.Item>
       </div>
-      <Row gutter={20} style={{ marginTop: "20px" }}>
-        <Col span={24}>
-          <Row gutter={20}>
-            <Col span={5} className="card-container">
-              <Overview
-                data={{
-                  title: "Tổng chiến dịch viếng thăm",
-                  data: 10,
-                  show_ratio: false
-                }}
-              />
-            </Col>
-            <Col span={5} className="card-container">
-              <Overview
-                data={{
-                  title: "Số báo cáo AI chấm đạt",
-                  data: 30,
-                  show_ratio: true,
-                  ratio: 50
-                }}
-              />
-            </Col>
-            <Col span={5} className="card-container">
-              <Overview
-                data={{
-                  title: "Số báo cáo giám sát chấm đạt",
-                  data: 40,
-                  show_ratio: true,
-                  ratio: 70
-                }}
-              />
-            </Col>
-            <Col span={5} className="card-container">
-              <Overview
-                data={{
-                  title: "Tổng khách hàng tham gia",
-                  data: 20,
-                  show_ratio: false
-                }}
-              />
-            </Col>
-            <Col span={4} className="card-container">
-              <Overview
-                data={{
-                  title: "Tổng nhân viên thực hiện",
-                  data: 10,
-                  show_ratio: false
-                }}
-              />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-      <Row gutter={20} style={{ marginTop: "20px" }}>
-        <Col span={16}>
-          <InfoCard
-            style={{ height: "450px", overflow: "auto" }}
+      <Row gutter={8} justify="space-evenly" style={{ marginTop: "20px" }}>
+  <Col span={4} className="card-container">
+    <Overview
+      data={{
+        title: "Tổng chiến dịch viếng thăm",
+        data: 10,
+        show_ratio: false
+      }}
+    />
+  </Col>
+  <Col span={4} className="card-container">
+    <Overview
+      data={{
+        title: "Số báo cáo AI chấm đạt",
+        data: 30,
+        show_ratio: true,
+        ratio: 50
+      }}
+    />
+  </Col>
+  <Col span={4} className="card-container">
+    <Overview
+      data={{
+        title: "Số báo cáo giám sát chấm đạt",
+        data: "40",
+        show_ratio: true,
+        ratio: 70
+      }}
+    />
+  </Col>
+  <Col span={4} className="card-container">
+    <Overview
+      data={{
+        title: "Tổng khách hàng tham gia",
+        data: 20,
+        show_ratio: false
+      }}
+    />
+  </Col>
+  <Col span={4} className="card-container">
+    <Overview
+      data={{
+        title: "Tổng nhân viên thực hiện",
+        data: 10,
+        show_ratio: false
+      }}
+    />
+  </Col>
+</Row>
+
+      <Row gutter={20}  style={{ marginTop: "30px" }}>
+        <Col span={16} style={{ minHeight: '450px' }}>
+          <InfoCard 
             data={{
               title: "Tỷ lệ chấm điểm đạt theo từng chiến dịch",
               data: colTableTyLeDat,
@@ -536,9 +537,8 @@ let resEmployeeTakePic = await AxiosService.get(
             }}
           />
         </Col>
-        <Col span={8}>
+        <Col span={8} style={{ minHeight: '450px' }}>
           <InfoCard
-            style={{ height: "450px", overflow: "auto" }}
             data={{
               title: "Tỷ lệ tiến độ chiến dịch theo cửa hàng viếng thăm",
               data: colTableTienDoTyLe,
