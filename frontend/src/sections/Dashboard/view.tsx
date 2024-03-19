@@ -57,7 +57,7 @@ export default function Dashboard() {
         dataIndex: "tyle_ai",
         render: (percent) => (
           <Progress
-            percent={percent}
+            percent={Math.round(percent)}
             strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
           />
         ),
@@ -67,7 +67,7 @@ export default function Dashboard() {
         dataIndex: "tyle_giamsat",
         render: (percent) => (
           <Progress
-            percent={percent}
+            percent={Math.round(percent)}
             strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
           />
         ),
@@ -352,6 +352,7 @@ let resEmployeeTakePic = await AxiosService.get(
   urlDashboardEmployeeTakePicture
 );
     if (resCampaign.message == "ok") {
+      console.log(resCampaign.result.data);
       colTableTyLe["source"] = resCampaign.result.data.map((item, index) => {
         return {
           stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
@@ -378,7 +379,7 @@ let resEmployeeTakePic = await AxiosService.get(
             width: "25%",
             render: (percent) => (
               <Progress
-                percent={percent}
+                percent={Math.round(percent)}
                 strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
               />
             ),

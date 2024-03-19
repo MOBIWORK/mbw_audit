@@ -48,7 +48,7 @@ export const InfoCard =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-           <TableCustom scroll={{ y: 270 }}
+           <TableCustom style={{height:'100%'}} scroll={{ y: 270 }}
             columns={data.data.columns}
             dataSource={data.data.source}
           />
@@ -66,7 +66,7 @@ export const InfoCardEmploy =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-           <TableCustom  pagination={{ pageSize: 5 }} scroll={{ y: 270 }} size="small"
+           <TableCustom style={{height:'100%'}} pagination={{ pageSize: 5 }} scroll={{ y: 270 }} size="small"
             columns={data.data.columns}
             dataSource={data.data.source}
           />
