@@ -317,6 +317,7 @@ export default function Product_SKU() {
   const propUploadCheckProducts: UploadProps = {
     onRemove: () => {
       setFileListImage([]);
+      setFileUploadCheckProduct([]);
     },
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     accept: "image/png, image/jpeg",
@@ -694,6 +695,12 @@ export default function Product_SKU() {
       setIsModalOpenAddProduct(true);
     }
   };
+  const isBarcodeValid = (barcode) => {
+    // Sử dụng biểu thức chính quy để kiểm tra xem barcode có chứa ký tự tiếng Việt không
+    const vietnameseRegex = /[\u00C0-\u1EF9\u1EFB-\u1F01\u1F03-\u1F57\u1F59-\u1F5B\u1F5D-\u1F5F\u1F60-\u1FC1\u1FC3-\u1FF9\u1FFB-\u1FFF]/;
+  
+    return !vietnameseRegex.test(barcode);
+  };
 const handleOkAddProduct = async () => {
   setLoadingAddProduct(true);
   let objProduct = formAddProduct.getFieldsValue();
@@ -712,11 +719,15 @@ const handleOkAddProduct = async () => {
   }
 
   let arrImages = [];
-  console.log(fileUploadAddProduct);
   for (let i = 0; i < fileUploadAddProduct.length; i++) {
     arrImages.push(fileUploadAddProduct[i]);
   }
-
+   // Kiểm tra mã vạch
+   if (!isBarcodeValid(objProduct.barcode_product)) {
+    message.error("Barcode không được chứa ký tự tiếng Việt");
+    setLoadingAddProduct(false);
+    return;
+  }
   // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
   if (!objProduct.product_name || arrImages.length === 0) {
     // Hiển thị thông báo lỗi
@@ -795,16 +806,17 @@ const handleOkAddProduct = async () => {
   };
 
   const renderBarcodeByValue = (val) => {
-    JsBarcode("#barcode", val, {
-      width: 4,
-      height: 40,
-      displayValue: true,
-      font: "Arial",
-      text: val,
-      textMargin: 10,
-      fontSize: 13,
-      background: "#F5F7FA",
-    });
+      JsBarcode("#barcode", val, {
+        width: 4,
+        height: 40,
+        displayValue: true,
+        font: "Arial",
+        text: val,
+        textMargin: 10,
+        fontSize: 13,
+        background: "#F5F7FA",
+      });
+  
   };
 
   const handleOkEditProduct = async () => {
@@ -938,7 +950,17 @@ const handleOkAddProduct = async () => {
   };
 
   const handleOkCheckProduct = async () => {
-    setLoadingCheckProduct(true);
+    if(products.length == 0){
+      message.error("Chưa thêm thêm sản phẩm cho danh mục này")
+      setLoadingCheckProduct(false);
+      return
+    }
+    if(fileUploadCheckProduct.length == 0){
+      message.error("Chưa thêm hình ảnh nhận diện")
+      setLoadingCheckProduct(false);
+      return
+    }else{
+      setLoadingCheckProduct(true);
     let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
     console.log(fileUploadCheckProduct);
     let objCheckProduct = {
@@ -959,32 +981,38 @@ const handleOkAddProduct = async () => {
       });
     }
     if (res != null && res.message != null) {
-      setUrlImageAI(
-        "data:image/png;base64," + res.message.results.verbose[0].base64_image
-      );
-      let arrBoxes = [];
-      arrProductDetect.forEach((item) => {
-        if (res.message.results.count[item.product_name] != null)
-          item.product_count = res.message.results.count[item.product_name];
-        let locates = res.message.results.verbose[0].locates;
-
-        // Lọc các đối tượng có trường label bằng giá trị của item.product_name
-        let locatesWithLabel = locates.filter(function (obj) {
-          return obj.label === item.product_name;
+      if(res.message.status == "failed"){
+        setLoadingCheckProduct(false);
+        message.error("Không thể kiểm tra ảnh sản phẩm")
+      }else{
+        setUrlImageAI(
+          "data:image/png;base64," + res.message.results.verbose[0].base64_image
+        );
+        let arrBoxes = [];
+        arrProductDetect.forEach((item) => {
+          if (res.message.results.count[item.product_name] != null)
+            item.product_count = res.message.results.count[item.product_name];
+          let locates = res.message.results.verbose[0].locates;
+  
+          // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+          let locatesWithLabel = locates.filter(function (obj) {
+            return obj.label === item.product_name;
+          });
+          let newObjectBoxes = locatesWithLabel.map(function (box) {
+            let bbox = box.bbox;
+            return {
+              x: bbox[0],
+              y: bbox[1],
+              width: bbox[2] - bbox[0],
+              height: bbox[3] - bbox[1],
+              label: box.label,
+            };
+          });
+          arrBoxes = arrBoxes.concat(newObjectBoxes);
         });
-        let newObjectBoxes = locatesWithLabel.map(function (box) {
-          let bbox = box.bbox;
-          return {
-            x: bbox[0],
-            y: bbox[1],
-            width: bbox[2] - bbox[0],
-            height: bbox[3] - bbox[1],
-            label: box.label,
-          };
-        });
-        arrBoxes = arrBoxes.concat(newObjectBoxes);
-      });
-      setObjectBoxes(arrBoxes);
+        setObjectBoxes(arrBoxes);
+      }
+     
     }
 
     setUrlImageCheckProductResult(
@@ -996,6 +1024,8 @@ const handleOkAddProduct = async () => {
     setResultProductCheck(arrProductDetect);
     setIsModelResultProduct(true);
     handleCancelCheckProduct();
+    }
+    
   };
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -1013,12 +1043,16 @@ const handleOkAddProduct = async () => {
     }
   });
   const handleCancelCheckProduct = () => {
+    setFileUploadCheckProduct([]);
     setFileListImage([]);
+    setLoadingCheckProduct(false);
     setIsModalOpenCheckProduct(false);
   };
 
   const handleCancelResultCheckProduct = () => {
     setIsModelResultProduct(false);
+    setFileListImage([]);
+    setFileUploadCheckProduct([]);
   };
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
