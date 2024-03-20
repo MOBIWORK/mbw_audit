@@ -97,14 +97,22 @@ export default function Product_SKU() {
   const [editItemCategory, setEditItemCategory] = useState({});
   const [isModelOpenEditCategory, setIsModelOpenEditCategory] = useState(false);
   const [loadingAddCategory, setLoadingAddCategory] = useState<boolean>(false);
-  const [loadingEditCategory,setLoadingEditCategory] = useState<boolean>(false);
+  const [loadingDeleteProduct, setLoadingDeleteProduct] = useState<boolean>(false);
+  
+  const [loadingEditCategory, setLoadingEditCategory] =
+    useState<boolean>(false);
 
   //biến cho sản phẩm theo danh mục
   const [loadingAddProduct, setLoadingAddProduct] = useState<boolean>(false);
   const [loadingEditProduct, setLoadingEditProduct] = useState<boolean>(false);
-  const [loadingCheckProduct, setLoadingCheckProduct] = useState<boolean>(false);
-  const [loadingAddListProduct, setLoadingAddListProduct] = useState<boolean>(false);
-  const [loadingImportFileExcelProduct, setLoadingImportFileExcelProduct] = useState<boolean>(false);
+
+
+  const [loadingCheckProduct, setLoadingCheckProduct] =
+    useState<boolean>(false);
+  const [loadingAddListProduct, setLoadingAddListProduct] =
+    useState<boolean>(false);
+  const [loadingImportFileExcelProduct, setLoadingImportFileExcelProduct] =
+    useState<boolean>(false);
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
   const [searchProduct, setSearchProduct] = useState("");
@@ -211,6 +219,19 @@ export default function Product_SKU() {
     },
   };
   const propUploadAddProducts: UploadProps = {
+    onRemove: (file)=>{
+       // Lấy tên tệp tin từ thuộc tính name của file
+    const removedFileName = file.name;
+    // Loại bỏ tệp tin có tên trùng khớp khỏi mảng fileUploadAddProduct
+    setFileUploadAddProduct((prevFileUpload) =>
+      prevFileUpload.filter((item) => {
+        // Lấy tên tệp tin từ đường dẫn
+        const fileName = item.split('/').pop(); 
+        // So sánh tên tệp tin với tên tệp tin bị xóa
+        return fileName !== removedFileName;
+      })
+    );
+    },
     beforeUpload: async (file) => {
       const isJpgOrPng =
         file.type === "image/jpeg" || file.type === "image/png";
@@ -228,7 +249,7 @@ export default function Product_SKU() {
       const formData = new FormData();
       const fields = {
         file,
-        'category_name': categorySelected.name
+        category_name: categorySelected.name,
       };
 
       for (const [key, value] of Object.entries(fields)) {
@@ -270,7 +291,7 @@ export default function Product_SKU() {
       const formData = new FormData();
       const fields = {
         file,
-        'category_name': categorySelected.name
+        category_name: categorySelected.name,
       };
 
       for (const [key, value] of Object.entries(fields)) {
@@ -315,7 +336,7 @@ export default function Product_SKU() {
 
       const formData = new FormData();
       const fields = {
-        file
+        file,
       };
 
       for (const [key, value] of Object.entries(fields)) {
@@ -351,7 +372,11 @@ export default function Product_SKU() {
     {
       title: "Mã Sản phẩm",
       dataIndex: "product_code",
-      render: (text: string, record: any) => <a href="javascript:;" onClick={() => handleClickEditProduct(record)}>{text}</a>,
+      render: (text: string, record: any) => (
+        <a href="javascript:;" onClick={() => handleClickEditProduct(record)}>
+          {text}
+        </a>
+      ),
     },
     {
       title: "Tên sản phẩm",
@@ -366,7 +391,10 @@ export default function Product_SKU() {
       key: "action",
       render: (_, record) => (
         <>
-          <EditOutlined className="mr-4" onClick={() => handleClickEditProduct(record)} />
+          <EditOutlined
+            className="mr-4"
+            onClick={() => handleClickEditProduct(record)}
+          />
           <DeleteOutlined onClick={() => handleClickDeleteProduct(record)} />
         </>
       ),
@@ -404,6 +432,7 @@ export default function Product_SKU() {
             };
           }
         );
+        dataCategories = sortAlphabet(dataCategories, "category_name");
         setCategories(dataCategories);
         // Chọn danh mục đầu tiên mặc định
         if (dataCategories.length > 0) {
@@ -426,7 +455,14 @@ export default function Product_SKU() {
   const onChangeFilterCategory = (event) => {
     setSearchCategory(event.target.value);
   };
-
+  const sortAlphabet = (arr, field) => {
+    return arr.sort((a, b) => {
+      if (a[field] && b[field]) {
+        return a[field].localeCompare(b[field]);
+      }
+      return 0;
+    });
+  };
   const handleMouseEnterCategory = (event, item) => {
     setCategories((prevCategories) =>
       prevCategories.map((category) => {
@@ -464,17 +500,6 @@ export default function Product_SKU() {
   };
 
   const handleDeleteOkCategory = async () => {
-    // if(deleteItemCategory != null && deleteItemCategory.item != null){
-    //   let urlDelete = `/api/resource/VGM_Category/${deleteItemCategory.item.name}`;
-    //   let res = await AxiosService.delete(urlDelete);
-    //   if(res != null && res.message == "ok"){
-    //     message.success("Xóa thành công");
-    //     fetchDataCategories();
-    //     handleDeleteCancelCategory();
-    //   }else{
-    //     message.error("Xóa thất bại");
-    //   }
-    // }
     if (deleteItemCategory != null && deleteItemCategory.item != null) {
       let arrIdDelete = [];
       arrIdDelete = [deleteItemCategory.item.name];
@@ -561,7 +586,11 @@ export default function Product_SKU() {
       setLoadingAddCategory(false);
       return;
     }
-
+    if (categoryName.length > 25) {
+      message.error("Tên danh mục không được vượt quá 25 ký tự.");
+      setLoadingAddCategory(false);
+      return;
+    }
     try {
       const dataPost = {
         doc: JSON.stringify({
@@ -597,6 +626,7 @@ export default function Product_SKU() {
 
   const handleCancelCategory = () => {
     setIsModalOpenAddCategory(false);
+    setLoadingAddCategory(false);
   };
 
   //Các hàm xử lý danh sách sản phẩm
@@ -643,6 +673,7 @@ export default function Product_SKU() {
           category_name: categorySelected.category_name,
         };
       });
+      dataProducts = sortAlphabet(dataProducts, "product_name");
       setProducts(dataProducts);
     }
   };
@@ -654,7 +685,7 @@ export default function Product_SKU() {
   const showModalAddProduct = () => {
     formAddProduct.resetFields();
     setFileList([]);
-    setLoadingAddProduct(false)
+    setLoadingAddProduct(false);
     let barcode = document.getElementById("barcode");
     if (barcode) {
       barcode.innerHTML = "";
@@ -663,61 +694,70 @@ export default function Product_SKU() {
       setIsModalOpenAddProduct(true);
     }
   };
+const handleOkAddProduct = async () => {
+  setLoadingAddProduct(true);
+  let objProduct = formAddProduct.getFieldsValue();
 
-  const handleOkAddProduct = async () => {
-    setLoadingAddProduct(true);
-    let objProduct = formAddProduct.getFieldsValue();
+  // Kiểm tra mã sản phẩm
+  if (objProduct.product_code) {
     let productFilter = products.filter(
       (x) =>
-        x.product_code.toLowerCase() == objProduct.product_code.toLowerCase()
+        x.product_code.toLowerCase() === objProduct.product_code.toLowerCase()
     );
     if (productFilter.length > 0) {
       message.error("Mã sản phẩm đã tồn tại");
+      setLoadingAddProduct(false);
       return;
     }
-    let arrImages = [];
-    for (let i = 0; i < fileUploadAddProduct.length; i++) {
-      arrImages.push(fileUploadAddProduct[i]);
-    }
-    
-    // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
-    if (!objProduct.product_name || arrImages.length === 0) {
-      // Hiển thị thông báo lỗi
-      message.error(
-        "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
-      );
-      return;
-    }
-    let urlAddProduct = "/api/resource/VGM_Product";
-    let objProductCreate = {
-      barcode: objProduct.barcode_product,
-      product_code:
-        objProduct.product_code != null ? objProduct.product_code.trim() : null,
-      product_name:
-        objProduct.product_name != null ? objProduct.product_name.trim() : null,
-      product_description:
-        objProduct.product_description != null
-          ? objProduct.product_description.trim()
-          : null,
-      category: categorySelected.name,
-      images: JSON.stringify(arrImages),
-    };
+  }
 
-    let res = await AxiosService.post(urlAddProduct, objProductCreate);
-    if (res != null && res.data != null) {
-      message.success("Thêm mới thành công");
-      setLoadingAddProduct(false);
-      formAddProduct.resetFields();
-      let barcode = document.getElementById("barcode");
-      barcode.innerHTML = "";
-      setFileUploadAddProduct([]);
-      initDataProductByCategory();
-      handleCancelAddProduct();
-    } else {
-      message.error("Thêm mới thất bại");
-      setLoadingAddProduct(false);
-    }
+  let arrImages = [];
+  console.log(fileUploadAddProduct);
+  for (let i = 0; i < fileUploadAddProduct.length; i++) {
+    arrImages.push(fileUploadAddProduct[i]);
+  }
+
+  // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
+  if (!objProduct.product_name || arrImages.length === 0) {
+    // Hiển thị thông báo lỗi
+    message.error(
+      "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
+    );
+    setLoadingAddProduct(false);
+    return;
+  }
+ 
+  let urlAddProduct = "/api/resource/VGM_Product";
+  let objProductCreate = {
+    barcode: objProduct.barcode_product,
+    product_code:
+      objProduct.product_code != null ? objProduct.product_code.trim() : null,
+    product_name:
+      objProduct.product_name != null ? objProduct.product_name.trim() : null,
+    product_description:
+      objProduct.product_description != null
+        ? objProduct.product_description.trim()
+        : null,
+    category: categorySelected.name,
+    images: JSON.stringify(arrImages),
   };
+
+  let res = await AxiosService.post(urlAddProduct, objProductCreate);
+  if (res != null && res.data != null) {
+    message.success("Thêm mới thành công");
+    setLoadingAddProduct(false);
+    formAddProduct.resetFields();
+    let barcode = document.getElementById("barcode");
+    barcode.innerHTML = "";
+    setFileUploadAddProduct([]);
+    initDataProductByCategory();
+    handleCancelAddProduct();
+  } else {
+    message.error("Thêm mới thất bại");
+    setLoadingAddProduct(false);
+  }
+};
+
 
   const handleRenderBarcodeAddProduct = (event) => {
     renderBarcodeByValue(event.target.value);
@@ -823,31 +863,33 @@ export default function Product_SKU() {
   };
 
   const handleDeleteOkProduct = async () => {
-    // let urlDeleteProduct = `/api/resource/VGM_Product/${deleteItemProduct.item.name}`;
-    // let res = await AxiosService.delete(urlDeleteProduct);
-    // if(res != null && res.message != null && res.message == "ok"){
-    //   message.success("Xóa thành công");
-    //   setDeleteItemProduct({});
-    //   initDataProductByCategory();
-    //   handleDeleteCancelProduct();
-    // }else{
-    //   message.error("Xóa thất bại");
-    // }
     let arrIdDelete = [];
-    arrIdDelete = [deleteItemProduct.item.name];
-    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
-    let dataDeletePost = {
-      doctype: "VGM_Product",
-      items: JSON.stringify(arrIdDelete),
-    };
-    let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
-    if (res != null && res.message != null && res.message.status == "success") {
-      message.success("Xóa thành công");
-      setDeleteItemProduct({});
-      initDataProductByCategory();
-      handleDeleteCancelProduct();
-    } else {
-      message.error("Xóa thất bại , Sản phẩm đang được sử dụng");
+    try {
+      setLoadingDeleteProduct(true)
+      arrIdDelete = [deleteItemProduct.item.name];
+      let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+      let dataDeletePost = {
+        doctype: "VGM_Product",
+        items: JSON.stringify(arrIdDelete),
+      };
+      let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+      if (
+        res != null &&
+        res.message != null &&
+        res.message.status == "success"
+      ) {
+        message.success("Xóa thành công");
+        setDeleteItemProduct({});
+        initDataProductByCategory();
+        setLoadingDeleteProduct(false)
+        handleDeleteCancelProduct();
+      } else {
+        message.error("Xóa thất bại , Sản phẩm đang được sử dụng");
+        setLoadingDeleteProduct(false)
+      }
+    } catch (error) {
+      message.error("Xóa thất bại,Có lỗi xảy ra khi xóa sản phẩm");
+      setLoadingDeleteProduct(false)
     }
   };
 
@@ -860,25 +902,32 @@ export default function Product_SKU() {
   };
 
   const handleDeleteListOkProduct = async () => {
-    let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
-    let arrIdDelete = [];
-    for (let i = 0; i < productSelected.length; i++)
-      arrIdDelete.push(productSelected[i].name);
-    let dataDeletePost = {
-      doctype: "VGM_Product",
-      items: JSON.stringify(arrIdDelete),
-    };
-    let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
-    if (res != null && res.message != null && res.message.status == "success") {
-      message.success("Xóa thành công");
-      setProductSelected([]);
-      setShowDeleteList(false);
-      initDataProductByCategory();
-      handleDeleteListCancelProduct();
-    } else {
-      message.error("Xóa thất bại");
+    try {
+        let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+        let arrIdDelete = [];
+        for (let i = 0; i < productSelected.length; i++)
+            arrIdDelete.push(productSelected[i].name);
+        let dataDeletePost = {
+            doctype: "VGM_Product",
+            items: JSON.stringify(arrIdDelete),
+        };
+
+        let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+
+        if (res != null && res.message != null && res.message.status == "success") {
+            message.success("Xóa thành công");
+            setProductSelected([]);
+            setShowDeleteList(false);
+            initDataProductByCategory();
+            handleDeleteListCancelProduct();
+        } else {
+          message.error("Xóa thất bại, có sản phẩm đã tồn tại trong báo cáo");
+        }
+    } catch (error) {
+        message.error("Có lỗi xảy ra khi xóa sản phẩm");
     }
-  };
+};
+
 
   const handleDeleteListCancelProduct = () => {
     setIsModelOpenDeleteList(false);
@@ -896,7 +945,7 @@ export default function Product_SKU() {
       collection_name: categorySelected.name,
       linkimages:
         fileUploadCheckProduct.length > 0
-          ? fileUploadCheckProduct[fileUploadCheckProduct.length -1]
+          ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
           : "",
     };
     let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
@@ -940,7 +989,7 @@ export default function Product_SKU() {
 
     setUrlImageCheckProductResult(
       fileUploadCheckProduct.length > 0
-        ? fileUploadCheckProduct[fileUploadCheckProduct.length-1]
+        ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
         : ""
     ); //import.meta.env.VITE_BASE_URL+
     setLoadingCheckProduct(false);
@@ -1027,6 +1076,7 @@ export default function Product_SKU() {
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeProductFromERP[]
   ) => {
+    console.log(selectedRow);
     setProductFromERPSelected(selectedRow);
   };
 
@@ -1055,8 +1105,9 @@ export default function Product_SKU() {
       });
     }
     setProductFromERP(arrProductERPSource);
+   
   };
-
+ 
   const handleSaveProductFromERP = async () => {
     //Goi dich vu luu san pham tu erp
     setLoadingAddListProduct(true);
@@ -1244,18 +1295,16 @@ export default function Product_SKU() {
                       <Typography.Text></Typography.Text> {item.category_name}
                     </span>
                     <span style={{ display: item.hidden ? "none" : "block" }}>
-                     
-                        <span style={{ marginRight: "10px" }}>
-                          <EditOutlined
-                            key="edit"
-                            onClick={() => handleEditCategoryClick(item)}
-                          />
-                        </span>
-                      
-                        <span onClick={() => handleDeleteCategoryClick(item)}>
-                          <DeleteOutlined key="delete" />
-                        </span>
-                    
+                      <span style={{ marginRight: "10px" }}>
+                        <EditOutlined
+                          key="edit"
+                          onClick={() => handleEditCategoryClick(item)}
+                        />
+                      </span>
+
+                      <span onClick={() => handleDeleteCategoryClick(item)}>
+                        <DeleteOutlined key="delete" />
+                      </span>
                     </span>
                   </div>
                 </List.Item>
@@ -1276,7 +1325,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelCheckProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkCheckProduct} loading={loadingCheckProduct}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkCheckProduct}
+            loading={loadingCheckProduct}
+          >
             Kiểm tra
           </Button>,
         ]}
@@ -1356,10 +1410,14 @@ export default function Product_SKU() {
           <div>
             <span style={{ marginRight: 8 }}>
               {hasSelected
-                ? `Đã chọn ${productFromERPSelected.length} danh mục`
+                ? `Đã chọn ${productFromERPSelected.length} sản phẩm`
                 : ""}
             </span>
-            <Button type="primary" onClick={handleSaveProductFromERP} loading={loadingAddListProduct}>
+            <Button
+              type="primary"
+              onClick={handleSaveProductFromERP}
+              loading={loadingAddListProduct}
+            >
               Thêm
             </Button>
           </div>
@@ -1395,7 +1453,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelAddProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkAddProduct} loading={loadingAddProduct}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkAddProduct}
+            loading={loadingAddProduct}
+          >
             Lưu
           </Button>,
         ]}
@@ -1485,7 +1548,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelEditProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkEditProduct} loading={loadingEditProduct}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkEditProduct}
+            loading={loadingEditProduct}
+          >
             Lưu
           </Button>,
         ]}
@@ -1570,7 +1638,14 @@ export default function Product_SKU() {
         open={isModelOpenDeleteProduct}
         onOk={handleDeleteOkProduct}
         onCancel={handleDeleteCancelProduct}
-        okText="Xác nhận"
+        footer={[
+          <Button key="submit" onClick={handleDeleteCancelProduct}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" loading={loadingDeleteProduct} onClick={handleDeleteOkProduct}>
+            Xác nhận
+          </Button>,
+        ]}
         cancelText="Hủy"
       >
         <div>{deleteItemProduct.contentConfirm}</div>
@@ -1602,7 +1677,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelCategory}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkCategory} loading={loadingAddCategory}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkCategory}
+            loading={loadingAddCategory}
+          >
             Lưu
           </Button>,
         ]}
@@ -1614,6 +1694,13 @@ export default function Product_SKU() {
               label="Tên danh mục"
               name="name_item"
               required
+              rules={[
+                { required: true, message: "Vui lòng nhập tên danh mục!" },
+                {
+                  max: 25,
+                  message: "Tên danh mục không được vượt quá 25 ký tự!",
+                },
+              ]}
             >
               <Input />
             </FormItemCustom>
@@ -1637,7 +1724,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelEditCategory}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkEditCategory} loading={loadingEditCategory}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkEditCategory}
+            loading={loadingEditCategory}
+          >
             Lưu
           </Button>,
         ]}
@@ -1685,7 +1777,12 @@ export default function Product_SKU() {
           <Button key="back" onClick={handleCancelImportExcel}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" onClick={handleOkImportExcel} loading={loadingImportFileExcelProduct}>
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleOkImportExcel}
+            loading={loadingImportFileExcelProduct}
+          >
             Lưu lại
           </Button>,
         ]}
