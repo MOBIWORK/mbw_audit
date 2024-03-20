@@ -1,16 +1,25 @@
 import { MenuProps } from "antd/lib";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { listMenu } from "./data";
 import { MenuCustom } from "../../components/menu-item/menu-item";
+import { useLocation } from 'react-router-dom';
 
 export default function MenuLeft() {
-  const [current, setCurrent] = useState(
-    localStorage.getItem("selectedKey") || "dashboard"
-  );
+  const [current, setCurrent] = useState("dashboard");
+  let location = useLocation();
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setCurrent("dashboard");
+    } else if (location.pathname === "/reports") {
+      setCurrent("report");
+    } else if (location.pathname === "/product_sku") {
+      setCurrent("product_sku");
+    }else if(location.pathname === "/campaign"){
+      setCurrent("campaign");
+    }
+  }, [location.pathname]);
   const onClick: MenuProps["onClick"] = (e) => {
-    console.log(e);
     setCurrent(e.key);
-    localStorage.setItem("selectedKey", e.key);
   };
 
  
