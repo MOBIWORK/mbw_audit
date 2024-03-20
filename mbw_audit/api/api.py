@@ -22,14 +22,11 @@ from mbw_audit.utils import appconst
 @frappe.whitelist(methods=["POST"])
 def test_queue(*args,**kwargs):
     #process_queue('Test label')
-    frappe.enqueue(process_queue, queue='short', timeout=500)
+    result = frappe.enqueue(process_queue, queue='short', timeout=500)
+    return result
 
 def process_queue():
-    print("Dòng 28")
-    # doc = frappe.new_doc('VGM_DocTest')
-    # doc.label = val
-    # doc.insert(ignore_permissions=True)
-    # print("Dòng 35 ", doc)
+    return "sucess"
 
 
 @frappe.whitelist(methods=["POST"])
@@ -387,21 +384,23 @@ def summary_overview_dashboard():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
     try:
-        filters = {}
+        filters = []
         if start_date is not None and end_date is not None:
             date_format_with_time = '%Y/%m/%d %H:%M:%S'
             start_date_in = int(start_date)
             end_date_in = int(end_date)
             start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
             end_date_in = datetime.fromtimestamp(end_date_in).strftime(date_format_with_time)
-            filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
+            filter_date = []
+            filter_date.append("images_time")
+            filter_date.append("between")
+            filter_date.append([start_date_in, end_date_in])
+            filters.append(filter_date)
         report_sources = frappe.get_all("VGM_Report",
             filters=filters,
             fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
         )
         campaign_sources = frappe.get_all("VGM_Campaign", fields=["name","campaign_name"])
-        employee_sources = frappe.get_all("Employee", fields=["name"])
-        customer_sources = frappe.get_all("Customer", fields=["name"])
         campaign_start = 0
         for campaign in campaign_sources:
             for report in report_sources:
@@ -430,18 +429,19 @@ def summary_campaign():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
     try:
-        filters = {}
+        filters_summary = []
         if start_date is not None and end_date is not None:
-            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            date_format_with_time = '%d-%m-%Y'
             start_date_in = int(start_date)
             end_date_in = int(end_date)
             start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
             end_date_in = datetime.fromtimestamp(end_date_in).strftime(date_format_with_time)
-            filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
-        report_sources = frappe.get_all("VGM_Report",
-            filters=filters,
-            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
-        )
+            filter_date = []
+            filter_date.append("date_report")
+            filter_date.append("between")
+            filter_date.append([start_date_in, end_date_in])
+            filters_summary.append(filter_date)
+        summary_campaign_sources = frappe.get_all("VGM_SummaryByCampaign", filters=filters_summary, fields=["name", "campaign_code", "total_customer_process", "total_report_ai_pass", "total_report_human_pass", "total_report", "total_picture"])
         campaign_sources = frappe.get_all("VGM_Campaign", fields=["name","campaign_name","retails"])
         summary_campaigns = []
         for campaign_source in campaign_sources:
@@ -449,31 +449,32 @@ def summary_campaign():
                 'id': campaign_source.get("name"),
                 'campaign_name': campaign_source.get("campaign_name")
             }
-            reports_by_campaign = [report for report in report_sources if report.get("campaign_code") == campaign_source.get("name")]
+            reports_by_campaign = [report for report in summary_campaign_sources if report.get("campaign_code") == campaign_source.get("name")]
             ratio_ai_evaluate = 0
             ratio_human_evaluate = 0
             processing = 0
-            num_picture = 0
+            total_picture = 0
             if len(reports_by_campaign) > 0:
-                report_ai_pass = [report for report in reports_by_campaign if report.get("scoring_machine") == 1]
-                ratio_ai_evaluate = (len(report_ai_pass)/len(reports_by_campaign))*100
-                report_human_pass = [report for report in reports_by_campaign if report.get("scoring_human") == 1]
-                ratio_human_evaluate = (len(report_human_pass)/len(reports_by_campaign))*100
-                customer_process_audit = []
-                for report_by_campaign in reports_by_campaign:
-                    if report_by_campaign.get("images") is not None:
-                        images_by_report = json.loads(report_by_campaign.get("images"))
-                        num_picture += len(images_by_report)
-                    if report_by_campaign.get("retail_code") not in customer_process_audit:
-                        customer_process_audit.append(report_by_campaign.get("retail_code"))
+                total_customer_process = 0
+                total_report_ai_pass = 0
+                total_report_human_pass = 0
+                total_report = 0
+                for report in reports_by_campaign:
+                    total_customer_process += report.get("total_customer_process")
+                    total_report_ai_pass += report.get("total_report_ai_pass")
+                    total_report_human_pass += report.get("total_report_human_pass")
+                    total_report += report.get("total_report")
+                    total_picture += report.get("total_picture")
+                ratio_ai_evaluate = (total_report_ai_pass/total_report)*100
+                ratio_human_evaluate = (total_report_human_pass/total_report)*100
                 if campaign_source.get("retails") is not None:
                     retails = json.loads(campaign_source.get("retails"))
                     if len(retails) > 0:
-                        processing = (len(customer_process_audit)/len(retails))*100
+                        processing = (total_customer_process/len(retails))*100
             summary_campaign["ratio_ai_evaluate"] = ratio_ai_evaluate
             summary_campaign["ratio_human_evaluate"] = ratio_human_evaluate
             summary_campaign["processing"] = processing
-            summary_campaign["num_picture"] = num_picture
+            summary_campaign["num_picture"] = total_picture
             summary_campaigns.append(summary_campaign)
         return gen_response(200, "ok", {"data": summary_campaigns})
     except Exception as e:
@@ -484,28 +485,27 @@ def summary_user_by_picture():
     start_date = frappe.form_dict.get('start_date')
     end_date = frappe.form_dict.get('end_date')
     try:
-        filters = {}
+        filters = []
         if start_date is not None and end_date is not None:
-            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            date_format_with_time = '%d-%m-%Y'
             start_date_in = int(start_date)
             end_date_in = int(end_date)
             start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
             end_date_in = datetime.fromtimestamp(end_date_in).strftime(date_format_with_time)
-            filters["images_time"] = [[">=", start_date_in], ["<=", end_date_in]]
-        report_sources = frappe.get_all("VGM_Report",
-            filters=filters,
-            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
-        )
+            filter_date = []
+            filter_date.append("date_report")
+            filter_date.append("between")
+            filter_date.append([start_date_in, end_date_in])
+            filters.append(filter_date)
+        summary_user_sources = frappe.get_all("VGM_SummaryPictureByUser", filters=filters, fields=["name", "employee_code", "total_picture"])
         employee_sources = frappe.get_all("Employee", fields=["name","employee_name","image"])
         summary_users = []
         for employee_source in employee_sources:
-            reports_by_employee = [report for report in report_sources if report.get("employee_code") == employee_source.get("name")]
+            reports_by_employee = [report for report in summary_user_sources if report.get("employee_code") == employee_source.get("name")]
             if len(reports_by_employee) > 0:
                 num_picture = 0
                 for report_by_employee in reports_by_employee:
-                    if report_by_employee.get("images") is not None:
-                        images_by_report = json.loads(report_by_employee.get("images"))
-                        num_picture += len(images_by_report)
+                    num_picture += report_by_employee.get("total_picture")
                 summary_user = {
                     'id': employee_source.get("name"),
                     'employee_name': employee_source.get("employee_name"),

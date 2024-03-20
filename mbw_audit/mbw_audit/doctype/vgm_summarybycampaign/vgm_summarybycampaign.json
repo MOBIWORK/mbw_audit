@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2024-03-20 02:18:24.074562",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "campaign_code",
+  "total_customer_process",
+  "total_report_ai_pass",
+  "total_report_human_pass",
+  "total_report",
+  "total_picture",
+  "date_report"
+ ],
+ "fields": [
+  {
+   "fieldname": "campaign_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Campaign Code"
+  },
+  {
+   "fieldname": "total_picture",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total picture"
+  },
+  {
+   "fieldname": "total_report_ai_pass",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Report AI Pass"
+  },
+  {
+   "fieldname": "total_report_human_pass",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Report Human Pass"
+  },
+  {
+   "fieldname": "total_report",
+   "fieldtype": "Int",
+   "label": "Total Report"
+  },
+  {
+   "fieldname": "total_customer_process",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Customer Process"
+  },
+  {
+   "fieldname": "date_report",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date Report"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-20 09:01:04.984564",
+ "modified_by": "Administrator",
+ "module": "mbw audit",
+ "name": "VGM_SummaryByCampaign",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
