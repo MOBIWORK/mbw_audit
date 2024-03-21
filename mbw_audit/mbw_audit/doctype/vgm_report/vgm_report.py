@@ -18,6 +18,7 @@ class VGM_Report(Document):
             fields=["name", "retail_code", "campaign_code", "employee_code", "images", "scoring_machine","scoring_human","images_time"]
         )
 		reports_campaign = [report for report in reports_campaign if report.images_time.date() == datetime.now().date()]
+		
 		arr_customer_process = []
 		total_picture = 0
 		for report in reports_campaign:
