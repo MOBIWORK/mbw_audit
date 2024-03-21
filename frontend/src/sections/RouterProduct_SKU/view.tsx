@@ -97,15 +97,15 @@ export default function Product_SKU() {
   const [editItemCategory, setEditItemCategory] = useState({});
   const [isModelOpenEditCategory, setIsModelOpenEditCategory] = useState(false);
   const [loadingAddCategory, setLoadingAddCategory] = useState<boolean>(false);
-  const [loadingDeleteProduct, setLoadingDeleteProduct] = useState<boolean>(false);
-  
+  const [loadingDeleteProduct, setLoadingDeleteProduct] =
+    useState<boolean>(false);
+
   const [loadingEditCategory, setLoadingEditCategory] =
     useState<boolean>(false);
 
   //biến cho sản phẩm theo danh mục
   const [loadingAddProduct, setLoadingAddProduct] = useState<boolean>(false);
   const [loadingEditProduct, setLoadingEditProduct] = useState<boolean>(false);
-
 
   const [loadingCheckProduct, setLoadingCheckProduct] =
     useState<boolean>(false);
@@ -123,6 +123,9 @@ export default function Product_SKU() {
   const [editItemProduct, setEditItemProduct] = useState({});
   const [isModelOpenEditProduct, setIsModelOpenEditProduct] = useState(false);
   const [fileUploadEditProduct, setFileUploadEditProduct] = useState([]);
+  const [idImageProduct, setIdImageProduct] = useState([]);
+  const [idAddImageProduct, setIdAddImageProduct] = useState([]);
+  
   const [barcodeEditProduct, setBarcodeEditProduct] = useState(null);
   const [productSelected, setProductSelected] = useState<DataType[]>([]);
   const [showDeleteList, setShowDeleteList] = useState(false);
@@ -219,18 +222,17 @@ export default function Product_SKU() {
     },
   };
   const propUploadAddProducts: UploadProps = {
-    onRemove: (file)=>{
-       // Lấy tên tệp tin từ thuộc tính name của file
-    const removedFileName = file.name;
-    // Loại bỏ tệp tin có tên trùng khớp khỏi mảng fileUploadAddProduct
-    setFileUploadAddProduct((prevFileUpload) =>
-      prevFileUpload.filter((item) => {
-        // Lấy tên tệp tin từ đường dẫn
-        const fileName = item.split('/').pop(); 
-        // So sánh tên tệp tin với tên tệp tin bị xóa
-        return fileName !== removedFileName;
-      })
-    );
+    onRemove: (file) => {
+      const removedFileName = file.name;
+      if (removedFileName) {
+        const indexToRemove = idAddImageProduct.indexOf(file.uid);
+        setFileUploadAddProduct((prevFileUpload) =>
+          prevFileUpload.filter((item, index) => index !== indexToRemove)
+        );
+        setIdAddImageProduct((prevFileUpload) =>
+          prevFileUpload.filter((item, index) => index !== indexToRemove)
+        );
+      }
     },
     beforeUpload: async (file) => {
       const isJpgOrPng =
@@ -265,6 +267,10 @@ export default function Product_SKU() {
           ...prevFileUpload,
           response.result.file_url,
         ]);
+        setIdAddImageProduct((previdUpload) => [
+          ...previdUpload,
+          file.uid,
+        ]);
         message.success("Tải ảnh thành công");
       } else {
         message.error("Tải ảnh thất bại");
@@ -272,8 +278,24 @@ export default function Product_SKU() {
       return false;
     },
   };
+
   const propUploadEditProducts: UploadProps = {
-    onRemove: (file) => {},
+    onRemove: (file) => {
+      // Lấy tên tệp tin từ thuộc tính name của file
+      const removedFileName = file.name;
+      // Loại bỏ tệp tin có tên trùng khớp khỏi mảng fileUploadAddProduct
+      if (removedFileName) {
+        const indexToRemove = idImageProduct.indexOf(file.uid);
+        setFileUploadEditProduct((prevFileUpload) =>
+          prevFileUpload.filter((item, index) => index !== indexToRemove)
+        );
+        setIdImageProduct((prevFileUpload) =>
+          prevFileUpload.filter((item, index) => index !== indexToRemove)
+        );
+      } else {
+        setFileListEdit(prevFileUpload => prevFileUpload.filter(file => !file.uid));
+      }
+    },
     beforeUpload: async (file) => {
       const isJpgOrPng =
         file.type === "image/jpeg" || file.type === "image/png";
@@ -306,6 +328,11 @@ export default function Product_SKU() {
         setFileUploadEditProduct((prevFileUpload) => [
           ...prevFileUpload,
           response.result.file_url,
+        ]);
+
+        setIdImageProduct((previdUpload) => [
+          ...previdUpload,
+          file.uid,
         ]);
         message.success("Tải ảnh thành công");
       } else {
@@ -697,78 +724,11 @@ export default function Product_SKU() {
   };
   const isBarcodeValid = (barcode) => {
     // Sử dụng biểu thức chính quy để kiểm tra xem barcode có chứa ký tự tiếng Việt không
-    const vietnameseRegex = /[\u00C0-\u1EF9\u1EFB-\u1F01\u1F03-\u1F57\u1F59-\u1F5B\u1F5D-\u1F5F\u1F60-\u1FC1\u1FC3-\u1FF9\u1FFB-\u1FFF]/;
-  
+    const vietnameseRegex =
+      /[\u00C0-\u1EF9\u1EFB-\u1F01\u1F03-\u1F57\u1F59-\u1F5B\u1F5D-\u1F5F\u1F60-\u1FC1\u1FC3-\u1FF9\u1FFB-\u1FFF]/;
+
     return !vietnameseRegex.test(barcode);
   };
-const handleOkAddProduct = async () => {
-  setLoadingAddProduct(true);
-  let objProduct = formAddProduct.getFieldsValue();
-
-  // Kiểm tra mã sản phẩm
-  if (objProduct.product_code) {
-    let productFilter = products.filter(
-      (x) =>
-        x.product_code.toLowerCase() === objProduct.product_code.toLowerCase()
-    );
-    if (productFilter.length > 0) {
-      message.error("Mã sản phẩm đã tồn tại");
-      setLoadingAddProduct(false);
-      return;
-    }
-  }
-
-  let arrImages = [];
-  for (let i = 0; i < fileUploadAddProduct.length; i++) {
-    arrImages.push(fileUploadAddProduct[i]);
-  }
-   // Kiểm tra mã vạch
-   if (!isBarcodeValid(objProduct.barcode_product)) {
-    message.error("Barcode không được chứa ký tự tiếng Việt");
-    setLoadingAddProduct(false);
-    return;
-  }
-  // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
-  if (!objProduct.product_name || arrImages.length === 0) {
-    // Hiển thị thông báo lỗi
-    message.error(
-      "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
-    );
-    setLoadingAddProduct(false);
-    return;
-  }
- 
-  let urlAddProduct = "/api/resource/VGM_Product";
-  let objProductCreate = {
-    barcode: objProduct.barcode_product,
-    product_code:
-      objProduct.product_code != null ? objProduct.product_code.trim() : null,
-    product_name:
-      objProduct.product_name != null ? objProduct.product_name.trim() : null,
-    product_description:
-      objProduct.product_description != null
-        ? objProduct.product_description.trim()
-        : null,
-    category: categorySelected.name,
-    images: JSON.stringify(arrImages),
-  };
-
-  let res = await AxiosService.post(urlAddProduct, objProductCreate);
-  if (res != null && res.data != null) {
-    message.success("Thêm mới thành công");
-    setLoadingAddProduct(false);
-    formAddProduct.resetFields();
-    let barcode = document.getElementById("barcode");
-    barcode.innerHTML = "";
-    setFileUploadAddProduct([]);
-    initDataProductByCategory();
-    handleCancelAddProduct();
-  } else {
-    message.error("Thêm mới thất bại");
-    setLoadingAddProduct(false);
-  }
-};
-
 
   const handleRenderBarcodeAddProduct = (event) => {
     renderBarcodeByValue(event.target.value);
@@ -806,29 +766,111 @@ const handleOkAddProduct = async () => {
   };
 
   const renderBarcodeByValue = (val) => {
-      JsBarcode("#barcode", val, {
-        width: 4,
-        height: 40,
-        displayValue: true,
-        font: "Arial",
-        text: val,
-        textMargin: 10,
-        fontSize: 13,
-        background: "#F5F7FA",
-      });
-  
+    JsBarcode("#barcode", val, {
+      width: 4,
+      height: 40,
+      displayValue: true,
+      font: "Arial",
+      text: val,
+      textMargin: 10,
+      fontSize: 13,
+      background: "#F5F7FA",
+    });
   };
+  const handleOkAddProduct = async () => {
+    setLoadingAddProduct(true);
+    let objProduct = formAddProduct.getFieldsValue();
 
+    // Kiểm tra mã sản phẩm
+    if (objProduct.product_code) {
+      let productFilter = products.filter(
+        (x) =>
+          x.product_code.toLowerCase() === objProduct.product_code.toLowerCase()
+      );
+      if (productFilter.length > 0) {
+        message.error("Mã sản phẩm đã tồn tại");
+        setLoadingAddProduct(false);
+        return;
+      }
+    }
+
+    let arrImages = [];
+    for (let i = 0; i < fileUploadAddProduct.length; i++) {
+      arrImages.push(fileUploadAddProduct[i]);
+    }
+    // Kiểm tra mã vạch
+    if (!isBarcodeValid(objProduct.barcode_product)) {
+      message.error("Barcode không được chứa ký tự tiếng Việt");
+      setLoadingAddProduct(false);
+      return;
+    }
+    // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
+    if (!objProduct.product_name || arrImages.length === 0) {
+      // Hiển thị thông báo lỗi
+      message.error(
+        "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
+      );
+      setLoadingAddProduct(false);
+      return;
+    }
+
+    let urlAddProduct = "/api/resource/VGM_Product";
+    let objProductCreate = {
+      barcode: objProduct.barcode_product,
+      product_code:
+        objProduct.product_code != null ? objProduct.product_code.trim() : null,
+      product_name:
+        objProduct.product_name != null ? objProduct.product_name.trim() : null,
+      product_description:
+        objProduct.product_description != null
+          ? objProduct.product_description.trim()
+          : null,
+      category: categorySelected.name,
+      images: JSON.stringify(arrImages),
+    };
+
+    let res = await AxiosService.post(urlAddProduct, objProductCreate);
+    if (res != null && res.data != null) {
+      message.success("Thêm mới thành công");
+      setLoadingAddProduct(false);
+      formAddProduct.resetFields();
+      let barcode = document.getElementById("barcode");
+      barcode.innerHTML = "";
+      setFileUploadAddProduct([]);
+      setIdAddImageProduct([]);
+      initDataProductByCategory();
+      handleCancelAddProduct();
+    } else {
+      message.error("Thêm mới thất bại");
+      setLoadingAddProduct(false);
+    }
+  };
   const handleOkEditProduct = async () => {
     setLoadingEditProduct(true);
     let arrImage = [];
     let objProduct = formEditProduct.getFieldsValue();
-    for (let i = 0; i < fileListEdit.length; i++)
-      if (fileListEdit[i].url_base != null && fileListEdit[i].url_base != "")
+    if (!isBarcodeValid(objProduct.barcode_product)) {
+      message.error("Barcode không được chứa ký tự tiếng Việt");
+      setLoadingEditProduct(false);
+      return;
+    }
+    // Lặp qua mảng fileListEdit và thêm các URL hình ảnh vào arrImage
+    for (let i = 0; i < fileListEdit.length; i++) {
+      // Kiểm tra nếu có URL và không phải là null hoặc rỗng
+      if (
+        fileListEdit[i].url_base &&
+        fileListEdit[i].url_base !== null &&
+        fileListEdit[i].url_base !== ""
+      ) {
         arrImage.push(fileListEdit[i].url_base);
-    if (fileUploadEditProduct != null)
-      for (let i = 0; i < fileUploadEditProduct.length; i++)
-        arrImage.push(fileUploadEditProduct[i].file_url);
+      }
+    }
+    // Kiểm tra và thêm các URL hình ảnh từ fileUploadEditProduct vào arrImage
+    if (fileUploadEditProduct !== null) {
+      for (let i = 0; i < fileUploadEditProduct.length; i++) {
+        arrImage.push(fileUploadEditProduct[i]);
+      }
+    }
     let urlEditProduct = `/api/resource/VGM_Product/${editItemProduct.name}`;
     let objProductEdit = {
       barcode: objProduct.barcode_product,
@@ -851,6 +893,7 @@ const handleOkAddProduct = async () => {
       let barcode = document.getElementById("barcode");
       barcode.innerHTML = "";
       setFileUploadEditProduct([]);
+      setIdImageProduct([])
       initDataProductByCategory();
       handleCancelEditProduct();
     } else {
@@ -861,6 +904,7 @@ const handleOkAddProduct = async () => {
 
   const handleCancelEditProduct = () => {
     setIsModelOpenEditProduct(false);
+    setLoadingEditProduct(false);
   };
 
   const handleClickDeleteProduct = (item) => {
@@ -877,7 +921,7 @@ const handleOkAddProduct = async () => {
   const handleDeleteOkProduct = async () => {
     let arrIdDelete = [];
     try {
-      setLoadingDeleteProduct(true)
+      setLoadingDeleteProduct(true);
       arrIdDelete = [deleteItemProduct.item.name];
       let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
       let dataDeletePost = {
@@ -893,15 +937,15 @@ const handleOkAddProduct = async () => {
         message.success("Xóa thành công");
         setDeleteItemProduct({});
         initDataProductByCategory();
-        setLoadingDeleteProduct(false)
+        setLoadingDeleteProduct(false);
         handleDeleteCancelProduct();
       } else {
         message.error("Xóa thất bại , Sản phẩm đang được sử dụng");
-        setLoadingDeleteProduct(false)
+        setLoadingDeleteProduct(false);
       }
     } catch (error) {
       message.error("Xóa thất bại,Có lỗi xảy ra khi xóa sản phẩm");
-      setLoadingDeleteProduct(false)
+      setLoadingDeleteProduct(false);
     }
   };
 
@@ -915,31 +959,34 @@ const handleOkAddProduct = async () => {
 
   const handleDeleteListOkProduct = async () => {
     try {
-        let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
-        let arrIdDelete = [];
-        for (let i = 0; i < productSelected.length; i++)
-            arrIdDelete.push(productSelected[i].name);
-        let dataDeletePost = {
-            doctype: "VGM_Product",
-            items: JSON.stringify(arrIdDelete),
-        };
+      let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
+      let arrIdDelete = [];
+      for (let i = 0; i < productSelected.length; i++)
+        arrIdDelete.push(productSelected[i].name);
+      let dataDeletePost = {
+        doctype: "VGM_Product",
+        items: JSON.stringify(arrIdDelete),
+      };
 
-        let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
+      let res = await AxiosService.post(urlDeleteByList, dataDeletePost);
 
-        if (res != null && res.message != null && res.message.status == "success") {
-            message.success("Xóa thành công");
-            setProductSelected([]);
-            setShowDeleteList(false);
-            initDataProductByCategory();
-            handleDeleteListCancelProduct();
-        } else {
-          message.error("Xóa thất bại, có sản phẩm đã tồn tại trong báo cáo");
-        }
+      if (
+        res != null &&
+        res.message != null &&
+        res.message.status == "success"
+      ) {
+        message.success("Xóa thành công");
+        setProductSelected([]);
+        setShowDeleteList(false);
+        initDataProductByCategory();
+        handleDeleteListCancelProduct();
+      } else {
+        message.error("Xóa thất bại, có sản phẩm đã tồn tại trong báo cáo");
+      }
     } catch (error) {
-        message.error("Có lỗi xảy ra khi xóa sản phẩm");
+      message.error("Có lỗi xảy ra khi xóa sản phẩm");
     }
-};
-
+  };
 
   const handleDeleteListCancelProduct = () => {
     setIsModelOpenDeleteList(false);
@@ -950,82 +997,81 @@ const handleOkAddProduct = async () => {
   };
 
   const handleOkCheckProduct = async () => {
-    if(products.length == 0){
-      message.error("Chưa thêm thêm sản phẩm cho danh mục này")
+    if (products.length == 0) {
+      message.error("Chưa thêm thêm sản phẩm cho danh mục này");
       setLoadingCheckProduct(false);
-      return
+      return;
     }
-    if(fileUploadCheckProduct.length == 0){
-      message.error("Chưa thêm hình ảnh nhận diện")
+    if (fileUploadCheckProduct.length == 0) {
+      message.error("Chưa thêm hình ảnh nhận diện");
       setLoadingCheckProduct(false);
-      return
-    }else{
+      return;
+    } else {
       setLoadingCheckProduct(true);
-    let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
-    console.log(fileUploadCheckProduct);
-    let objCheckProduct = {
-      collection_name: categorySelected.name,
-      linkimages:
+      let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
+      console.log(fileUploadCheckProduct);
+      let objCheckProduct = {
+        collection_name: categorySelected.name,
+        linkimages:
+          fileUploadCheckProduct.length > 0
+            ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
+            : "",
+      };
+      let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
+      let arrProductDetect = [];
+      for (let i = 0; i < products.length; i++) {
+        arrProductDetect.push({
+          key: products[i].name,
+          product_code: products[i].product_code,
+          product_name: products[i].product_name,
+          product_count: 0,
+        });
+      }
+      if (res != null && res.message != null) {
+        if (res.message.status == "failed") {
+          setLoadingCheckProduct(false);
+          message.error("Không thể kiểm tra ảnh sản phẩm");
+        } else {
+          setUrlImageAI(
+            "data:image/png;base64," +
+              res.message.results.verbose[0].base64_image
+          );
+          let arrBoxes = [];
+          arrProductDetect.forEach((item) => {
+            if (res.message.results.count[item.product_name] != null)
+              item.product_count = res.message.results.count[item.product_name];
+            let locates = res.message.results.verbose[0].locates;
+
+            // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+            let locatesWithLabel = locates.filter(function (obj) {
+              return obj.label === item.product_name;
+            });
+            let newObjectBoxes = locatesWithLabel.map(function (box) {
+              let bbox = box.bbox;
+              return {
+                x: bbox[0],
+                y: bbox[1],
+                width: bbox[2] - bbox[0],
+                height: bbox[3] - bbox[1],
+                label: box.label,
+              };
+            });
+            arrBoxes = arrBoxes.concat(newObjectBoxes);
+          });
+          setObjectBoxes(arrBoxes);
+        }
+      }
+
+      setUrlImageCheckProductResult(
         fileUploadCheckProduct.length > 0
           ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
-          : "",
-    };
-    let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
-    let arrProductDetect = [];
-    for (let i = 0; i < products.length; i++) {
-      arrProductDetect.push({
-        key: products[i].name,
-        product_code: products[i].product_code,
-        product_name: products[i].product_name,
-        product_count: 0,
-      });
+          : ""
+      ); //import.meta.env.VITE_BASE_URL+
+      setLoadingCheckProduct(false);
+      setResultProductCheck(arrProductDetect);
+      setIsModelResultProduct(true);
+      handleCancelCheckProduct();
     }
-    if (res != null && res.message != null) {
-      if(res.message.status == "failed"){
-        setLoadingCheckProduct(false);
-        message.error("Không thể kiểm tra ảnh sản phẩm")
-      }else{
-        setUrlImageAI(
-          "data:image/png;base64," + res.message.results.verbose[0].base64_image
-        );
-        let arrBoxes = [];
-        arrProductDetect.forEach((item) => {
-          if (res.message.results.count[item.product_name] != null)
-            item.product_count = res.message.results.count[item.product_name];
-          let locates = res.message.results.verbose[0].locates;
-  
-          // Lọc các đối tượng có trường label bằng giá trị của item.product_name
-          let locatesWithLabel = locates.filter(function (obj) {
-            return obj.label === item.product_name;
-          });
-          let newObjectBoxes = locatesWithLabel.map(function (box) {
-            let bbox = box.bbox;
-            return {
-              x: bbox[0],
-              y: bbox[1],
-              width: bbox[2] - bbox[0],
-              height: bbox[3] - bbox[1],
-              label: box.label,
-            };
-          });
-          arrBoxes = arrBoxes.concat(newObjectBoxes);
-        });
-        setObjectBoxes(arrBoxes);
-      }
-     
-    }
-
-    setUrlImageCheckProductResult(
-      fileUploadCheckProduct.length > 0
-        ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
-        : ""
-    ); //import.meta.env.VITE_BASE_URL+
-    setLoadingCheckProduct(false);
-    setResultProductCheck(arrProductDetect);
-    setIsModelResultProduct(true);
-    handleCancelCheckProduct();
-    }
-    
   };
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -1139,9 +1185,8 @@ const handleOkAddProduct = async () => {
       });
     }
     setProductFromERP(arrProductERPSource);
-   
   };
- 
+
   const handleSaveProductFromERP = async () => {
     //Goi dich vu luu san pham tu erp
     setLoadingAddListProduct(true);
@@ -1676,7 +1721,12 @@ const handleOkAddProduct = async () => {
           <Button key="submit" onClick={handleDeleteCancelProduct}>
             Hủy
           </Button>,
-          <Button key="submit" type="primary" loading={loadingDeleteProduct} onClick={handleDeleteOkProduct}>
+          <Button
+            key="submit"
+            type="primary"
+            loading={loadingDeleteProduct}
+            onClick={handleDeleteOkProduct}
+          >
             Xác nhận
           </Button>,
         ]}

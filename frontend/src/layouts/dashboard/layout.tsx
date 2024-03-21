@@ -9,17 +9,10 @@ type Props = {
 const { Content, Sider, theme } = Layout;
 export default function DashboardLayout({ children }: Props) {
   return (
-    // <div className="bg-[#F5F7FA] w-screen min-h-screen">
-    //   <Header />
-    //   <div className="flex">
-    //     <MenuLeft />
-    //     {/* <div className='max-w-full w-[80%] mx-auto'><div  className="rounded-md">{children}</div></div> */}
-    //   </div>
-    // </div>
     <Layout>
       <Content
         style={{ padding: "0 0px" }}
-        className="!bg-[#fff] w-screen min-h-screen"
+        className="!bg-[#fff]  min-h-screen"
       >
         <Header />
         <Layout
