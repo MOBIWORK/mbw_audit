@@ -18,15 +18,17 @@ from datetime import datetime
 import base64
 import cv2
 from mbw_audit.utils import appconst
+from mbw_sfc_integrations.sfc_integrations.utils import create_sfc_log
+from frappe import _, msgprint
 
 @frappe.whitelist(methods=["POST"])
 def test_queue(*args,**kwargs):
     #process_queue('Test label')
-    result = frappe.enqueue(process_queue, queue='short', timeout=500)
-    return result
+    frappe.enqueue("mbw_audit.api.api.process_queue", par={"pro": "one"})
+    return "ok"
 
-def process_queue():
-    return "sucess"
+def process_queue(par):
+    res = 1+1
 
 
 @frappe.whitelist(methods=["POST"])
@@ -126,9 +128,7 @@ def get_campaign_info(*args,**kwargs):
 
 @frappe.whitelist(methods=["POST"])
 def record_report_data(*args, **kwargs):
-    date_format_with_time = '%Y/%m/%d %H:%M:%S'
-    images_time = float(kwargs.get('images_time'))
-    images_time = datetime.fromtimestamp(images_time).strftime(date_format_with_time)
+    images_time = datetime.now()
     category = json.loads(kwargs.get('category'))
     categories_str = json.dumps(category)  # Chuyển đổi danh sách thành chuỗi JSON
     images = json.loads(kwargs.get('images'))
@@ -150,16 +150,19 @@ def record_report_data(*args, **kwargs):
         }
         doc = frappe.get_doc(data)
         doc.insert()
-        #process_request({'name': doc.name, 'report_images': images, 'category': category, 'setting_score_audit': setting_score_audit}, "process_report_sku")
-        #frappe.enqueue(process_report_sku, queue='short', name=doc.name, report_images=kwargs.get("images"), category=category)
-        process_report_sku(doc.name, images, category, setting_score_audit)
-
+        input_report_sku = {"name_doc": doc.name, "report_images": images, "category": category, "setting_score_audit": setting_score_audit}
+        #process_report_sku(input_report_sku)
+        frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
 
-def process_report_sku(name, report_images, category, setting_score_audit):
+def process_report_sku(input_sku): #name, report_images, category, setting_score_audit
     try:
+        name = input_sku["name_doc"]
+        report_images = input_sku["report_images"]
+        category = input_sku["category"]
+        setting_score_audit = input_sku["setting_score_audit"]
         products_by_category = []
         for category_id in category:
             # Truy vấn các sản phẩm có category tương ứng
@@ -229,13 +232,36 @@ def process_report_sku(name, report_images, category, setting_score_audit):
                 else:
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps([]))
             if setting_score_audit is not None:
-                frappe.db.set_value('VGM_Report', name, 'scoring_machine', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
-                frappe.db.set_value('VGM_Report', name, 'scoring_human', 0 if 0 in score_by_products else 1 if 1 in score_by_products else -1)
+                doc_report = frappe.get_doc("VGM_Report", name)
+                doc_report.scoring_machine = 0 if 0 in score_by_products else 1 if 1 in score_by_products else 0
+                doc_report.scoring_human = 0 if 0 in score_by_products else 1 if 1 in score_by_products else 0
+                doc_report.save()
             else:
-                frappe.db.set_value('VGM_Report', name, 'scoring_machine', -1)
-                frappe.db.set_value('VGM_Report', name, 'scoring_human', -1)
+                doc_report = frappe.get_doc("VGM_Report", name)
+                doc_report.scoring_machine = 0
+                doc_report.scoring_human = 0
+                doc_report.save()
+        write_upload_log(status=True, input_sku=input_sku, name_report=name, method="mbw_audit.api.api.process_report_sku")
     except Exception as e:
-        print({'status': 'fail', 'message': _("Failed to add VGM Report: {0}").format(str(e))})
+        write_upload_log(status=False, input_sku=input_sku, name_report=name, method="mbw_audit.api.api.process_report_sku")
+
+def write_upload_log(status: bool, input_sku, name_report, method="mbw_audit.api.api.process_report_sku"):
+    if not status:
+        msg = f"Failed to counting product to sfc " + "<br>"
+        msgprint(msg, title="Note", indicator="orange")
+        create_sfc_log(
+            status="Error",  
+            request_data=input_sku, 
+            message=msg, 
+            method=method,
+        )
+    else:
+        create_sfc_log(
+            status="Success",
+            request_data=input_sku,
+            message=f"report_sku: {name_report}",
+            method=method,
+        )
 
 def render_image_ai(verbose):
     arr_image_ai = []

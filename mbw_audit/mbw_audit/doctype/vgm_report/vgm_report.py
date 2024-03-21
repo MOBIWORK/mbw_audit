@@ -17,8 +17,7 @@ class VGM_Report(Document):
             filters={"campaign_code": campaign_code},
             fields=["name", "retail_code", "campaign_code", "employee_code", "images", "scoring_machine","scoring_human","images_time"]
         )
-		reports_campaign = [report for report in reports_campaign if report.images_time.date() == datetime.now().date()]
-		
+		reports_campaign = [report for report in reports_campaign if report.images_time.date() == datetime.now().date()]	
 		arr_customer_process = []
 		total_picture = 0
 		for report in reports_campaign:
@@ -29,7 +28,7 @@ class VGM_Report(Document):
 				total_picture += len(arrImage)
 		arr_report_ai_pass = [report for report in reports_campaign if report.get("scoring_machine") == 1]
 		arr_report_human_pass = [report for report in reports_campaign if report.get("scoring_human") == 1]
-		exist_doc = frappe.db.exists({"doctype": "VGM_SummaryByCampaign", "date_report": datetime.now().date()})
+		exist_doc = frappe.db.exists("VGM_SummaryByCampaign", { "date_report": datetime.now().date(), "campaign_code": campaign_code})
 		if exist_doc is not None:
 			frappe.db.set_value('VGM_SummaryByCampaign', exist_doc, {
 				'total_customer_process': len(arr_customer_process),
@@ -59,7 +58,7 @@ class VGM_Report(Document):
 			if report.get("images") is not None:
 				arrImage = json.loads(report.get("images"))
 				total_picture += len(arrImage)
-		exist_doc = frappe.db.exists({"doctype": "VGM_SummaryPictureByUser", "date_report": datetime.now().date()})
+		exist_doc = frappe.db.exists("VGM_SummaryPictureByUser", {"date_report": datetime.now().date(), "employee_code": employee_code})
 		if exist_doc is not None:
 			frappe.db.set_value('VGM_SummaryPictureByUser', exist_doc, {
 				'total_picture': total_picture
