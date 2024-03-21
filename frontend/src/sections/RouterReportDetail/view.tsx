@@ -107,7 +107,7 @@ export default function ReportDetail() {
     },
     {
       title: "Ảnh gian hàng AI",
-      dataIndex: "images",
+      dataIndex: "images_ai",
       render: (item) => (
         <a onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
@@ -203,7 +203,7 @@ export default function ReportDetail() {
     },
     {
       title: "Ảnh gian hàng AI",
-      dataIndex: "images",
+      dataIndex: "images_ai",
       render: (item) => (
         <a onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
