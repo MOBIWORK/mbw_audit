@@ -256,9 +256,12 @@ export default function Product({
   };
 
   const handleDeleteCategory = (item) => {
-    const updatedCategoriesSelected = categoriesSelected.filter(
-      (category) => category.name !== item.name
-    );
+    const updatedCategoriesSelected = categoriesSelected
+    .filter((category) => category.name !== item.name)
+    .map((category, index) => ({
+      ...category,
+      stt: index + 1,
+    }));
     const updatedProductSelected = productSelected.filter(
       (product) => product.cate_name !== item.category_name
     );
@@ -357,9 +360,7 @@ export default function Product({
     setProductSelected(updatedRowData);
     onChangeCategory(categoriesSelected);
   };
-  const handleQuantityChangeProduct = (index: number, newValue: number) => {
-  
-  };
+  const handleQuantityChangeProduct = (index: number, newValue: number) => {};
   const handleDragRowEvent = (data: any) => {
     let arrSequenceProduct = data.map((x) => x.name);
     setSequenceProducts(arrSequenceProduct);

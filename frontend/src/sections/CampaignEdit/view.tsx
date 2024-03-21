@@ -102,6 +102,7 @@ export default function CampaignEdit() {
         let endDate = convertDate(objFrm.campaign_end);
         if (startDate >= endDate) {
             message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
+            setLoadingEditCampaign(false);
             return; // Dừng lại nếu có lỗi
         }
 

@@ -33,6 +33,7 @@ export default function CampaignCreate() {
         // Kiểm tra nếu start_date bé hơn end_date
         if (startDate >= endDate) {
             message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
+            setLoadingAddCampaign(false);
             return; // Dừng lại nếu có lỗi
         }
 

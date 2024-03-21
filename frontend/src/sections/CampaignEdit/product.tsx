@@ -292,9 +292,12 @@ export default function ProductCampaignEdit({
   };
 
   const handleDeleteCategory = (item) => {
-    const updatedCategoriesSelected = categoriesSelected.filter(
-      (category) => category.name !== item.name
-    );
+    const updatedCategoriesSelected = categoriesSelected
+    .filter((category) => category.name !== item.name)
+    .map((category, index) => ({
+      ...category,
+      stt: index + 1,
+    }));
     const updatedProductSelected = productSelected.filter(
       (product) => product.cate_name !== item.category_name
     );
