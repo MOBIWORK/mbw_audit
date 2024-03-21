@@ -465,8 +465,13 @@ def summary_campaign():
                     total_report_human_pass += report.get("total_report_human_pass")
                     total_report += report.get("total_report")
                     total_picture += report.get("total_picture")
-                ratio_ai_evaluate = (total_report_ai_pass/total_report)*100
-                ratio_human_evaluate = (total_report_human_pass/total_report)*100
+                if total_report == 0:
+                    ratio_ai_evaluate = 0
+                    ratio_human_evaluate = 0
+                else:
+                    ratio_ai_evaluate = (total_report_ai_pass/total_report)*100
+                    ratio_human_evaluate = (total_report_human_pass/total_report)*100
+                
                 if campaign_source.get("retails") is not None:
                     retails = json.loads(campaign_source.get("retails"))
                     if len(retails) > 0:
