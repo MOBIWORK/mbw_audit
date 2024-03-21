@@ -687,7 +687,6 @@ export default function ProductCampaignEdit({
               {
                 title: "Chọn thứ tự",
                 dataIndex: "sequence_product",
-                dataIndex: "sequence_product",
                 render: (
                   item: number,
                   rowData: DataType,
