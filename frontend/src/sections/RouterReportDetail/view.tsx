@@ -9,7 +9,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined
 } from "@ant-design/icons";
-import { Input, TableColumnsType, DatePicker, Select } from "antd";
+import { Input, TableColumnsType, DatePicker, Select,Image } from "antd";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
@@ -52,6 +52,9 @@ export default function ReportDetail() {
   const [searchEmployee, setSearchEmployee] = useState('all'); // Mặc định là 'all'
   const [searchAIEvalue, setSearchAIEvalue] = useState('all');
   const [searchHumanEvalue, setSearchHumanEvalue] = useState('all');
+
+  const [imageButtonClick, setImageButtonClick] = useState(false);
+
   const [arrSourceEvalue, setArrSourceEvalue] = useState<any[]>(
     [
       {'label': "Đạt", 'value': 1},
@@ -96,19 +99,21 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng",
       dataIndex: "images",
       render: (item) => (
-        <>
-          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
-        </>
-      )
+        <a onClick={(event) => {
+            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+        }}>Xem hình ảnh</a>
+    )
     },
     {
       title: "Ảnh gian hàng AI",
       dataIndex: "images",
       render: (item) => (
-        <>
-          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
-        </>
-      )
+        <a onClick={(event) => {
+            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+        }}>Xem hình ảnh</a>
+    )
     },
     {
       title: "Thời gian thực hiện",
@@ -140,7 +145,6 @@ export default function ReportDetail() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const campaign = params.get('campaign');
-  console.log(campaign);
   // if(campaign != null && campaign != "" && campaign != "all"){
   //   setSearchCampaign(campaign);
   // }
@@ -150,9 +154,11 @@ export default function ReportDetail() {
   const [campaignSources, setCampaignSources] = useState<any[]>([]);
 
   const handleRowClick = (record) => {
-    // Lưu record vào local storage
+      // Lưu record vào local storage
     localStorage.setItem('recordData', JSON.stringify(record));
     navigate(`/report-view`);
+  
+   
   };
   useEffect(() => {
     initDataEmployee();
@@ -160,9 +166,6 @@ export default function ReportDetail() {
     fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
   }, []);
 
-  const handleShowImage = (image) => {
-    console.log(image)
-  }
 
   const columns: TableColumnsType<DataTypeReport> = [
     {
@@ -192,19 +195,21 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng",
       dataIndex: "images",
       render: (item) => (
-        <>
-          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
-        </>
-      )
+        <a onClick={(event) => {
+            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+        }}>Xem hình ảnh</a>
+    )
     },
     {
       title: "Ảnh gian hàng AI",
       dataIndex: "images",
       render: (item) => (
-        <>
-          <a onClick={() => handleShowImage(item)}>Xem hình ảnh</a>
-        </>
-      )
+        <a onClick={(event) => {
+            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+        }}>Xem hình ảnh</a>
+    )
     },
     {
       title: "Thời gian thực hiện",
@@ -251,6 +256,13 @@ export default function ReportDetail() {
 ];
 
 const fetchDataReport = async () => {
+  const localData = JSON.parse(localStorage.getItem('campaign_dashboard'));
+  if(localData){
+    setSearchCampaign(localData.campaign_code)
+    setIsGroupByCampaign(true)
+       // Xóa dữ liệu đã lưu trong localStorage
+    localStorage.removeItem('campaign_dashboard');
+  }  
   let urlReports = "/api/method/mbw_audit.api.api.get_reports_by_filter";
   if(searchCampaign != null && searchCampaign != "" && searchCampaign != "all"){
     urlReports = `${urlReports}?campaign_code=${searchCampaign}`;
@@ -443,7 +455,19 @@ const initDataCampaigns = async () => {
       setIsGroupByCampaign(true);
     }
   }
-
+  const [itemImage, setItemImage] = useState<any[]>([]);
+  const [previewVisible, setPreviewVisible] = useState(false); // Thiết lập mặc định là true để hiển thị chế độ preview
+  
+  const handlePreviewVisibleChange = (visible) => {
+    setPreviewVisible(false); // Đặt previewVisible thành false khi chế độ xem preview đóng lại
+    setItemImage([]);
+  };
+  
+  const handleImageClick = (item) => {
+    const imageArray = JSON.parse(item);
+    setItemImage(imageArray);
+    setPreviewVisible(true); // Mở chế độ xem preview khi click vào hình ảnh
+  };
   return (
     <>
       <HeaderPage
@@ -459,7 +483,11 @@ const initDataCampaigns = async () => {
           },
         ]}
       />
+ 
+
+ 
       <div className="bg-white rounded-xl">
+      
         <div className="flex p-4" style={{ alignItems: 'flex-end' }}>
         <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '15px' }}>
           <label style={{paddingBottom: '5px'}}>Chiến dịch:</label>
@@ -556,6 +584,15 @@ const initDataCampaigns = async () => {
           }
         </div>
       </div>
+      <Image.PreviewGroup preview={{ visible: previewVisible, onVisibleChange: handlePreviewVisibleChange }}>
+    {itemImage.map((url, index) => (
+      <Image style={{display:'none'}}
+        key={index}
+        width={50}
+        src={url}
+      />
+    ))}
+  </Image.PreviewGroup>
     </>
   );
 

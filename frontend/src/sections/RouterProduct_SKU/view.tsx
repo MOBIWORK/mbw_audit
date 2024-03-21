@@ -1565,7 +1565,7 @@ const handleOkAddProduct = async () => {
                 onChange={onChangeImageFormAddProduct}
                 onPreview={onPreview}
               >
-                {fileList.length < 5 && "+ Upload"}
+                {"+ Upload"}
               </Upload>
             </FormItemCustom>
           </Form>

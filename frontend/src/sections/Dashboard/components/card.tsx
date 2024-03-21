@@ -1,5 +1,7 @@
 import classNames from "classnames";
 import { ReactNode } from "react";
+import './inforcard.css';
+import { useNavigate } from "react-router-dom";
 import { Downicon, Upicon } from "./icons";
 import { ChartCustom,HorizontalBarChart } from "./chart";
 import { TableCustom } from "../../../components";
@@ -40,6 +42,12 @@ export const Overview =({data}: {data:any}) => {
     </WrapperCard>
 }
 export const InfoCard =({data}: {data:any}) => {
+  const navigate = useNavigate();
+  const handleRowClick = (record: any) => {
+    // Xử lý sự kiện click vào từng hàng ở đây
+    localStorage.setItem('campaign_dashboard', JSON.stringify(record));
+    navigate(`/reports`);
+};
     return <WrapperCardTable >
           <p className="text-base font-medium pl-2" style={{
       fontSize: '15px',
@@ -51,8 +59,12 @@ export const InfoCard =({data}: {data:any}) => {
             {data.title}
             </p>
            <TableCustom style={{height:'100%'}} scroll={{ y: 270 }}
+            rowClassName="row-pointer"
             columns={data.data.columns}
             dataSource={data.data.source}
+            onRow={(record: any) => ({
+              onClick: () => handleRowClick(record)
+          })}
           />
     </WrapperCardTable>
 }
@@ -71,6 +83,7 @@ export const InfoCardEmploy =({data}: {data:any}) => {
            <TableCustom style={{height:'100%'}} pagination={{ pageSize: 5 }} scroll={{ y: 270 }} size="small"
             columns={data.data.columns}
             dataSource={data.data.source}
+            
           />
         </div>
          

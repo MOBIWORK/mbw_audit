@@ -356,10 +356,10 @@ let resEmployeeTakePic = await AxiosService.get(
   urlDashboardEmployeeTakePicture
 );
     if (resCampaign.message == "ok") {
-      console.log(resCampaign.result.data);
       colTableTyLe["source"] = resCampaign.result.data.map((item, index) => {
         return {
           stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
+          campaign_code: item.id,
           campaign_name: item.campaign_name,
           tyle_ai: item.ratio_ai_evaluate, // Bạn cần tính toán tỷ lệ AI dựa trên dữ liệu của mình
           tyle_giamsat: item.ratio_human_evaluate, // Tương tự, bạn cần tính toán tỷ lệ giám sát
@@ -433,12 +433,12 @@ let resEmployeeTakePic = await AxiosService.get(
         data: campaign_start,
         show_ratio: false
       });
-    
+     
       setDataBaoCaoAI({
         title: "Số báo cáo AI chấm đạt",
         data: report_pass_ai,
         show_ratio: true,
-        ratio: Math.round((report_pass_ai / num_reports) * 100)
+        ratio: num_reports !== 0 ? Math.round((report_pass_ai / num_reports) * 100) : 0
       });
     
       setDataGiamSat(
@@ -446,7 +446,7 @@ let resEmployeeTakePic = await AxiosService.get(
           title: "Số báo cáo giám sát chấm đạt",
           data: report_pass_human,
           show_ratio: true,
-          ratio: Math.round((report_pass_human / num_reports) * 100)
+          ratio: num_reports !== 0 ? Math.round((report_pass_human / num_reports) * 100) : 0
         }
       )
     
