@@ -151,8 +151,8 @@ def record_report_data(*args, **kwargs):
         doc = frappe.get_doc(data)
         doc.insert()
         input_report_sku = {"name_doc": doc.name, "report_images": images, "category": category, "setting_score_audit": setting_score_audit}
-        #process_report_sku(input_report_sku)
-        frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
+        process_report_sku(input_report_sku)
+        #frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
@@ -192,6 +192,7 @@ def process_report_sku(input_sku): #name, report_images, category, setting_score
                     for info_product in info_products:
                         lst_product_check[info_product.get("product_name")] = 0
                     resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                print("dòng 195 ", resultExistProduct)
                 #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
                 if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
                     obj_setting_sequences = setting_score_audit.get("sequence_product", [])
@@ -279,6 +280,7 @@ def render_image_ai(verbose):
         current_datetime = now_datetime()
         path_folder = create_folder(f"{current_datetime.month}", f"booth_product_ai/{frappe.session.user}/{current_datetime.year}")
         fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_product_ai", path_folder)
+        print("Dòng 282 ", frappe.utils.get_request_site_address() )
         arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
     return arr_image_ai
 
@@ -323,7 +325,8 @@ def get_reports_by_filter():
             filters["scoring_human"] = status_scoring_human
         report_sources = frappe.get_all("VGM_Report",
             filters=filters,
-            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"]
+            fields=["name", "retail_code", "campaign_code", "employee_code", "categories", "images", "images_time", "scoring_machine", "image_ai","scoring_human"],
+            order_by='images_time desc'
         )
         lst_report = []
         for report_source in report_sources:
