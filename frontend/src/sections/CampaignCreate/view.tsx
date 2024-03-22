@@ -41,11 +41,6 @@ export default function CampaignCreate() {
         let objSettingScore = {};
         let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
         if (checkExistProduct) {
-            // let objMinProduct = {};
-            // propertiesSettingScore.forEach(item => {
-            //     let valSettingScore = scoreSelected[item];
-            //     objMinProduct[item] = valSettingScore.min_product;
-            // })
             objSettingScore["min_product"] = scoreSelected.min_product;
         }
 
