@@ -1,6 +1,6 @@
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 
-import { Flex, Progress, Avatar,Form } from "antd";
+import { Flex, Progress, Avatar, Form } from "antd";
 import {
   Overview,
   InfoCard,
@@ -35,8 +35,6 @@ export default function Dashboard() {
   const [dataKhachHangThamgia, setDataKhachHangThamgia] = useState({});
   const [dataNhanVienThucHien, setDataNhanVienThucHien] = useState({});
 
-
-
   const [colTableTyLeDat, setColTableTyLeDat] = useState({});
   const [colTableTienDoTyLe, setColTableTienDoTyLe] = useState({});
   const [chienDichThucHien, setChienDichThucHien] = useState({});
@@ -48,13 +46,12 @@ export default function Dashboard() {
       {
         title: "STT",
         dataIndex: "stt",
-        width:'10%'
+        width: "10%",
       },
       {
         title: "Chiến dịch",
         dataIndex: "campaign_name",
-        width:'40%'
-
+        width: "40%",
       },
       {
         title: "Tỷ lệ AI chấm",
@@ -327,44 +324,51 @@ export default function Dashboard() {
   const initDataDashboard = async () => {
     let startDateTimestamp = null;
     let endDateTimestamp = null;
-    if (searchTime && searchTime.length === 2 && searchTime[0] && searchTime[1]) {
-        const startDate = new Date(searchTime[0]);
-        startDate.setUTCHours(0, 0, 0, 0);
-        startDateTimestamp = Math.floor(startDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
+    if (
+      searchTime &&
+      searchTime.length === 2 &&
+      searchTime[0] &&
+      searchTime[1]
+    ) {
+      const startDate = new Date(searchTime[0]);
+      startDate.setUTCHours(0, 0, 0, 0);
+      startDateTimestamp = Math.floor(startDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
 
-        const endDate = new Date(searchTime[1]);
-        endDate.setUTCHours(23, 59, 59, 999);
-        endDateTimestamp = Math.floor(endDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
-        if (startDate >= endDate) {
-          message.error("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.");
-          return; // Dừng hàm nếu có lỗi
+      const endDate = new Date(searchTime[1]);
+      endDate.setUTCHours(23, 59, 59, 999);
+      endDateTimestamp = Math.floor(endDate.getTime() / 1000); // Chia cho 1000 để lấy timestamp dưới dạng giây
+      if (startDate >= endDate) {
+        message.error("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.");
+        return; // Dừng hàm nếu có lỗi
       }
     }
     let urlOverviewDashboard = `/api/method/mbw_audit.api.api.summary_overview_dashboard`;
     let urlDashboardCampaign = `/api/method/mbw_audit.api.api.summary_campaign`;
     let urlDashboardEmployeeTakePicture = `/api/method/mbw_audit.api.api.summary_user_by_picture`;
 
-   // Thêm tham số start_date và end_date nếu có
-   if (startDateTimestamp !== null && endDateTimestamp !== null) {
-    urlOverviewDashboard += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
-    urlDashboardCampaign += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
-    urlDashboardEmployeeTakePicture += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
-}
-let res = await AxiosService.get(urlOverviewDashboard);
-let resCampaign = await AxiosService.get(urlDashboardCampaign);
-let resEmployeeTakePic = await AxiosService.get(
-  urlDashboardEmployeeTakePicture
-);
+    // Thêm tham số start_date và end_date nếu có
+    if (startDateTimestamp !== null && endDateTimestamp !== null) {
+      urlOverviewDashboard += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+      urlDashboardCampaign += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+      urlDashboardEmployeeTakePicture += `?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+    }
+    let res = await AxiosService.get(urlOverviewDashboard);
+    let resCampaign = await AxiosService.get(urlDashboardCampaign);
+    let resEmployeeTakePic = await AxiosService.get(
+      urlDashboardEmployeeTakePicture
+    );
     if (resCampaign.message == "ok") {
-      colTableTyLe["source"] = resCampaign.result.data.map((item, index) => {
-        return {
-          stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
-          campaign_code: item.id,
-          campaign_name: item.campaign_name,
-          tyle_ai: item.ratio_ai_evaluate, // Bạn cần tính toán tỷ lệ AI dựa trên dữ liệu của mình
-          tyle_giamsat: item.ratio_human_evaluate, // Tương tự, bạn cần tính toán tỷ lệ giám sát
-        };
-      });
+      colTableTyLe["source"] = resCampaign.result.data
+        .map((item, index) => {
+          return {
+            stt: ("0" + (index + 1)).slice(-2), // Chuyển số thứ tự thành chuỗi có độ dài 2 ký tự và thêm số 0 ở đầu nếu cần
+            campaign_code: item.id,
+            campaign_name: item.campaign_name,
+            tyle_ai: item.ratio_ai_evaluate, // Bạn cần tính toán tỷ lệ AI dựa trên dữ liệu của mình
+            tyle_giamsat: item.ratio_human_evaluate, // Tương tự, bạn cần tính toán tỷ lệ giám sát
+          };
+        })
+        .sort((a, b) => b.tyle_giamsat - a.tyle_giamsat);
       let colTableTienDoTyLe = {
         columns: [
           {
@@ -415,7 +419,28 @@ let resEmployeeTakePic = await AxiosService.get(
           },
         ],
       };
+      // Tạo một bản sao của sampleData để tránh ảnh hưởng đến dữ liệu gốc
+      let sortedSampleData = JSON.parse(JSON.stringify(sampleData));
 
+      // Sắp xếp mảng data giảm dần
+      sortedSampleData.datasets[0].data.sort((a, b) => b - a);
+
+      // Sắp xếp lại mảng labels tương ứng với thứ tự mới của mảng data
+      sortedSampleData.labels = sortedSampleData.labels.sort((a, b) => {
+        const indexA = sampleData.datasets[0].data.findIndex(
+          (entry) => entry === a
+        );
+        const indexB = sampleData.datasets[0].data.findIndex(
+          (entry) => entry === b
+        );
+        return (
+          sortedSampleData.datasets[0].data[indexB] -
+          sortedSampleData.datasets[0].data[indexA]
+        );
+      });
+
+      // Điều này sẽ cập nhật sampleData ban đầu với mảng đã được sắp xếp
+      sampleData = sortedSampleData;
       setColTableTyLeDat(colTableTyLe);
       setColTableTienDoTyLe(colTableTienDoTyLe);
       setChienDichThucHien(sampleData);
@@ -427,42 +452,46 @@ let resEmployeeTakePic = await AxiosService.get(
       const num_reports = res.result.data.num_reports;
       const customer = res.result.data.customer;
       const employee = res.result.data.employee;
-    
+
       setDataChienDichViengTham({
         title: "Tổng số chiến dịch đã viếng thăm",
         data: campaign_start,
-        show_ratio: false
+        show_ratio: false,
       });
-     
+
       setDataBaoCaoAI({
         title: "Số báo cáo AI chấm đạt",
         data: report_pass_ai,
         show_ratio: true,
-        ratio: num_reports !== 0 ? Math.round((report_pass_ai / num_reports) * 100) : 0
+        ratio:
+          num_reports !== 0
+            ? Math.round((report_pass_ai / num_reports) * 100)
+            : 0,
       });
-    
-      setDataGiamSat(
-        {
-          title: "Số báo cáo giám sát chấm đạt",
-          data: report_pass_human,
-          show_ratio: true,
-          ratio: num_reports !== 0 ? Math.round((report_pass_human / num_reports) * 100) : 0
-        }
-      )
-    
+
+      setDataGiamSat({
+        title: "Số báo cáo giám sát chấm đạt",
+        data: report_pass_human,
+        show_ratio: true,
+        ratio:
+          num_reports !== 0
+            ? Math.round((report_pass_human / num_reports) * 100)
+            : 0,
+      });
+
       setDataKhachHangThamgia({
         title: "Tổng khách hàng tham gia",
         data: customer,
-        show_ratio: false
-      })
-    
+        show_ratio: false,
+      });
+
       setDataNhanVienThucHien({
         title: "Tổng nhân viên thực hiện",
         data: employee,
-        show_ratio: false
-      })
+        show_ratio: false,
+      });
     }
-    
+
     if (resEmployeeTakePic.message == "ok") {
       const sortedData = resEmployeeTakePic.result.data.sort(
         (a, b) => b.num_picture - a.num_picture
@@ -479,7 +508,7 @@ let resEmployeeTakePic = await AxiosService.get(
           "//user-images.githubusercontent.com/5709133/50445980-88299a80-0912-11e9-962a-6fd92fd18027.png",
       }));
       colTableNhanVienChupAnh["source"] = result;
-      setDataNhanVienChup(colTableNhanVienChupAnh)
+      setDataNhanVienChup(colTableNhanVienChupAnh);
     }
   };
 
@@ -495,10 +524,7 @@ let resEmployeeTakePic = await AxiosService.get(
         }}
       >
         <HeaderPage title="Dashboard" />
-        <Form.Item
-          className="border-none mr-4"
-          label="Thời gian thực hiện"
-        >
+        <Form.Item className="border-none mr-4" label="Thời gian thực hiện">
           <RangePicker
             value={searchTime}
             onChange={(dates) => setSearchTime(dates)}
@@ -506,53 +532,43 @@ let resEmployeeTakePic = await AxiosService.get(
         </Form.Item>
       </div>
       <Row gutter={10} style={{ marginTop: "20px" }}>
-  <Col span={5} className="card-container">
-    <Overview
-      data={dataChienDichViengTham}
-    />
-  </Col>
- 
-  <Col span={5} className="card-container">
-    <Overview
-      data={dataBaoCaoAI}
-    />
-  </Col>
- 
-  <Col span={5} className="card-container">
-    <Overview
-      data={dataGiamSat}
-    />
-  </Col>
-  
-  <Col span={5} className="card-container">
-    <Overview
-      data={dataKhachHangThamgia}
-    />
-  </Col>
- 
-  <Col span={4} className="card-container">
-    <Overview
-      data={dataNhanVienThucHien}
-    />
-  </Col>
-</Row>
+        <Col span={5} className="card-container">
+          <Overview data={dataChienDichViengTham} />
+        </Col>
 
-      <Row gutter={20}  style={{ marginTop: "30px" }}>
-        <Col span={16} style={{ minHeight: '450px' }}>
-          <InfoCard 
+        <Col span={5} className="card-container">
+          <Overview data={dataBaoCaoAI} />
+        </Col>
+
+        <Col span={5} className="card-container">
+          <Overview data={dataGiamSat} />
+        </Col>
+
+        <Col span={5} className="card-container">
+          <Overview data={dataKhachHangThamgia} />
+        </Col>
+
+        <Col span={4} className="card-container">
+          <Overview data={dataNhanVienThucHien} />
+        </Col>
+      </Row>
+
+      <Row gutter={20} style={{ marginTop: "30px" }}>
+        <Col span={16} style={{ minHeight: "450px" }}>
+          <InfoCard
             data={{
               title: "Tỷ lệ chấm điểm đạt theo từng chiến dịch",
               data: colTableTyLeDat,
-              height: 450
+              height: 450,
             }}
           />
         </Col>
-        <Col span={8} style={{ minHeight: '450px' }}>
+        <Col span={8} style={{ minHeight: "450px" }}>
           <InfoCard
             data={{
               title: "Tỷ lệ viếng thăm khách hàng theo chiến dịch",
               data: colTableTienDoTyLe,
-              height: 450
+              height: 450,
             }}
           />
         </Col>

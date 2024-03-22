@@ -623,11 +623,18 @@ export default function Product_SKU() {
   const handleOkCategory = async () => {
     setLoadingAddCategory(true);
     const valField = form.getFieldsValue();
+      // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
+  if (!valField.hasOwnProperty('name_item') || !valField.name_item) {
+    message.warning("Vui lòng nhập tên danh mục.");
+    setLoadingAddCategory(false);
+    return;
+  }
     const categoryName = valField.name_item.trim();
-
     if (!categoryName) {
       message.warning("Vui lòng nhập tên danh mục.");
       return;
+    }else{
+
     }
     // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
     const isCategoryExists = categories.some(
