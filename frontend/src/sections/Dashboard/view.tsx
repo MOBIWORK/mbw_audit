@@ -1,29 +1,20 @@
-import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
+import { HeaderPage, TableCustom } from "../../components";
 
-import { Flex, Progress, Avatar, Form } from "antd";
+import { Progress, Avatar, Form } from "antd";
 import {
   Overview,
   InfoCard,
-  WrapperCard,
   InfoCardChart,
   InfoCardEmploy,
 } from "./components/card";
 import {
-  Input,
-  Space,
-  Table,
-  TableColumnsType,
-  Tag,
-  Modal,
   message,
-  Button,
-  UploadProps,
   DatePicker,
   Row,
   Col,
 } from "antd";
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AxiosService } from "../../services/server";
 import "./dashboard.css";
 const { RangePicker } = DatePicker;
@@ -41,6 +32,13 @@ export default function Dashboard() {
 
   const [dataNhanVienChup, setDataNhanVienChup] = useState({});
 
+  const handleCampaignClick = (record: any) => {
+    // Xử lý sự kiện click vào từng hàng ở đây
+    const navigate = useNavigate();
+    localStorage.setItem('campaign_dashboard', JSON.stringify(record));
+    navigate(`/reports`);
+};
+
   const colTableTyLe = {
     columns: [
       {
@@ -52,6 +50,9 @@ export default function Dashboard() {
         title: "Chiến dịch",
         dataIndex: "campaign_name",
         width: "40%",
+        render: (_, record) => (
+          <a href="javascript:;" onClick={() => handleCampaignClick(record)}>{record.campaign_name}</a>
+        )
       },
       {
         title: "Tỷ lệ AI chấm",
@@ -59,6 +60,7 @@ export default function Dashboard() {
         render: (percent) => (
           <Progress
             percent={Math.round(percent)}
+            format={(percent) => `${percent} %`}
             strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
           />
         ),
@@ -69,6 +71,7 @@ export default function Dashboard() {
         render: (percent) => (
           <Progress
             percent={Math.round(percent)}
+            format={(percent) => `${percent} %`}
             strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
           />
         ),
@@ -374,20 +377,24 @@ export default function Dashboard() {
           {
             title: "STT",
             dataIndex: "stt",
-            width: "20%",
+            width: "18%",
           },
           {
             title: "Chiến dịch",
             dataIndex: "campaign_name",
-            width: "55%",
+            width: "52%",
+            render: (_, record) => (
+              <a href="javascript:;" onClick={() => handleCampaignClick(record)}>{record.campaign_name}</a>
+            )
           },
           {
             title: "Tỷ lệ",
             dataIndex: "tyle",
-            width: "25%",
+            width: "30%",
             render: (percent) => (
               <Progress
                 percent={Math.round(percent)}
+                format={(percent) => `${percent} %`}
                 strokeColor={percent > 50 ? "#52c41a" : "rgba(255, 86, 48, 1)"}
               />
             ),
@@ -405,8 +412,12 @@ export default function Dashboard() {
             stt: ("0" + (index + 1)).slice(-2),
           })),
       };
+      let dataSourceByPicture = JSON.parse(JSON.stringify(resCampaign.result.data));
+      dataSourceByPicture = dataSourceByPicture.sort((a, b) => {
+        return b.num_picture - a.num_picture;
+      });
       let sampleData = {
-        labels: resCampaign.result.data.map((entry) => entry.campaign_name),
+        labels: dataSourceByPicture.map((entry) => entry.campaign_name),
         datasets: [
           {
             label: "Chiến dịch",
@@ -415,32 +426,10 @@ export default function Dashboard() {
             borderWidth: 0.5,
             hoverBackgroundColor: "rgba(24, 119, 242, 1)",
             hoverBorderColor: "rgba(24, 119, 242, 1)",
-            data: resCampaign.result.data.map((entry) => entry.num_picture),
+            data: dataSourceByPicture.map((entry) => entry.num_picture),
           },
         ],
       };
-      // Tạo một bản sao của sampleData để tránh ảnh hưởng đến dữ liệu gốc
-      let sortedSampleData = JSON.parse(JSON.stringify(sampleData));
-
-      // Sắp xếp mảng data giảm dần
-      sortedSampleData.datasets[0].data.sort((a, b) => b - a);
-
-      // Sắp xếp lại mảng labels tương ứng với thứ tự mới của mảng data
-      sortedSampleData.labels = sortedSampleData.labels.sort((a, b) => {
-        const indexA = sampleData.datasets[0].data.findIndex(
-          (entry) => entry === a
-        );
-        const indexB = sampleData.datasets[0].data.findIndex(
-          (entry) => entry === b
-        );
-        return (
-          sortedSampleData.datasets[0].data[indexB] -
-          sortedSampleData.datasets[0].data[indexA]
-        );
-      });
-
-      // Điều này sẽ cập nhật sampleData ban đầu với mảng đã được sắp xếp
-      sampleData = sortedSampleData;
       setColTableTyLeDat(colTableTyLe);
       setColTableTienDoTyLe(colTableTienDoTyLe);
       setChienDichThucHien(sampleData);
