@@ -31,10 +31,12 @@ class VGM_Product(Document):
         deep_vision: DeepVision = DeepVision(vectordb_dir)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
-        custom_field = json.loads(self.get('custom_field'))
-        if custom_field is None:
+        print(self)
+        custom_field_check = self.get('custom_field')
+        if custom_field_check is None:
             self.check_and_add_product()
         else:
+            custom_field = json.loads(self.get('custom_field'))
             product_id_ai = custom_field.get('product_id')
             if product_id_ai is None:
                 self.check_and_add_product()
@@ -63,7 +65,7 @@ class VGM_Product(Document):
         product_name = self.product_name
         json_string = self.images
         images_dict = json.loads(json_string)
-        
+        print('123')
         # Kiểm tra xem images_dict có phần tử không
         if images_dict:
             base_url = frappe.utils.get_request_site_address()
