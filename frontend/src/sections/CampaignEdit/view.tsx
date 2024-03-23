@@ -39,6 +39,7 @@ export default function CampaignEdit() {
     let urlDetailCampaign = `/api/resource/VGM_Campaign/${name}`;
     let res = await AxiosService(urlDetailCampaign);
     if(res != null && res.data != null){
+      console.log(res.data);
         form.setFieldsValue({
             'campaign_name': res.data.campaign_name,
             'campaign_description': res.data.campaign_description,
@@ -46,6 +47,7 @@ export default function CampaignEdit() {
             'campaign_end': convertDateFormat(res.data.end_date),
              campaign_status: res.data.campaign_status,
         })
+        setCampaignStatus(res.data.campaign_status)
         setStatusCampaignEdit(res.data.campaign_status);
         setCategoryEdit(JSON.parse(res.data.categories));
         setProductEdit(convertSettingScoreAudit(JSON.parse(res.data.setting_score_audit)));
@@ -58,6 +60,8 @@ export default function CampaignEdit() {
         }
         let objSettingScore = JSON.parse(res.data.setting_score_audit);
         if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
+
+        console.log(object);
     }
   }
 
@@ -92,6 +96,8 @@ export default function CampaignEdit() {
             })
             objSettingScore["min_product"] = objMinProduct;
         }
+        console.log(checkExistProduct);
+        console.log(checkSequenceProduct);
         if(checkSequenceProduct){
           objSettingScore["sequence_product"] = sequenceProducts;
         }

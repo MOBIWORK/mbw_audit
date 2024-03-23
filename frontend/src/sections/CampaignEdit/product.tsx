@@ -99,7 +99,7 @@ export default function ProductCampaignEdit({
     if (response && response.data) {
       // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
       let dataCategories: TypeCategory[] = response.data.map(
-        (item: TypeCategory) => {
+        (item: TypeCategory,index : number) => {
           return {
             ...item,
             key: item.name,
@@ -185,6 +185,9 @@ export default function ProductCampaignEdit({
       // Hiển thị danh sách sản phẩm theo thứ tự với trường "sequence_product"
       setProductSort(productsInOrder);
       setProductSelected(allProducts);
+      for(let idx = 0 ; idx < categoryInitSelected.length;idx++){
+        categoryInitSelected[idx].stt = idx + 1
+      }
       setCategoriesSelected(categoryInitSelected);
     }
   };
@@ -203,7 +206,7 @@ export default function ProductCampaignEdit({
     if (response && response.data) {
       // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
       let dataCategories: TypeCategory[] = response.data.map(
-        (item: TypeCategory) => {
+        (item: TypeCategory, index: number) => {
           return {
             ...item,
             key: item.name,
@@ -215,10 +218,11 @@ export default function ProductCampaignEdit({
         let res = await AxiosService.get(urlProduct);
         if (res != null && res.data != null) {
           dataCategories[i].product_num = res.data.length;
-          let arrProducts: TypeProduct[] = res.data.map((item: TypeProduct) => {
+          let arrProducts: TypeProduct[] = res.data.map((item: TypeProduct, index: number) => {
             return {
               ...item,
               key: item.name,
+              stt: index + 1
             };
           });
           dataCategories[i].products = arrProducts;
@@ -227,6 +231,7 @@ export default function ProductCampaignEdit({
           dataCategories[i].products = [];
         }
       }
+     
       setCategories(dataCategories);
     }
   };
@@ -547,6 +552,7 @@ export default function ProductCampaignEdit({
     let arrSequenceProduct = result.map((x) => x.name);
     //onChangeSequenceProducts(arrSequenceProduct);
     //Fire event ra component cha
+    console.log(arrSequenceProduct);
     onChangeSequenceProducts(arrSequenceProduct);
     setProductSort(result);
     handleCancelAddProductSequence();
@@ -673,7 +679,7 @@ export default function ProductCampaignEdit({
           </div>
         </div>
         <div className="pt-4">
-          <TableCustom
+          <TableCustom scroll={{ y: 270 }}
             rowSelection={rowSelectionProduct}
             columns={[
               {

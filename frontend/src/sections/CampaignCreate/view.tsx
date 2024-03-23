@@ -24,61 +24,81 @@ export default function CampaignCreate() {
 
   const handleAddCampaign = async () => {
     try {
-        // Lấy giá trị từ form và các dữ liệu khác
-        setLoadingAddCampaign(true);
-        let objFrm = form.getFieldsValue();
-        let startDate = convertDate(objFrm.campaign_start);
-        let endDate = convertDate(objFrm.campaign_end);
+      // Lấy giá trị từ form và các dữ liệu khác
+      setLoadingAddCampaign(true);
+      let objFrm = form.getFieldsValue();
+      let startDate = convertDate(objFrm.campaign_start);
+      let endDate = convertDate(objFrm.campaign_end);
 
-        // Kiểm tra nếu start_date bé hơn end_date
-        if (startDate >= endDate) {
-            message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
-            setLoadingAddCampaign(false);
-            return; // Dừng lại nếu có lỗi
-        }
-
-        // Tiếp tục xử lý nếu không có lỗi về ngày tháng
-        let objSettingScore = {};
-        let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
-        if (checkExistProduct) {
-            objSettingScore["min_product"] = scoreSelected.min_product;
-        }
-
-        if(checkSequenceProduct){
-          objSettingScore["sequence_product"] = sequenceProducts;
-        }
-        let arrCategory = categoriesSelected.map((x) => x.name);
-        let arrEmployee = employeesSelected.map((x) => x.name);
-        let arrCustomer = customersSelected.map((x) => x.name);
-
-        let urlPostData = "/api/resource/VGM_Campaign";
-        let dataPost = {
-            campaign_name: objFrm.campaign_name,
-            campaign_description: objFrm.campaign_description,
-            start_date: startDate,
-            end_date: endDate,
-            campaign_status: campaignStatus,
-            categories: JSON.stringify(arrCategory),
-            employees: JSON.stringify(arrEmployee),
-            retails: JSON.stringify(arrCustomer),
-            setting_score_audit: objSettingScore
-        };
-        let res = await AxiosService.post(urlPostData, dataPost);
-
-        if (res != null && res.data != null) {
-            message.success("Thêm mới thành công");
-            setLoadingAddCampaign(false);
-            navigate("/campaign");
-        } else {
-            message.error("Thêm mới thất bại");
-            setLoadingAddCampaign(false);
-        }
-    } catch (error) {
-        // Xử lý khi có lỗi xảy ra trong quá trình thêm mới
-        message.error("Không thể thêm mới. Vui lòng kiểm tra lại thông tin thời gian, sản phẩm, nhân viên, khách hàng");
+      // Kiểm tra nếu start_date bé hơn end_date
+      if (startDate >= endDate) {
+        message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
         setLoadingAddCampaign(false);
+        return; // Dừng lại nếu có lỗi
+      }
+
+      // Tiếp tục xử lý nếu không có lỗi về ngày tháng
+      let objSettingScore = {};
+      let propertiesSettingScore = Object.getOwnPropertyNames(scoreSelected);
+      if (checkExistProduct) {
+        objSettingScore["min_product"] = scoreSelected.min_product;
+      }
+
+      if (checkSequenceProduct) {
+        objSettingScore["sequence_product"] = sequenceProducts;
+      }
+      // Kiểm tra xem ba mảng có chứa dữ liệu hợp lệ không
+      if (categoriesSelected.length === 0) {
+        message.error("Vui lòng điền thông tin sản phẩm");
+        setLoadingAddCampaign(false);
+        return;
+      }
+
+      if (employeesSelected.length === 0) {
+        message.error("Vui lòng chọn ít nhất một nhân viên.");
+        setLoadingAddCampaign(false);
+        return;
+      }
+
+      if (customersSelected.length === 0) {
+        message.error("Vui lòng chọn ít nhất một khách hàng.");
+        setLoadingAddCampaign(false);
+        return;
+      }
+
+      let arrCategory = categoriesSelected.map((x) => x.name);
+      let arrEmployee = employeesSelected.map((x) => x.name);
+      let arrCustomer = customersSelected.map((x) => x.name);
+      let urlPostData = "/api/resource/VGM_Campaign";
+      let dataPost = {
+        campaign_name: objFrm.campaign_name,
+        campaign_description: objFrm.campaign_description,
+        start_date: startDate,
+        end_date: endDate,
+        campaign_status: campaignStatus,
+        categories: JSON.stringify(arrCategory),
+        employees: JSON.stringify(arrEmployee),
+        retails: JSON.stringify(arrCustomer),
+        setting_score_audit: objSettingScore,
+      };
+      let res = await AxiosService.post(urlPostData, dataPost);
+
+      if (res != null && res.data != null) {
+        message.success("Thêm mới thành công");
+        setLoadingAddCampaign(false);
+        navigate("/campaign");
+      } else {
+        message.error("Thêm mới thất bại");
+        setLoadingAddCampaign(false);
+      }
+    } catch (error) {
+      // Xử lý khi có lỗi xảy ra trong quá trình thêm mới
+      message.error(
+        "Không thể thêm mới. Vui lòng kiểm tra lại thông tin thời gian, sản phẩm, nhân viên, khách hàng"
+      );
+      setLoadingAddCampaign(false);
     }
-};
+  };
 
   const convertDate = (val) => {
     // Tạo một đối tượng Date từ chuỗi thời gian
@@ -101,20 +121,23 @@ export default function CampaignCreate() {
     const min_product = {};
 
     // Duyệt qua mỗi phần tử trong mảng data
-    val.forEach(item => {
-        // Duyệt qua mỗi sản phẩm trong mảng products của mỗi phần tử
-        item.products.forEach(product => {
-            // Kiểm tra nếu key của sản phẩm đã tồn tại trong min_product và giá trị mới nhỏ hơn giá trị hiện tại
-            if (min_product.hasOwnProperty(product.key)) {
-                min_product[product.key] = Math.min(min_product[product.key], parseInt(product.product_num));
-            } else {
-                // Nếu key chưa tồn tại, thêm key mới vào min_product
-                min_product[product.key] = parseInt(product.product_num);
-            }
-        });
+    val.forEach((item) => {
+      // Duyệt qua mỗi sản phẩm trong mảng products của mỗi phần tử
+      item.products.forEach((product) => {
+        // Kiểm tra nếu key của sản phẩm đã tồn tại trong min_product và giá trị mới nhỏ hơn giá trị hiện tại
+        if (min_product.hasOwnProperty(product.key)) {
+          min_product[product.key] = Math.min(
+            min_product[product.key],
+            parseInt(product.product_num)
+          );
+        } else {
+          // Nếu key chưa tồn tại, thêm key mới vào min_product
+          min_product[product.key] = parseInt(product.product_num);
+        }
+      });
     });
-    
-    const result = { "min_product": min_product };
+
+    const result = { min_product: min_product };
     setScoreSelected(result);
   };
 
@@ -128,15 +151,15 @@ export default function CampaignCreate() {
 
   const handleChangeExistProduct = (val) => {
     setCheckExistProduct(val);
-  }
+  };
 
   const handleChangeCheckSequenceProduct = (val) => {
     setCheckSequenceProduct(val);
-  }
+  };
 
   const handleChangeSequenceProducts = (val) => {
     setSequenceProducts(val);
-  }
+  };
 
   return (
     <>
@@ -179,8 +202,16 @@ export default function CampaignCreate() {
               {
                 label: <p className="px-4 mb-0">Sản phẩm</p>,
                 key: "2",
-                children: <Product onChangeCategory={handleChangeCategory} onChangeCheckExistProduct={handleChangeExistProduct}
-                onChangeCheckSequenceProduct={handleChangeCheckSequenceProduct} onChangeSequenceProducts={handleChangeSequenceProducts}/>,
+                children: (
+                  <Product
+                    onChangeCategory={handleChangeCategory}
+                    onChangeCheckExistProduct={handleChangeExistProduct}
+                    onChangeCheckSequenceProduct={
+                      handleChangeCheckSequenceProduct
+                    }
+                    onChangeSequenceProducts={handleChangeSequenceProducts}
+                  />
+                ),
               },
               {
                 label: <p className="px-4 mb-0">Nhân viên bán hàng</p>,
