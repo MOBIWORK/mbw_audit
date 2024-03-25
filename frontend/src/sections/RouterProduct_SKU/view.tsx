@@ -125,7 +125,7 @@ export default function Product_SKU() {
   const [fileUploadEditProduct, setFileUploadEditProduct] = useState([]);
   const [idImageProduct, setIdImageProduct] = useState([]);
   const [idAddImageProduct, setIdAddImageProduct] = useState([]);
-  
+
   const [barcodeEditProduct, setBarcodeEditProduct] = useState(null);
   const [productSelected, setProductSelected] = useState<DataType[]>([]);
   const [showDeleteList, setShowDeleteList] = useState(false);
@@ -159,6 +159,7 @@ export default function Product_SKU() {
     multiple: false,
     onRemove: () => {
       setFileListImport([]);
+      setLstProductImport([]);
     },
     beforeUpload: async (file) => {
       try {
@@ -216,7 +217,9 @@ export default function Product_SKU() {
       } catch (error) {
         // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
 
-        message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+        message.error(
+          "Chưa nhập File hoặc File không chính xác tải dữ liệu mẫu để tiếp tục"
+        );
         return false; // Trả về false để ngăn việc tự động tải file
       }
     },
@@ -250,22 +253,22 @@ export default function Product_SKU() {
           message.error("Dung lượng tệp tải lên phải bé hơn 2MB!");
           return;
         }
-    
+
         const formData = new FormData();
         const fields = {
           file,
           category_name: categorySelected.name,
         };
-    
+
         for (const [key, value] of Object.entries(fields)) {
           formData.append(key, value);
         }
-    
+
         const response = await AxiosService.post(
           "/api/method/mbw_audit.api.api.upload_file_for_product",
           formData
         );
-    
+
         if (response.message === "ok") {
           setFileUploadAddProduct((prevFileUpload) => [
             ...prevFileUpload,
@@ -277,12 +280,13 @@ export default function Product_SKU() {
           message.error("Tải ảnh thất bại");
         }
       } else {
-        message.error("Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF");
+        message.error(
+          "Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
+        );
       }
-    
+
       return false;
     },
-    
   };
 
   const propUploadEditProducts: UploadProps = {
@@ -299,7 +303,9 @@ export default function Product_SKU() {
           prevFileUpload.filter((item, index) => index !== indexToRemove)
         );
       } else {
-        setFileListEdit(prevFileUpload => prevFileUpload.filter(file => !file.uid));
+        setFileListEdit((prevFileUpload) =>
+          prevFileUpload.filter((file) => !file.uid)
+        );
       }
     },
     beforeUpload: async (file) => {
@@ -335,7 +341,7 @@ export default function Product_SKU() {
           file,
           category_name: categorySelected.name,
         };
-  
+
         for (const [key, value] of Object.entries(fields)) {
           formData.append(key, value);
         }
@@ -349,20 +355,18 @@ export default function Product_SKU() {
             ...prevFileUpload,
             response.result.file_url,
           ]);
-  
-          setIdImageProduct((previdUpload) => [
-            ...previdUpload,
-            file.uid,
-          ]);
+
+          setIdImageProduct((previdUpload) => [...previdUpload, file.uid]);
           message.success("Tải ảnh thành công");
         } else {
           message.error("Tải ảnh thất bại");
         }
         return false;
-      }else{
-        message.error("Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF");
+      } else {
+        message.error(
+          "Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
+        );
       }
-      
     },
   };
   const propUploadCheckProducts: UploadProps = {
@@ -480,11 +484,15 @@ export default function Product_SKU() {
               ...item,
               key: item.name,
               hidden: true,
-              selected: index === 0,
+              selected: false,
             };
           }
         );
         dataCategories = sortAlphabet(dataCategories, "category_name");
+        // Thiết lập selected cho phần tử đầu tiên (nếu có)
+        if (dataCategories.length > 0) {
+          dataCategories[0].selected = true;
+        }
         setCategories(dataCategories);
         // Chọn danh mục đầu tiên mặc định
         if (dataCategories.length > 0) {
@@ -623,18 +631,17 @@ export default function Product_SKU() {
   const handleOkCategory = async () => {
     setLoadingAddCategory(true);
     const valField = form.getFieldsValue();
-      // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
-  if (!valField.hasOwnProperty('name_item') || !valField.name_item) {
-    message.warning("Vui lòng nhập tên danh mục.");
-    setLoadingAddCategory(false);
-    return;
-  }
+    // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
+    if (!valField.hasOwnProperty("name_item") || !valField.name_item) {
+      message.warning("Vui lòng nhập tên danh mục.");
+      setLoadingAddCategory(false);
+      return;
+    }
     const categoryName = valField.name_item.trim();
     if (!categoryName) {
       message.warning("Vui lòng nhập tên danh mục.");
       return;
-    }else{
-
+    } else {
     }
     // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
     const isCategoryExists = categories.some(
@@ -924,7 +931,7 @@ export default function Product_SKU() {
       let barcode = document.getElementById("barcode");
       barcode.innerHTML = "";
       setFileUploadEditProduct([]);
-      setIdImageProduct([])
+      setIdImageProduct([]);
       initDataProductByCategory();
       handleCancelEditProduct();
     } else {
@@ -1198,8 +1205,8 @@ export default function Product_SKU() {
   const initDataProductFromERP = async () => {
     //Goi dich vu lay danh sach san pham tu erp
     let url = "/api/method/mbw_dms.api.selling.product.list_product";
-   // if (searchProductFromERP != null && searchProductFromERP != "")
-      //url = `${url}?item_name=${searchProductFromERP.trim()}`;
+    // if (searchProductFromERP != null && searchProductFromERP != "")
+    //url = `${url}?item_name=${searchProductFromERP.trim()}`;
     let res = await AxiosService.get(url);
     let arrProductERPSource = [];
     if (res != null && res.result != null && res.result.data != null) {
@@ -1211,10 +1218,12 @@ export default function Product_SKU() {
       });
     }
     if (searchProductFromERP != null && searchProductFromERP.trim() !== "") {
-      arrProductERPSource = arrProductERPSource.filter(item =>
-          item.item_name.toLowerCase().includes(searchProductFromERP.toLowerCase())
+      arrProductERPSource = arrProductERPSource.filter((item) =>
+        item.item_name
+          .toLowerCase()
+          .includes(searchProductFromERP.toLowerCase())
       );
-  }
+    }
     setProductFromERP(arrProductERPSource);
   };
 

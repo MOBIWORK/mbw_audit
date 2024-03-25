@@ -271,8 +271,8 @@ const fetchDataReport = async () => {
     urlReports = `${urlReports}?campaign_code=${searchCampaign}`;
   }
   if(searchTime != null && searchTime.length == 2){
-    let start_date = new Date(searchTime[0]).getTime()/1000;
-    let end_date = new Date(searchTime[1]).getTime()/1000;
+    let start_date = Math.round(new Date(searchTime[0]).getTime()/1000);
+    let end_date = Math.round(new Date(searchTime[1]).getTime()/1000);
     if(urlReports.includes("?")) urlReports = `${urlReports}&start_date=${start_date}&end_date=${end_date}`;
     else urlReports = `${urlReports}?start_date=${start_date}&end_date=${end_date}`;
   }
@@ -383,84 +383,121 @@ const initDataCampaigns = async () => {
     isGroupByCampaign ? onExportDataToExcelByCampaign(dataReportsByCampaign,columnsReportByCampaign, "Báo cáo chấm điểm trưng bày") : onExportDataToExcel(dataReports, "Báo cáo chấm điểm trưng bày") ;
   };
 
-  const onExportDataToExcelByCampaign = async (table, columns, title) => {
-    console.log(table);
-    console.log(columns); 
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Sheet1');
-
-    let currentColumnIndex = 1; // Chỉ số cột hiện tại
-    columns.forEach((column, index) => {
-        const startColumnIndex = currentColumnIndex; // Chỉ số cột bắt đầu
-
-        // Đặt tiêu đề và chiều rộng cho cột
-        sheet.getColumn(currentColumnIndex).width = column.width || 20; // Set default width if not provided
-        sheet.getCell(1, currentColumnIndex).value = column.title;
-
-        // Kiểm tra nếu cột có children
-        if (column.children && column.children.length > 0) {
-            // Tính tổng số cột con
-            const totalChildColumns = column.children.length;
-
-            // Gộp các ô cho cột cha nếu chưa được gộp
-            const isMerged = sheet.getCell(1, currentColumnIndex).isMerged;
-            if (!isMerged) {
-                sheet.mergeCells(1, currentColumnIndex, 1, currentColumnIndex + totalChildColumns - 1);
-            }
-
-            // Thêm tiêu đề cho các cột con
-            column.children.forEach((child, childIndex) => {
-                const childColumnIndex = startColumnIndex + childIndex;
-                sheet.getCell(2, childColumnIndex).value = child.title;
-            });
-
-            // Cập nhật chỉ số cột hiện tại cho vòng lặp tiếp theo
-            currentColumnIndex += totalChildColumns;
-        } else {
-            // Nếu cột không có children, di chuyển đến cột tiếp theo
-            currentColumnIndex++;
+  const applyCommonCellStyle = (cell, isHeader = false) => {
+    const style = {
+        font: {
+            bold: true,
+            name: 'Times New Roman',
+            size: 12
+        },
+        alignment: {
+            vertical: 'middle',
+            horizontal: 'center'
         }
-    });
+    };
 
-    // Điền dữ liệu từ bảng vào Excel
-    const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
-    table.forEach((row, rowIndex) => {
-        currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
-        columns.forEach((column, columnIndex) => {
-            const dataIndex = column.dataIndex; // Tên của thuộc tính trong dữ liệu tương ứng với cột
-            let cellValue = row[dataIndex]; // Lấy giá trị từ dữ liệu
+    if (isHeader) {
+        style.border = {
+            top: { style: 'medium' },
+            left: { style: 'medium' },
+            bottom: { style: 'medium' },
+            right: { style: 'medium' }
+        };
+    }
 
-            // Kiểm tra nếu cột có children
-            if (column.children && column.children.length > 0) {
-                // Không làm gì với cột cha có children
-                return;
-            }
+    cell.style = style;
+};
 
-            // Kiểm tra nếu cột là 'title_ai' hoặc 'title_human'
-            if (dataIndex.endsWith('_ai') || dataIndex.endsWith('_human')) {
-                // Tách tên cột và loại sản phẩm (ai/human)
-                const [title, type] = column.title.split(' '); // Giả sử tiêu đề của cột là 'Tên sản phẩm ai'
-                // Tìm dữ liệu tương ứng từ dữ liệu của hàng
-                const productData = row[title.toLowerCase()]; // title.toLowerCase() sẽ trở thành 'dove_1' hoặc 'dove_2'
-                if (productData && Array.isArray(productData)) {
-                    // Lọc dữ liệu theo loại (ai/human)
-                    const filteredData = productData.filter(product => product.product_name === title);
-                    // Tạo chuỗi dữ liệu từ các sản phẩm
-                    cellValue = filteredData.map(product => `${product.product_name}: ${product.sum}`).join('\n');
-                }
-            }
+const onExportDataToExcelByCampaign = async (table, columns, title) => {
+  console.log(table);
+  console.log(columns);
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Sheet1');
 
-            // Gán giá trị vào ô Excel
-            sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex).value = cellValue;
+  let currentColumnIndex = 1; // Chỉ số cột hiện tại
+  columns.forEach((column, index) => {
+    const startColumnIndex = currentColumnIndex; // Chỉ số cột bắt đầu
 
-            // Di chuyển đến cột tiếp theo
-            currentColumnIndex++;
+    // Đặt tiêu đề và chiều rộng cho cột
+    if (currentColumnIndex === 1) {
+        // Cố định chiều rộng cột đầu tiên
+        sheet.getColumn(currentColumnIndex).width = 10;
+    } else {
+        // Đặt chiều rộng theo giá trị mặc định hoặc được chỉ định
+        sheet.getColumn(currentColumnIndex).width = column.width || 20; // Set default width if not provided
+    }
+
+    const cell = sheet.getCell(1, currentColumnIndex);
+    cell.value = column.title;
+    applyCommonCellStyle(cell, true); // Áp dụng viền đậm cho ô tiêu đề cột
+
+    // Kiểm tra nếu cột có children
+    if (column.children && column.children.length > 0) {
+        // Tính tổng số cột con
+        const totalChildColumns = column.children.length;
+
+        // Gộp các ô cho cột cha nếu chưa được gộp
+        const isMerged = cell.isMerged;
+        if (!isMerged) {
+            sheet.mergeCells(1, currentColumnIndex, 1, currentColumnIndex + totalChildColumns - 1);
+        }
+
+        // Thêm tiêu đề cho các cột con
+        column.children.forEach((child, childIndex) => {
+            const childColumnIndex = startColumnIndex + childIndex;
+            const childCell = sheet.getCell(2, childColumnIndex);
+            childCell.value = child.title;
+            applyCommonCellStyle(childCell);
         });
-    });
 
+        // Cập nhật chỉ số cột hiện tại cho vòng lặp tiếp theo
+        currentColumnIndex += totalChildColumns;
+    } else {
+        // Nếu cột không có children, di chuyển đến cột tiếp theo
+        currentColumnIndex++;
+    }
+});
+
+  // Điền dữ liệu từ bảng vào Excel
+  const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
+  table.forEach((row, rowIndex) => {
+      currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
+      columns.forEach((column, columnIndex) => {
+          const dataIndex = column.dataIndex; // Tên của thuộc tính trong dữ liệu tương ứng với cột
+          let cellValue = row[dataIndex]; // Lấy giá trị từ dữ liệu
+
+          // Kiểm tra nếu cột có children
+          if (column.children && column.children.length > 0) {
+              // Không làm gì với cột cha có children
+              return;
+          }
+
+          // Kiểm tra nếu cột là 'title_ai' hoặc 'title_human'
+          if (dataIndex.endsWith('_ai') || dataIndex.endsWith('_human')) {
+              // Tách tên cột và loại sản phẩm (ai/human)
+              const [title, type] = column.title.split(' '); // Giả sử tiêu đề của cột là 'Tên sản phẩm ai'
+              // Tìm dữ liệu tương ứng từ dữ liệu của hàng
+              const productData = row[title.toLowerCase()]; // title.toLowerCase() sẽ trở thành 'dove_1' hoặc 'dove_2'
+              if (productData && Array.isArray(productData)) {
+                  // Lọc dữ liệu theo loại (ai/human)
+                  const filteredData = productData.filter(product => product.product_name === title);
+                  // Tạo chuỗi dữ liệu từ các sản phẩm
+                  cellValue = filteredData.map(product => `${product.product_name}: ${product.sum}`).join('\n');
+              }
+          }
+
+          // Gán giá trị vào ô Excel
+          const cell = sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex);
+          cell.value = cellValue;
+          applyCommonCellStyle(cell,false);
+
+          // Di chuyển đến cột tiếp theo
+          currentColumnIndex++;
+      });
+  });
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAsExcelFile(buffer, "report")
+    saveAsExcelFile(buffer, "report");
 };
 
 
