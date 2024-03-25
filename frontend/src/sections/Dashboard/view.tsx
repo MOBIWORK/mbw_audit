@@ -443,7 +443,7 @@ export default function Dashboard() {
       const employee = res.result.data.employee;
 
       setDataChienDichViengTham({
-        title: "Tổng số chiến dịch đã viếng thăm",
+        title: "Tổng số chiến dịch đã chụp ảnh",
         data: campaign_start,
         show_ratio: false,
       });
@@ -555,7 +555,7 @@ export default function Dashboard() {
         <Col span={8} style={{ minHeight: "450px" }}>
           <InfoCard
             data={{
-              title: "Tỷ lệ viếng thăm khách hàng theo chiến dịch",
+              title: "Tỷ lệ khách hàng đã chụp ảnh trưng bày theo chiến dịch",
               data: colTableTienDoTyLe,
               height: 450,
             }}
