@@ -377,10 +377,23 @@ export default function ProductCampaignEdit({
         }))
       );
     });
-    // console.log(objSettingSequenceProduct);
-    // setSelectedProductRowKeys(objSettingSequenceProduct)
-    setArrProductCategory(allProducts); // In ra mảng chứa tất cả sản phẩm của từng danh mục
+    allProducts.forEach((item, index) => {
+      const foundIndex = objSettingSequenceProduct.indexOf(item.name);
+      if (foundIndex !== -1) {
+          // Nếu mã nằm trong mảng arr1, thêm trường sequence_product
+          item.sequence_product = foundIndex + 1;
+      } else {
+          // Nếu không tìm thấy mã, đặt sequence_product thành null hoặc giá trị mặc định khác
+          item.sequence_product = null;
+      }
+  });
+   
+    setArrProductCategory(allProducts);
+    
     setArrPro(allProducts);
+    console.log(objSettingSequenceProduct);
+    console.log(allProducts);
+    setSelectedProductRowKeys(objSettingSequenceProduct)
   };
 
   const handleDragRowEvent = (data: any) => { 
@@ -561,6 +574,7 @@ export default function ProductCampaignEdit({
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeCategory[]
   ) => {
+    console.log(newSelectedRowKeys);
     // Thêm trường sequence_product vào mỗi phần tử trong mảng dữ liệu
     const newData = arrPro.map((item, index) => {
       const sequenceIndex = newSelectedRowKeys.indexOf(item.name);
@@ -577,7 +591,15 @@ export default function ProductCampaignEdit({
     onChange: onSelectChangeProduct,
   };
   const handleQuantityChangeProduct = (index: number, newValue: number) => {
-    console.log(index,newValue);
+    setArrProductCategory(prevState => {
+      return prevState.map((item, idx) => {
+          if (idx === index) {
+              const prevValue = item.sequence_product || 0; // Lấy giá trị trước đó, nếu không có thì mặc định là 0
+              return { ...item, sequence_product: prevValue + newValue };
+          }
+          return item;
+      });
+  });
   };
   return (
     <div className="pt-4">
@@ -702,8 +724,9 @@ export default function ProductCampaignEdit({
                   index: number // Thêm index vào render function
                 ) => (
                   <Input
+                    type='number'
                     style={{ width: "120px" }}
-                    defaultValue={item}
+                   
                     value={item}
                     onChange={(e) =>
                       handleQuantityChangeProduct(

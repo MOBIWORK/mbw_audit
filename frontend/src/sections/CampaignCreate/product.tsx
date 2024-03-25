@@ -360,7 +360,17 @@ export default function Product({
     setProductSelected(updatedRowData);
     onChangeCategory(categoriesSelected);
   };
-  const handleQuantityChangeProduct = (index: number, newValue: number) => {};
+  const handleQuantityChangeProduct = (index: number, newValue: number) => {
+    setArrProductCategory(prevState => {
+      return prevState.map((item, idx) => {
+          if (idx === index) {
+              const prevValue = item.sequence_product || 0; // Lấy giá trị trước đó, nếu không có thì mặc định là 0
+              return { ...item, sequence_product: prevValue + newValue };
+          }
+          return item;
+      });
+  });
+  };
   const handleDragRowEvent = (data: any) => {
     let arrSequenceProduct = data.map((x) => x.name);
     setSequenceProducts(arrSequenceProduct);
