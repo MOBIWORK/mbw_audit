@@ -1376,6 +1376,7 @@ export default function Product_SKU() {
             </FormItemCustom>
             <div className="pt-3">
               <TableCustom
+               
                 rowSelection={{
                   type: selectionType,
                   ...rowSelectionProduct,

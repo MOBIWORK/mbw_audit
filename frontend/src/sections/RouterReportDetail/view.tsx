@@ -174,7 +174,8 @@ export default function ReportDetail() {
     {
       title: "STT",
       dataIndex: "stt",
-      fixed: 'left'
+      fixed: 'left',
+      width:'5%'
     },
     {
       title: "Khách hàng",
@@ -668,6 +669,7 @@ const onExportDataToExcelByCampaign = async (table, columns, title) => {
           {
             isGroupByCampaign? (
               <TableCustom
+                bordered
                 columns={columnsReportByCampaign}
                 dataSource={dataReportsByCampaign}
                 scroll={{ y: 540, x: 2000 }}
