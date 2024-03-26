@@ -190,14 +190,14 @@ export default function Product_SKU() {
             const ws = wb.Sheets[wsname];
             const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
             let dataImport = [];
-            if (data.length >= 2) {
+            if (data.length >= 2) {      
               for (let i = 1; i < data.length; i++) {
                 let objDataImport = {
                   product_code: data[i][0] ? data[i][0] : "",
                   barcode: data[i][1] ? data[i][1] : "",
                   product_name: data[i][2],
                   product_description: data[i][3],
-                  url_images: JSON.parse(data[i][4]),
+                  url_images: data[i][4] ? JSON.parse(data[i][4].replace('“', '"').replace('”', '"')) : [],
                 };
                 dataImport.push(objDataImport);
               }
@@ -600,6 +600,29 @@ export default function Product_SKU() {
   const handleOkEditCategory = async () => {
     setLoadingEditCategory(true);
     let objCategory = formEditCategory.getFieldsValue();
+     // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
+     if (!objCategory.hasOwnProperty("name_item") || !objCategory.name_item) {
+      message.warning("Vui lòng nhập tên danh mục.");
+      setLoadingEditCategory(false);
+      return;
+    }
+    const categoryName = objCategory.name_item.trim();
+    if (!categoryName) {
+      message.warning("Vui lòng nhập tên danh mục.");
+      return;
+    } else {
+    }
+    const isCategoryExists = categories.some(
+      (cat) =>
+        cat.category_name.toLowerCase() === categoryName.toLowerCase() &&
+        cat.category_name !== editItemCategory.category_name
+    );
+    // Kiểm tra xem danh mục đã tồn tại trong mảng category hay không
+    if (isCategoryExists) {
+      message.error("Danh mục đã tồn tại.");
+      setLoadingEditCategory(false);
+      return;
+    }
     if (editItemCategory != null && editItemCategory.name != null) {
       let urlPutCategory = `/api/resource/VGM_Category/${editItemCategory.name}`;
       let dataPut = {
