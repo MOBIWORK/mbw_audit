@@ -13,6 +13,7 @@ export default function  ReportView() {
   const [scoringHuman, setScoringHuman] = useState(0);
   const [reportSKUs, setReportSKUs] = useState<any[]>([]);
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false);
+  const [updateStorage, setUpdateStorage] = useState<boolean>(false);
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
   };
@@ -44,7 +45,6 @@ export default function  ReportView() {
   useEffect(() => {
     // Lấy record từ local storage khi component được mount
     let storedRecordData = localStorage.getItem('recordData');
-    console.log(JSON.parse(storedRecordData));
     if (storedRecordData) {
       let objRecord = JSON.parse(storedRecordData);
       setRecordData(objRecord);
@@ -62,8 +62,8 @@ export default function  ReportView() {
     }
 
     // Xóa record khỏi local storage sau khi đã sử dụng
-    localStorage.removeItem('recordData');
-  }, []);
+   // localStorage.removeItem('recordData');
+  }, [updateStorage]);
 
   const handleSaveReport = async () => {
     setLoadingUpdate(true);
@@ -77,6 +77,25 @@ export default function  ReportView() {
     if(res != null && res.message == "ok" && res.result != null && res.result.data == "success"){
       message.success("Cập nhật thành công");
       setLoadingUpdate(false);
+      let dataReports  = JSON.parse(localStorage.getItem('dataReports'));
+      let record = JSON.parse(localStorage.getItem('recordData'));
+      for (let i = 0; i< record.detail_skus.length;i++){
+        record.detail_skus[i].sum_product_human = reportSKUs[i].sum_product_human
+        record.detail_skus[i].scoring_human = reportSKUs[i].scoring_human
+      }
+      const currentIndex = dataReports.findIndex((item) => item.name === record.name);
+
+    // Kiểm tra nếu không phải là record cuối cùng trong danh sách
+    if (currentIndex !== null && currentIndex < dataReports.length - 1) {
+      const nextRecord = dataReports[currentIndex + 1];
+      // Xử lý với record kế tiếp ở đây
+      localStorage.setItem('recordData', JSON.stringify(nextRecord));
+      setUpdateStorage(prevState => !prevState);
+    }else{
+    //localStorage.removeItem('recordData');
+    return
+
+    }
     }else{
       message.error("Cập nhật thất bại");
       setLoadingUpdate(false);
@@ -91,13 +110,19 @@ export default function  ReportView() {
     // Nếu không có dữ liệu, hiển thị một tiêu đề mặc định
     return 'Tiêu đề';
   };
+  // Hàm xử lý khi click và điều hướng
+const handleNavigateToReports = () => {
+  navigate("/reports");
+  localStorage.removeItem('recordData');
+  localStorage.removeItem('dataReports');
+};
   return (
     <>
       <HeaderPage
         title={renderTitle()}
         icon={
           <p
-            onClick={() => navigate("/reports")}
+            onClick={ () => handleNavigateToReports()}
             className="mr-2 cursor-pointer"
           >
             <LeftOutlined />

@@ -159,6 +159,7 @@ export default function ReportDetail() {
   const handleRowClick = (record) => {
       // Lưu record vào local storage
     localStorage.setItem('recordData', JSON.stringify(record));
+    localStorage.setItem('dataReports', JSON.stringify(dataReports));
     navigate(`/report-view`);
   
    
