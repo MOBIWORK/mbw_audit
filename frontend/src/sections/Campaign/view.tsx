@@ -92,6 +92,7 @@ export default function Campaign() {
   const propUploadImportFileExcel: UploadProps = {
     onRemove: () => {
       setFileListImport([]);
+      setLstCampaignImport([]);
     },
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     multiple: false,
@@ -122,6 +123,9 @@ export default function Campaign() {
                         let dataImport = [];
                         if (data.length >= 2) {
                             for (let i = 1; i < data.length; i++) {
+                              if (!data[i][0]) {
+                                continue; // Bỏ qua dòng không có giá trị cho campaign_name và chuyển sang dòng tiếp theo
+                              }
                                 const EXCEL_EPOCH = new Date(1899, 11, 31);
                                 const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
                                 let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
@@ -135,11 +139,12 @@ export default function Campaign() {
                                     'campaign_start': (startDate.getTime() / 1000).toString(),
                                     'campaign_end': (endDate.getTime() / 1000).toString(),
                                     'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
-                                    'campaign_categories': data[i][5],
-                                    'campaign_employees': data[i][6],
-                                    'campaign_customers': data[i][7]
+                                    'campaign_categories': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : "",
+                                    'campaign_employees': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : "",
+                                    'campaign_customers': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : ""
                                 }
                                 dataImport.push(objDataImport);
+                                
                             }
                         }
                         setLstCampaignImport(dataImport);
@@ -282,12 +287,16 @@ export default function Campaign() {
 
   const handleOkImportExcel = async() => {
     let url_import_campaign = apiUrl + ".api.import_campaign";
+    if(lstCampaignImport.length == 0){
+      message.warning("Thêm file để tiếp tục");
+      return 
+    }
     let dataPost ={
       "listcampaign" :JSON.stringify(lstCampaignImport)
     }
     let res = await AxiosService.post(url_import_campaign, dataPost);
     if(res.message.status == "success"){
-      message.success("Thên chiến dịch thành công");
+      message.success("Thêm chiến dịch thành công");
       setIsModalOpenImportFileExcel(false)
       initDataCampaigns();
     }else{

@@ -406,8 +406,8 @@ export default function ProductCampaignEdit({
     {
       key: "1",
       label: (
-        <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}>
-          {" "}
+        <Checkbox checked={checkExistProduct} onClick={(event) => {event.stopPropagation()}} onChange={handleChangeCheckExist}>
+          {" "} 
           <span style={{ fontWeight: 700, fontSize: "15px" }}>
             {" "}
             1. Tiêu chí tồn tại sản phẩm
@@ -424,6 +424,7 @@ export default function ProductCampaignEdit({
       key: "2",
       label: (
         <Checkbox
+          onClick={(event) => {event.stopPropagation()}}
           checked={checkExistSequenceProduct}
           onChange={handleChangeCheckSequence}
         >

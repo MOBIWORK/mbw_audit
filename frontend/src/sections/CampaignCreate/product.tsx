@@ -271,6 +271,7 @@ export default function Product({
   };
 
   const handleChangeCheckExist = (e) => {
+    e.stopPropagation();
     setCheckExistProduct(e.target.checked);
     onChangeCheckExistProduct(e.target.checked);
   };
@@ -380,7 +381,7 @@ export default function Product({
     {
       key: "1",
       label: (
-        <Checkbox checked={checkExistProduct} onChange={handleChangeCheckExist}>
+        <Checkbox checked={checkExistProduct} onClick={(event) => {event.stopPropagation()}} onChange={handleChangeCheckExist}>
           {" "}
           <span style={{ fontWeight: 700, fontSize: "15px" }}>
             {" "}
@@ -398,6 +399,7 @@ export default function Product({
       key: "2",
       label: (
         <Checkbox
+          onClick={(event) => {event.stopPropagation()}}
           checked={checkSequenceProduct}
           onChange={handleChangeCheckSequence}
         >

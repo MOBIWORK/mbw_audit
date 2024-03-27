@@ -192,6 +192,9 @@ export default function Product_SKU() {
             let dataImport = [];
             if (data.length >= 2) {      
               for (let i = 1; i < data.length; i++) {
+                if (!data[i][2]) {
+                  continue; // Bỏ qua dòng không có giá trị cho product_name và chuyển sang dòng tiếp theo
+                }
                 let objDataImport = {
                   product_code: data[i][0] ? data[i][0] : "",
                   barcode: data[i][1] ? data[i][1] : "",
