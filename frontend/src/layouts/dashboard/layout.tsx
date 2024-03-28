@@ -1,43 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import Header from "./header";
 import MenuLeft from "./menu";
 import { Layout, Menu } from "antd";
+import styled from "styled-components";
 
 type Props = {
   children: React.ReactNode;
 };
-const { Content, Sider, theme } = Layout;
+const { Content, Sider } = Layout;
+
+const SiderCustome = styled(Sider)`
+  & .ant-layout-sider-trigger {
+    display: none;
+  }
+`;
 export default function DashboardLayout({ children }: Props) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <Layout>
-      <Content
-        style={{ padding: "0 0px" }}
-        className="!bg-[#fff]  min-h-screen"
+      <SiderCustome
+        style={{ background: "#fff" }}
+        width={!collapsed ? 250 : 78}
+        collapsible
+        collapsed={collapsed}
       >
-        <Header />
-        <Layout
-          style={{
-            padding: "24px 0",
-            background: "#fff",
-            borderRadius: "8px",
-            width: "80%",
-            margin: "0 auto",
-          }}
+        <MenuLeft handleCollapsed={setCollapsed} collapsed={collapsed} />
+      </SiderCustome>
+      <Layout>
+        <Content
+          style={{ padding: "0 0px" }}
+          className="!bg-[#fff]  min-h-screen"
         >
-          <Sider style={{ background: "#fff" }} width={250}>
-            <div className="font-semibold text-lg text-[#919EAB] leading-[22px] pl-[12px] mx-2 pb-4">
-              Audit
-            </div>
-            <MenuLeft />
-          </Sider>
-          <Content
-            className="round"
-            style={{ padding: "0 24px", minHeight: 280 }}
+          <Header />
+          <Layout
+            style={{
+              padding: "24px 0",
+              background: "#fff",
+              borderRadius: "8px",
+              margin: "0 auto"
+            }}
           >
-            <div>{children}</div>
-          </Content>
-        </Layout>
-      </Content>
+            <Content
+              className="round"
+              style={{ padding: "0 24px", minHeight: "90vh" ,background:"#F4F6F8" }}
+            >
+              <div>{children}</div>
+            </Content>
+          </Layout>
+        </Content>
+      </Layout>
     </Layout>
   );
 }
