@@ -1,14 +1,17 @@
-import { LuUploadCloud } from "react-icons/lu";
+import { LuUploadCloud, LuImport } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import ObjectDetectionResult from "./ObjectDetectionResult";
+import * as ExcelJS from 'exceljs';
 import * as XLSX from "xlsx";
+import * as FileSaver from 'file-saver';
 import {
   DeleteOutlined,
   EditOutlined,
   FileProtectOutlined,
   PlusOutlined,
   SearchOutlined,
+  VerticalAlignBottomOutlined
 } from "@ant-design/icons";
 import {
   Button,
@@ -1318,6 +1321,68 @@ export default function Product_SKU() {
       message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
     }
   };
+  const exportExcelCheckImage = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Sheet1');
+    
+    sheet.properties.defaultColWidth = 20;
+    sheet.getColumn('A').width = 30;
+    sheet.mergeCells('A2:J2');
+    sheet.getCell('A2').value = "Kiểm tra ảnh sản phẩm";
+    sheet.getCell('A2').style = { font: { bold: true, name: 'Times New Roman', size: 12 } };
+    sheet.getCell('A2').alignment = { vertical: 'middle', horizontal: 'left' };
+    let rowHeader = sheet.getRow(4);
+    let rowHeader_Next = sheet.getRow(5);
+    // Thêm dữ liệu cột
+    let fieldsMerge = [
+      {"title": "Mã sản phẩm", "field": "product_code"},
+      {"title": "Tên sản phẩm", "field": "product_name"},
+      {"title": "Số lượng", "field": "product_count"},
+      
+    ]
+    for(let i = 0; i < fieldsMerge.length; i++){
+      let cellStart = rowHeader.getCell(i+1);
+      let cellEnd = rowHeader_Next.getCell(i+1);
+      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
+      rowHeader.getCell(i+1).style = { font: { bold: true, name: 'Times New Roman', size: 12, italic: true } };
+      rowHeader.getCell(i+1).alignment = { vertical: 'middle', horizontal: 'center' };
+      rowHeader.getCell(i+1).value = fieldsMerge[i].title;
+    }
+    for(let i = 0; i < resultProductCheck.length; i++){
+      let rowStart = 6;
+      let row = sheet.getRow(i + rowStart);
+      let cellStart = 1;
+      for(let j = 0; j < fieldsMerge.length; j++){
+        row.getCell(cellStart).style = { font: { name: 'Times New Roman', size: 12, italic: true } };
+        let valCell = "";
+        valCell = resultProductCheck[i][fieldsMerge[j].field];
+        
+        row.getCell(cellStart).value = valCell;
+        cellStart += 1;
+      }
+    }
+    // sheet.columns = columns;
+    
+    // // Thêm dữ liệu từ bảng vào file Excel
+    // resultProductCheck.forEach((row, index) => {
+    //   sheet.addRow({
+    //     product_code: row.product_code,
+    //     product_name: row.product_name,
+    //     product_count: row.product_count,
+    //   });
+    // });
+       // Lưu file Excel
+       const buffer = await workbook.xlsx.writeBuffer();
+       saveAsExcelFile(buffer, "report_check_image");
+  }
+  const saveAsExcelFile = (buffer: any, fileName: string) => {
+    let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    let EXCEL_EXTENSION = '.xlsx';
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE
+    });
+    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+  }
   return (
     <>
       <HeaderPage
@@ -1512,7 +1577,16 @@ export default function Product_SKU() {
         </div>
 
         <div>
-          <div>Kết quả kiểm tra hình ảnh:</div>
+          <div style={{display:'flex',justifyContent:'space-between'}}>
+            <span>Kết quả kiểm tra hình ảnh:</span> 
+            <Button
+              type="primary"
+              onClick={exportExcelCheckImage}
+              icon={ <VerticalAlignBottomOutlined/>}
+            >
+              Xuất dữ liệu
+            </Button>
+            </div>
           <Table
             dataSource={resultProductCheck}
             columns={[
