@@ -42,6 +42,15 @@ export const Overview =({data}: {data:any}) => {
     </WrapperCard>
 }
 export const InfoCard =({data}: {data:any}) => {
+   // Kiểm tra số lượng bản ghi
+   let shouldDisplayPagination = false;
+   let shouldDisplayScroll = false
+   if(data.data.source){
+    shouldDisplayPagination = data.data.source.length > 5;
+    shouldDisplayScroll = data.data.source.length > 5;
+   }
+  
+ 
   const navigate = useNavigate();
   const handleRowClick = (record: any) => {
     // Xử lý sự kiện click vào từng hàng ở đây
@@ -58,7 +67,9 @@ export const InfoCard =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-           <TableCustom style={{height:'100%'}} scroll={{ y: 270 }}
+           <TableCustom style={{height:'100%'}}
+             pagination={shouldDisplayPagination}
+             scroll={shouldDisplayScroll ? { y: 270 } : {}}
             rowClassName="row-pointer"
             columns={data.data.columns}
             dataSource={data.data.source}
@@ -69,6 +80,13 @@ export const InfoCard =({data}: {data:any}) => {
     </WrapperCardTable>
 }
 export const InfoCardEmploy =({data}: {data:any}) => {
+   // Kiểm tra số lượng bản ghi
+   let shouldDisplayPagination = false;
+   let shouldDisplayScroll = false
+  if(data.data.source){
+    shouldDisplayPagination = data.data.source.length > 5;
+    shouldDisplayScroll = data.data.source.length > 5;
+   }
     return <WrapperCardTable>
         <div style={{height:'100%'}}>
         <p className="text-base font-medium pl-2" style={{
@@ -80,7 +98,8 @@ export const InfoCardEmploy =({data}: {data:any}) => {
     }}>
             {data.title}
             </p>
-           <TableCustom style={{height:'100%'}} pagination={{ pageSize: 5 }} scroll={{ y: 270 }} size="small"
+           <TableCustom style={{height:'100%'}}  pagination={shouldDisplayPagination}
+             scroll={shouldDisplayScroll ? { y: 270 } : {}} size="small"
             columns={data.data.columns}
             dataSource={data.data.source}
             
