@@ -9,6 +9,7 @@ import EmployeeSellCampaignEdit from "./employee-sale";
 import {useEffect, useState} from 'react';
 import { AxiosService } from "../../services/server";
 import moment from 'moment';
+import { log } from "console";
 
 export default function CampaignEdit() {
   const navigate = useNavigate();
@@ -102,7 +103,8 @@ export default function CampaignEdit() {
           objSettingScore["sequence_product"] = sequenceProducts;
         }
         let objFrm = form.getFieldsValue();
-
+        
+    
         // Kiểm tra nếu start_date bé hơn end_date
         let startDate = convertDate(objFrm.campaign_start);
         let endDate = convertDate(objFrm.campaign_end);
@@ -149,10 +151,10 @@ export default function CampaignEdit() {
   const convertDate = (val) => {
     // Tạo một đối tượng Date từ chuỗi thời gian
     const dateObject = new Date(val);
-
+    const formatDated = moment(dateObject).format('YYYY-MM-DD HH:mm:ss')
     // Chuyển đổi định dạng thành định dạng phù hợp cho MySQL
     const formattedDate = dateObject.toISOString().slice(0, 19).replace('T', ' ');
-    return formattedDate;
+    return formatDated;
   }
 
   const handleCampaignStatusChange = (val) => {
