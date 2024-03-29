@@ -6,7 +6,6 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/react.svg";
 import { Col, Row } from "antd";
 import { DoubleLeftOutlined, DoubleRightOutlined } from "@ant-design/icons";
-import { log } from "console";
 
 export default function MenuLeft({
   handleCollapsed,
@@ -40,7 +39,7 @@ export default function MenuLeft({
     "/product_sku": "product_sku",
     "/campaign": "campaign",
   };
-  
+
   const updateMenuState = (path: string) => {
     const currentKey = pathToMenuKeyMap[path] || "";
     setCurrent(currentKey);
