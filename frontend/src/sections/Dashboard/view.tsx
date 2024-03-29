@@ -513,12 +513,15 @@ export default function Dashboard() {
         }}
       >
         <HeaderPage title="Dashboard" />
-        <Form.Item className="border-none mr-4" label="Thời gian thực hiện">
+      
+        <Form.Item className="border-none" style={{padding:'20px 0', margin:'0'}} label="Thời gian thực hiện">
           <RangePicker
             value={searchTime}
             onChange={(dates) => setSearchTime(dates)}
           />
         </Form.Item>
+     
+       
       </div>
       <Row gutter={10} style={{ marginTop: "20px" }}>
         <Col span={5} className="card-container">

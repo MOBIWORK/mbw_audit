@@ -683,6 +683,7 @@ const onExportDataToExcelByCampaign = async (table, columns, title) => {
               />
             ) : (
               <TableCustom
+                bordered
                 columns={columns}
                 dataSource={dataReports}
                 scroll={{ y: 540, x: 1300 }}
