@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { MenuCustom } from "../../components/menu/menu";
 import { listMenu } from "./data";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../../assets/react.svg";
+import logo from "../../assets/logo.svg";
 import { Col, Row } from "antd";
 import { DoubleLeftOutlined, DoubleRightOutlined } from "@ant-design/icons";
 

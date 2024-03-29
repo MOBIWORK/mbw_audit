@@ -5,7 +5,7 @@ import {} from "frappe-react-sdk";
 import { useFrappeAuth } from "frappe-react-sdk";
 
 import { Link } from "react-router-dom";
-import logo from "../../assets/react.svg";
+import logo from "../../assets/logo.svg";
 import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 
