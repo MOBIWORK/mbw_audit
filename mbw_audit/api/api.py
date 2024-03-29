@@ -13,6 +13,7 @@ from mbw_audit.api.common import (post_images, gen_response, base64_to_cv2, draw
 from frappe.utils.file_manager import (
     save_file
 )
+from frappe.core.doctype.file.utils import delete_file
 from frappe.utils import get_site_path, now_datetime
 from datetime import datetime
 import base64
@@ -71,15 +72,41 @@ def checkImageProductExist(*args,**kwargs):
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
-    return response
+    
+    # return response
     if response.get('status') == 'completed':
-        count_value = response.get('results', {}).get('count', {})
-        return count_value
+        image_ais = render_check_image_ai(response.get("results",{}).get("verbose", []))
+        response['results']['verbose'] = image_ais 
+        return response
+        # count_value = response.get('results', {}).get('count', {})
+        # return count_value
         # self.set('sum', count_value)
     else:
         return {"status": "error", 'message': response}
         # self.set('sum', self.sum)
+        
+@frappe.whitelist(methods=["POST"])      
+def delete_check_image_ai(*args, **kwargs):
+    delete = delete_file( kwargs.get('file_name'))
+    return
+    # file_name = kwargs.get('file_name')
 
+    # # Kiểm tra xem tên tệp tin có tồn tại không
+    # if file_name:
+    #     path_file = "/files/" + file_name
+        
+    #     try:
+    #         # Xóa tệp tin nếu tồn tại
+    #         if os.path.exists(path_file):
+    #             os.remove(path_file)
+    #             return {"message": f"Đã xóa tệp tin {file_name} thành công."}
+    #         else:
+    #             return {"message": f"Tệp tin {file_name} không tồn tại."}
+    #     except Exception as e:
+    #         return {"message": f"Lỗi khi xóa tệp tin {file_name}: {e}"}
+    # else:
+    #     return {"message": "Tên tệp tin không được cung cấp."}
+    
 @frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
@@ -280,6 +307,26 @@ def render_image_ai(verbose):
         path_folder = create_folder(f"{current_datetime.month}", f"booth_product_ai/{frappe.session.user}/{current_datetime.year}")
         fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_product_ai", path_folder)
         print("Dòng 282 ", frappe.utils.get_request_site_address() )
+        arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
+    return arr_image_ai
+
+
+def render_check_image_ai(verbose):
+    arr_image_ai = []
+    for item in verbose:
+        base64_image = item.get("base64_image")
+        locates = item.get("locates", [])
+        image = base64_to_cv2(base64_image)
+        for locate in locates:
+            if locate.get("label") != "Unknow":
+                draw_detections(image, locate.get("bbox"), locate.get("label"))
+        timestamp = datetime.timestamp(datetime.now())
+        # Mã hóa hình ảnh thành chuỗi Base64
+        _, buffer = cv2.imencode('.jpg', image)
+        base64_image_encoded = base64.b64encode(buffer).decode("utf-8")
+        current_datetime = now_datetime()
+        path_folder = create_folder(f"{current_datetime.month}", f"booth_check_image_ai/{frappe.session.user}/{current_datetime.year}")
+        fileInfo = save_file(f"draw_checkimage_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_check_image_ai", path_folder)
         arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
     return arr_image_ai
 

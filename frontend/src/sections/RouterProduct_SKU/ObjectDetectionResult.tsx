@@ -3,9 +3,8 @@ import { Stage, Layer, Image, Rect, Text } from 'react-konva';
 // import './css/canvas.css'
 
 
-const ObjectDetectionResult = ({ imageSrc, objectBoxes, labelColors }) => {
+const ObjectDetectionResult = ({imageSrc, objectBoxes, labelColors }) => {
   // Đối tượng để ánh xạ các nhãn với màu viền tương ứng
-
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 450, height: 450 })
 

@@ -28,6 +28,7 @@ import {
   Upload,
   UploadProps,
   message,
+  Image
 } from "antd";
 import paths from "../AppConst/path.js";
 import { useState, useEffect } from "react";
@@ -1084,6 +1085,7 @@ export default function Product_SKU() {
             ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
             : "",
       };
+
       let res = await AxiosService.post(urlCheckProduct, objCheckProduct);
       let arrProductDetect = [];
       for (let i = 0; i < products.length; i++) {
@@ -1099,33 +1101,37 @@ export default function Product_SKU() {
           setLoadingCheckProduct(false);
           message.error("Không thể kiểm tra ảnh sản phẩm");
         } else {
-          setUrlImageAI(
-            "data:image/png;base64," +
-              res.message.results.verbose[0].base64_image
-          );
-          let arrBoxes = [];
-          arrProductDetect.forEach((item) => {
-            if (res.message.results.count[item.product_name] != null)
-              item.product_count = res.message.results.count[item.product_name];
-            let locates = res.message.results.verbose[0].locates;
+          if(res.message.results.verbose[0]){
+            setUrlImageAI(res.message.results.verbose[0]);
+          }
+         
+          // setUrlImageAI(
+          //   "data:image/png;base64," +
+          //     res.message.results.verbose[0].base64_image
+          // );
+          // let arrBoxes = [];
+          // arrProductDetect.forEach((item) => {
+          //   if (res.message.results.count[item.product_name] != null)
+          //     item.product_count = res.message.results.count[item.product_name];
+          //   let locates = res.message.results.verbose[0].locates;
 
-            // Lọc các đối tượng có trường label bằng giá trị của item.product_name
-            let locatesWithLabel = locates.filter(function (obj) {
-              return obj.label === item.product_name;
-            });
-            let newObjectBoxes = locatesWithLabel.map(function (box) {
-              let bbox = box.bbox;
-              return {
-                x: bbox[0],
-                y: bbox[1],
-                width: bbox[2] - bbox[0],
-                height: bbox[3] - bbox[1],
-                label: box.label,
-              };
-            });
-            arrBoxes = arrBoxes.concat(newObjectBoxes);
-          });
-          setObjectBoxes(arrBoxes);
+          //   // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+          //   let locatesWithLabel = locates.filter(function (obj) {
+          //     return obj.label === item.product_name;
+          //   });
+          //   let newObjectBoxes = locatesWithLabel.map(function (box) {
+          //     let bbox = box.bbox;
+          //     return {
+          //       x: bbox[0],
+          //       y: bbox[1],
+          //       width: bbox[2] - bbox[0],
+          //       height: bbox[3] - bbox[1],
+          //       label: box.label,
+          //     };
+          //   });
+          //   arrBoxes = arrBoxes.concat(newObjectBoxes);
+          // });
+          // setObjectBoxes(arrBoxes);
         }
       }
 
@@ -1564,17 +1570,21 @@ export default function Product_SKU() {
         onCancel={handleCancelResultCheckProduct}
         footer={null}
       >
-        <div style={{ marginBottom: "20px", display: "flex" }}>
-          <img
-            src={urlImageCheckProductResult}
-            style={{ width: "450px", height: "450px", marginRight: "20px" }}
-          />
-          <ObjectDetectionResult
-            imageSrc={urlImageAI}
-            objectBoxes={objectBoxes}
-            labelColors={labelColors}
-          />
-        </div>
+     <div style={{ marginBottom: "20px", display: "flex", justifyContent:"space-around" }}>
+      <Image.PreviewGroup>
+        <Image
+          key='1'
+          style={{ width: "100%", height: "450px" }} // Set width to 50% and height to 450px
+          src={urlImageCheckProductResult}
+        />
+        <div></div>
+        <Image
+          key='2'
+          style={{ width: "100%", height: "450px" }} // Set width to 50% and height to 450px
+          src={urlImageAI}
+        />
+      </Image.PreviewGroup>
+    </div>
 
         <div>
           <div style={{display:'flex',justifyContent:'space-between'}}>
