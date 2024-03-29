@@ -8,6 +8,7 @@ import Customer from "./customer-list";
 import EmployeeSell from "./employee-sale";
 import { useState } from "react";
 import { AxiosService } from "../../services/server";
+import moment from "moment";
 
 export default function CampaignCreate() {
   const navigate = useNavigate();
@@ -29,7 +30,6 @@ export default function CampaignCreate() {
       let objFrm = form.getFieldsValue();
       let startDate = convertDate(objFrm.campaign_start);
       let endDate = convertDate(objFrm.campaign_end);
-
       // Kiểm tra nếu start_date bé hơn end_date
       if (startDate >= endDate) {
         message.error("Thời gian bắt đầu phải nhỏ hơn Thời gian kết thúc");
@@ -103,13 +103,13 @@ export default function CampaignCreate() {
   const convertDate = (val) => {
     // Tạo một đối tượng Date từ chuỗi thời gian
     const dateObject = new Date(val);
-
     // Chuyển đổi định dạng thành định dạng phù hợp cho MySQL
-    const formattedDate = dateObject
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
-    return formattedDate;
+    const formattedDated = moment(dateObject).format('YYYY-MM-DD HH:mm:ss');
+    // const formattedDate = dateObject
+    //   .toISOString()
+    //   .slice(0, 19)
+    //   .replace("T", " ");
+    return formattedDated;
   };
 
   const handleCampaignStatusChange = (val) => {
