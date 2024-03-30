@@ -9,7 +9,7 @@ import EmployeeSellCampaignEdit from "./employee-sale";
 import {useEffect, useState} from 'react';
 import { AxiosService } from "../../services/server";
 import moment from 'moment';
-import { log } from "console";
+import dayjs from "dayjs";
 
 export default function CampaignEdit() {
   const navigate = useNavigate();
@@ -39,8 +39,9 @@ export default function CampaignEdit() {
   const initDataByIdCampaign = async () => {
     let urlDetailCampaign = `/api/resource/VGM_Campaign/${name}`;
     let res = await AxiosService(urlDetailCampaign);
+    console.log(convertDateFormat(res.data.start_date),'datepicker');
+    
     if(res != null && res.data != null){
-      console.log(res.data);
         form.setFieldsValue({
             'campaign_name': res.data.campaign_name,
             'campaign_description': res.data.campaign_description,
@@ -79,8 +80,9 @@ export default function CampaignEdit() {
   }
 
   const convertDateFormat = (val) => {
-    const datePickerDate = moment(val, 'YYYY-MM-DD HH:mm:ss');
-    return datePickerDate;
+    // const datePickerDate = moment(val, 'YYYY-MM-DD HH:mm:ss');
+    const datePicker = dayjs(val, 'YYYY-MM-DD HH:mm:ss');
+    return datePicker;
   }
 
   const handleEditCampaign = async () => {
