@@ -1109,29 +1109,29 @@ export default function Product_SKU() {
           //   "data:image/png;base64," +
           //     res.message.results.verbose[0].base64_image
           // );
-          // let arrBoxes = [];
-          // arrProductDetect.forEach((item) => {
-          //   if (res.message.results.count[item.product_name] != null)
-          //     item.product_count = res.message.results.count[item.product_name];
-          //   let locates = res.message.results.verbose[0].locates;
+         // let arrBoxes = [];
+          arrProductDetect.forEach((item) => {
+            if (res.message.results.count[item.product_name] != null)
+              item.product_count = res.message.results.count[item.product_name];
+           // let locates = res.message.results.verbose[0].locates;
 
-          //   // Lọc các đối tượng có trường label bằng giá trị của item.product_name
-          //   let locatesWithLabel = locates.filter(function (obj) {
-          //     return obj.label === item.product_name;
-          //   });
-          //   let newObjectBoxes = locatesWithLabel.map(function (box) {
-          //     let bbox = box.bbox;
-          //     return {
-          //       x: bbox[0],
-          //       y: bbox[1],
-          //       width: bbox[2] - bbox[0],
-          //       height: bbox[3] - bbox[1],
-          //       label: box.label,
-          //     };
-          //   });
-          //   arrBoxes = arrBoxes.concat(newObjectBoxes);
-          // });
-          // setObjectBoxes(arrBoxes);
+            // Lọc các đối tượng có trường label bằng giá trị của item.product_name
+            // let locatesWithLabel = locates.filter(function (obj) {
+            //   return obj.label === item.product_name;
+            // });
+            // let newObjectBoxes = locatesWithLabel.map(function (box) {
+            //   let bbox = box.bbox;
+            //   return {
+            //     x: bbox[0],
+            //     y: bbox[1],
+            //     width: bbox[2] - bbox[0],
+            //     height: bbox[3] - bbox[1],
+            //     label: box.label,
+            //   };
+            // });
+            // arrBoxes = arrBoxes.concat(newObjectBoxes);
+          });
+          //setObjectBoxes(arrBoxes);
         }
       }
 
