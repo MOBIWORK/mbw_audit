@@ -2,16 +2,16 @@ import { LuUploadCloud, LuImport } from "react-icons/lu";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import ObjectDetectionResult from "./ObjectDetectionResult";
-import * as ExcelJS from 'exceljs';
+import * as ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
-import * as FileSaver from 'file-saver';
+import * as FileSaver from "file-saver";
 import {
   DeleteOutlined,
   EditOutlined,
   FileProtectOutlined,
   PlusOutlined,
   SearchOutlined,
-  VerticalAlignBottomOutlined
+  VerticalAlignBottomOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -28,7 +28,7 @@ import {
   Upload,
   UploadProps,
   message,
-  Image
+  Image,
 } from "antd";
 import paths from "../AppConst/path.js";
 import { useState, useEffect } from "react";
@@ -194,22 +194,34 @@ export default function Product_SKU() {
             const ws = wb.Sheets[wsname];
             const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
             let dataImport = [];
-            if (data.length >= 2) {      
+            if (data.length >= 2) {
               for (let i = 1; i < data.length; i++) {
                 if (!data[i][2]) {
                   continue; // Bỏ qua dòng không có giá trị cho product_name và chuyển sang dòng tiếp theo
                 }
+                // Kiểm tra xem product_code và product_name đã tồn tại trong mảng existingProducts chưa
+
                 let objDataImport = {
                   product_code: data[i][0] ? data[i][0] : "",
                   barcode: data[i][1] ? data[i][1] : "",
                   product_name: data[i][2],
                   product_description: data[i][3],
-                  url_images: data[i][4] ? JSON.parse(data[i][4].replace('“', '"').replace('”', '"')) : [],
+                  url_images: data[i][4]
+                    ? JSON.parse(data[i][4].replace("“", '"').replace("”", '"'))
+                    : [],
                 };
+                if (
+                  products.some(
+                    (product) =>
+                      product.product_code === objDataImport.product_code &&
+                      product.product_name === objDataImport.product_name
+                  )
+                ) {
+                  continue; // Nếu đã tồn tại thì bỏ qua và chuyển sang dòng tiếp theo
+                }
                 dataImport.push(objDataImport);
               }
             }
-            console.log(dataImport);
             setLstProductImport(dataImport);
           };
           reader.readAsArrayBuffer(file);
@@ -288,8 +300,9 @@ export default function Product_SKU() {
         }
       } else {
         message.error(
-          "Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
+          "Tải ảnh thất bại, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
         );
+        return;
       }
 
       return false;
@@ -371,7 +384,7 @@ export default function Product_SKU() {
         return false;
       } else {
         message.error(
-          "Đã xảy ra lỗi, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
+          "Tải ảnh thất bại, chỉ chấp nhận các định dạng file ảnh: JPEG, JPG, PNG, GIF, BMP, TIFF, TIF"
         );
       }
     },
@@ -607,8 +620,8 @@ export default function Product_SKU() {
   const handleOkEditCategory = async () => {
     setLoadingEditCategory(true);
     let objCategory = formEditCategory.getFieldsValue();
-     // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
-     if (!objCategory.hasOwnProperty("name_item") || !objCategory.name_item) {
+    // Kiểm tra xem trường name_item có tồn tại và có được nhập liệu không
+    if (!objCategory.hasOwnProperty("name_item") || !objCategory.name_item) {
       message.warning("Vui lòng nhập tên danh mục.");
       setLoadingEditCategory(false);
       return;
@@ -866,6 +879,10 @@ export default function Product_SKU() {
     for (let i = 0; i < fileUploadAddProduct.length; i++) {
       arrImages.push(fileUploadAddProduct[i]);
     }
+    // Kiểm tra và gán giá trị cho barcode
+    if (!objProduct.barcode_product || objProduct.barcode_product === "") {
+      objProduct.barcode_product = objProduct.product_code; // Gán mã sản phẩm cho barcode nếu barcode không tồn tại hoặc rỗng
+    }
     // Kiểm tra mã vạch
     if (!isBarcodeValid(objProduct.barcode_product)) {
       message.error("Barcode không được chứa ký tự tiếng Việt");
@@ -917,6 +934,22 @@ export default function Product_SKU() {
     setLoadingEditProduct(true);
     let arrImage = [];
     let objProduct = formEditProduct.getFieldsValue();
+    // Kiểm tra và gán giá trị cho barcode
+    if (!objProduct.barcode_product || objProduct.barcode_product === "") {
+      objProduct.barcode_product = objProduct.product_code; // Gán mã sản phẩm cho barcode nếu barcode không tồn tại hoặc rỗng
+    }
+    // Kiểm tra mã sản phẩm
+    if (objProduct.product_code) {
+      let productFilter = products.filter(
+        (x) =>
+          x.product_code.toLowerCase() === objProduct.product_code.toLowerCase() && x.product_code.toLowerCase() !== editItemProduct.product_code.toLowerCase()
+      );
+      if (productFilter.length > 0) {
+        message.error("Mã sản phẩm đã tồn tại");
+        setLoadingEditProduct(false);
+        return;
+      }
+    }
     if (!isBarcodeValid(objProduct.barcode_product)) {
       message.error("Barcode không được chứa ký tự tiếng Việt");
       setLoadingEditProduct(false);
@@ -1077,7 +1110,6 @@ export default function Product_SKU() {
     } else {
       setLoadingCheckProduct(true);
       let urlCheckProduct = apiUrl + ".api.checkImageProductExist";
-      console.log(fileUploadCheckProduct);
       let objCheckProduct = {
         collection_name: categorySelected.name,
         linkimages:
@@ -1101,19 +1133,19 @@ export default function Product_SKU() {
           setLoadingCheckProduct(false);
           message.error("Không thể kiểm tra ảnh sản phẩm");
         } else {
-          if(res.message.results.verbose[0]){
+          if (res.message.results.verbose[0]) {
             setUrlImageAI(res.message.results.verbose[0]);
           }
-         
+
           // setUrlImageAI(
           //   "data:image/png;base64," +
           //     res.message.results.verbose[0].base64_image
           // );
-         // let arrBoxes = [];
+          // let arrBoxes = [];
           arrProductDetect.forEach((item) => {
             if (res.message.results.count[item.product_name] != null)
               item.product_count = res.message.results.count[item.product_name];
-           // let locates = res.message.results.verbose[0].locates;
+            // let locates = res.message.results.verbose[0].locates;
 
             // Lọc các đối tượng có trường label bằng giá trị của item.product_name
             // let locatesWithLabel = locates.filter(function (obj) {
@@ -1177,6 +1209,12 @@ export default function Product_SKU() {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [fileListEdit, setFileListEdit] = useState<UploadFile[]>([]);
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const [previewOpenEdit, setPreviewOpenEdit] = useState(false);
+  const [previewImageEdit, setPreviewImageEdit] = useState("");
+
   const onChangeImageFormAddProduct: UploadProps["onChange"] = ({
     fileList: newFileList,
   }) => {
@@ -1187,20 +1225,38 @@ export default function Product_SKU() {
   }) => {
     setFileListEdit(newFileList);
   };
-
-  const onPreview = async (file: UploadFile) => {
-    let src = file.url as string;
-    if (!src) {
-      src = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file.originFileObj as FileType);
-        reader.onload = () => resolve(reader.result as string);
-      });
+  const getBase64 = (file: FileType): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  const onPreviewEdit = async (file: UploadFile) => {
+    // let src = file.url as string;
+    // if (!src) {
+    //   src = await new Promise((resolve) => {
+    //     const reader = new FileReader();
+    //     reader.readAsDataURL(file.originFileObj as FileType);
+    //     reader.onload = () => resolve(reader.result as string);
+    //   });
+    // }
+    // const image = new Image();
+    // image.src = src;
+    // const imgWindow = window.open(src);
+    // imgWindow?.document.write(image.outerHTML);
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as FileType);
     }
-    const image = new Image();
-    image.src = src;
-    const imgWindow = window.open(src);
-    imgWindow?.document.write(image.outerHTML);
+    setPreviewImageEdit(file.url || (file.preview as string));
+    setPreviewOpenEdit(true);
+  };
+  const onPreviewAdd = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as FileType);
+    }
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
   };
 
   const handleAddProductFromERP = () => {
@@ -1229,7 +1285,6 @@ export default function Product_SKU() {
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeProductFromERP[]
   ) => {
-    console.log(selectedRow);
     setProductFromERPSelected(selectedRow);
   };
 
@@ -1324,51 +1379,59 @@ export default function Product_SKU() {
         setLoadingImportFileExcelProduct(false);
       }
     } else {
-      message.error("File không chính xác, tải dữ liệu mẫu để tiếp tục");
+      message.error("Danh sách sản phẩm đã tồn tại hoặc File không chính xác");
     }
   };
   const exportExcelCheckImage = async () => {
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Sheet1');
-    
+    const sheet = workbook.addWorksheet("Sheet1");
+
     sheet.properties.defaultColWidth = 20;
-    sheet.getColumn('A').width = 30;
-    sheet.mergeCells('A2:J2');
-    sheet.getCell('A2').value = "Kiểm tra ảnh sản phẩm";
-    sheet.getCell('A2').style = { font: { bold: true, name: 'Times New Roman', size: 12 } };
-    sheet.getCell('A2').alignment = { vertical: 'middle', horizontal: 'left' };
+    sheet.getColumn("A").width = 30;
+    sheet.mergeCells("A2:J2");
+    sheet.getCell("A2").value = "Kiểm tra ảnh sản phẩm";
+    sheet.getCell("A2").style = {
+      font: { bold: true, name: "Times New Roman", size: 12 },
+    };
+    sheet.getCell("A2").alignment = { vertical: "middle", horizontal: "left" };
     let rowHeader = sheet.getRow(4);
     let rowHeader_Next = sheet.getRow(5);
     // Thêm dữ liệu cột
     let fieldsMerge = [
-      {"title": "Mã sản phẩm", "field": "product_code"},
-      {"title": "Tên sản phẩm", "field": "product_name"},
-      {"title": "Số lượng", "field": "product_count"},
-      
-    ]
-    for(let i = 0; i < fieldsMerge.length; i++){
-      let cellStart = rowHeader.getCell(i+1);
-      let cellEnd = rowHeader_Next.getCell(i+1);
+      { title: "Mã sản phẩm", field: "product_code" },
+      { title: "Tên sản phẩm", field: "product_name" },
+      { title: "Số lượng", field: "product_count" },
+    ];
+    for (let i = 0; i < fieldsMerge.length; i++) {
+      let cellStart = rowHeader.getCell(i + 1);
+      let cellEnd = rowHeader_Next.getCell(i + 1);
       sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
-      rowHeader.getCell(i+1).style = { font: { bold: true, name: 'Times New Roman', size: 12, italic: true } };
-      rowHeader.getCell(i+1).alignment = { vertical: 'middle', horizontal: 'center' };
-      rowHeader.getCell(i+1).value = fieldsMerge[i].title;
+      rowHeader.getCell(i + 1).style = {
+        font: { bold: true, name: "Times New Roman", size: 12, italic: true },
+      };
+      rowHeader.getCell(i + 1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      rowHeader.getCell(i + 1).value = fieldsMerge[i].title;
     }
-    for(let i = 0; i < resultProductCheck.length; i++){
+    for (let i = 0; i < resultProductCheck.length; i++) {
       let rowStart = 6;
       let row = sheet.getRow(i + rowStart);
       let cellStart = 1;
-      for(let j = 0; j < fieldsMerge.length; j++){
-        row.getCell(cellStart).style = { font: { name: 'Times New Roman', size: 12, italic: true } };
+      for (let j = 0; j < fieldsMerge.length; j++) {
+        row.getCell(cellStart).style = {
+          font: { name: "Times New Roman", size: 12, italic: true },
+        };
         let valCell = "";
         valCell = resultProductCheck[i][fieldsMerge[j].field];
-        
+
         row.getCell(cellStart).value = valCell;
         cellStart += 1;
       }
     }
     // sheet.columns = columns;
-    
+
     // // Thêm dữ liệu từ bảng vào file Excel
     // resultProductCheck.forEach((row, index) => {
     //   sheet.addRow({
@@ -1377,18 +1440,22 @@ export default function Product_SKU() {
     //     product_count: row.product_count,
     //   });
     // });
-       // Lưu file Excel
-       const buffer = await workbook.xlsx.writeBuffer();
-       saveAsExcelFile(buffer, "report_check_image");
-  }
+    // Lưu file Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "report_check_image");
+  };
   const saveAsExcelFile = (buffer: any, fileName: string) => {
-    let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    let EXCEL_EXTENSION = '.xlsx';
+    let EXCEL_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    let EXCEL_EXTENSION = ".xlsx";
     const data: Blob = new Blob([buffer], {
-      type: EXCEL_TYPE
+      type: EXCEL_TYPE,
     });
-    FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-  }
+    FileSaver.saveAs(
+      data,
+      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+    );
+  };
   return (
     <>
       <HeaderPage
@@ -1450,7 +1517,6 @@ export default function Product_SKU() {
             </FormItemCustom>
             <div className="pt-3">
               <TableCustom
-               
                 rowSelection={{
                   type: selectionType,
                   ...rowSelectionProduct,
@@ -1570,33 +1636,49 @@ export default function Product_SKU() {
         onCancel={handleCancelResultCheckProduct}
         footer={null}
       >
-     <div style={{ marginBottom: "20px", display: "flex", justifyContent:"space-around" }}>
-      <Image.PreviewGroup>
-        <Image
-          key='1'
-          style={{ width: "100%", height: "450px" }} // Set width to 50% and height to 450px
-          src={urlImageCheckProductResult}
-        />
-        <div></div>
-        <Image
-          key='2'
-          style={{ width: "100%", height: "450px" }} // Set width to 50% and height to 450px
-          src={urlImageAI}
-        />
-      </Image.PreviewGroup>
-    </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Cột 1: Hình ảnh sản phẩm */}
+          <div style={{ flex: 1, marginRight: "10px" }}>
+            <h3 style={{ textAlign: "center" }}>Hình ảnh sản phẩm</h3>
+            <Image.PreviewGroup>
+              <Image
+                key="1"
+                style={{ width: "100%", height: "auto" }} // Set width to 100% and let height adjust automatically
+                src={urlImageCheckProductResult}
+              />
+            </Image.PreviewGroup>
+          </div>
+
+          {/* Cột 2: Hình ảnh AI */}
+          <div style={{ flex: 1, marginLeft: "10px" }}>
+            <h3 style={{ textAlign: "center" }}>Hình ảnh AI</h3>
+            <Image.PreviewGroup>
+              <Image
+                key="2"
+                style={{ width: "100%", height: "auto" }} // Set width to 100% and let height adjust automatically
+                src={urlImageAI}
+              />
+            </Image.PreviewGroup>
+          </div>
+        </div>
 
         <div>
-          <div style={{display:'flex',justifyContent:'space-between'}}>
-            <span>Kết quả kiểm tra hình ảnh:</span> 
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Kết quả kiểm tra hình ảnh:</span>
             <Button
               type="primary"
               onClick={exportExcelCheckImage}
-              icon={ <VerticalAlignBottomOutlined/>}
+              icon={<VerticalAlignBottomOutlined />}
             >
               Xuất dữ liệu
             </Button>
-            </div>
+          </div>
           <Table
             dataSource={resultProductCheck}
             columns={[
@@ -1617,6 +1699,7 @@ export default function Product_SKU() {
               },
             ]}
             pagination={false}
+            scroll={{ y: resultProductCheck.length > 5 ? 350 : undefined }}
           />
         </div>
       </Modal>
@@ -1759,10 +1842,22 @@ export default function Product_SKU() {
                 accept="image/png, image/jpeg"
                 fileList={fileList}
                 onChange={onChangeImageFormAddProduct}
-                onPreview={onPreview}
+                onPreview={onPreviewAdd}
               >
                 {"+ Upload"}
               </Upload>
+              {previewImage && (
+                <Image
+                  wrapperStyle={{ display: "none" }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) =>
+                      !visible && setPreviewImage(""),
+                  }}
+                  src={previewImage}
+                />
+              )}
             </FormItemCustom>
           </Form>
         </div>
@@ -1854,10 +1949,22 @@ export default function Product_SKU() {
                 accept="image/png, image/jpeg"
                 fileList={fileListEdit}
                 onChange={onChangeImageFormEditProduct}
-                onPreview={onPreview}
+                onPreview={onPreviewEdit}
               >
                 {"+ Upload"}
               </Upload>
+              {previewImageEdit && (
+                <Image
+                  wrapperStyle={{ display: "none" }}
+                  preview={{
+                    visible: previewOpenEdit,
+                    onVisibleChange: (visible) => setPreviewOpenEdit(visible),
+                    afterOpenChange: (visible) =>
+                      !visible && setPreviewImageEdit(""),
+                  }}
+                  src={previewImageEdit}
+                />
+              )}
             </FormItemCustom>
           </Form>
         </div>
