@@ -1,6 +1,6 @@
 import { useState,useEffect } from "react";
 import { HeaderPage } from "../../components";
-import { LeftOutlined } from "@ant-design/icons";
+import { DoubleLeftOutlined, DoubleRightOutlined, LeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Form ,Collapse, message  } from "antd";
 import type { CollapseProps } from 'antd';
@@ -14,6 +14,8 @@ export default function  ReportView() {
   const [reportSKUs, setReportSKUs] = useState<any[]>([]);
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false);
   const [updateStorage, setUpdateStorage] = useState<boolean>(false);
+  const [firstRecord, setFirstRecord] = useState<boolean>(false); 
+  const [lastRecord, setLastRecord] = useState<boolean>(false);
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
   };
@@ -65,6 +67,22 @@ export default function  ReportView() {
    // localStorage.removeItem('recordData');
   }, [updateStorage]);
 
+  useEffect(() => {
+    // Kiểm tra xem đây có phải là record đầu tiên hay cuối cùng không
+    let dataReports = JSON.parse(localStorage.getItem('dataReports'));
+    if (dataReports) {
+      const currentIndex = dataReports.findIndex((item) => item.name === recordData?.name);
+      if (currentIndex === 0) {
+        setFirstRecord(true); // Nếu đây là record đầu tiên, hiển thị lastRecord button
+      } else if (currentIndex === dataReports.length - 1) {
+        setLastRecord(true); // Nếu đây là record cuối cùng, hiển thị nextRecord button
+      } else {
+        setFirstRecord(false);
+        setLastRecord(false);
+      }
+    }
+  }, [recordData]);
+  
   const handleSaveReport = async () => {
     setLoadingUpdate(true);
     let objReportSKU = {
@@ -78,6 +96,7 @@ export default function  ReportView() {
       message.success("Cập nhật thành công");
       setLoadingUpdate(false);
       let dataReports  = JSON.parse(localStorage.getItem('dataReports'));
+      
       let record = JSON.parse(localStorage.getItem('recordData'));
       for (let i = 0; i< record.detail_skus.length;i++){
         record.detail_skus[i].sum_product_human = reportSKUs[i].sum_product_human
@@ -101,6 +120,28 @@ export default function  ReportView() {
       setLoadingUpdate(false);
     }
   }
+
+  const handleNavigateToPrevious = () => {
+    let dataReports = JSON.parse(localStorage.getItem('dataReports'));
+    const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
+    if (currentIndex > 0) {
+      const previousRecord = dataReports[currentIndex - 1];
+      localStorage.setItem('recordData', JSON.stringify(previousRecord));
+      setUpdateStorage(prevState => !prevState);
+    }
+  };
+
+  const handleNavigateToNext = () => {
+    let dataReports = JSON.parse(localStorage.getItem('dataReports'));
+    const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
+    if (currentIndex < dataReports.length - 1) {
+      const nextRecord = dataReports[currentIndex + 1];
+      localStorage.setItem('recordData', JSON.stringify(nextRecord));
+      setUpdateStorage(prevState => !prevState);
+    }
+    
+    
+  };
 
   const renderTitle = () => {
     if (recordData) {
@@ -129,6 +170,24 @@ const handleNavigateToReports = () => {
           </p>
         }
         buttons={[
+          {
+            label: "trước",
+            type: "default",
+            size: "20px",
+            className: "flex items-center mr-2",
+            icon: <DoubleLeftOutlined />,
+            action: handleNavigateToPrevious,
+            disabled: firstRecord 
+          },
+          {
+            label: "sau",
+            type: "default",
+            size: "20px",
+            className: "flex items-center mr-2",
+            icon: <DoubleRightOutlined />,
+            action: handleNavigateToNext,
+            disabled: lastRecord 
+          },
           {
             label: "Lưu lại",
             type: "primary",
