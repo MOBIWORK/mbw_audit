@@ -13,6 +13,9 @@ import cv2
 import numpy as np
 from mbw_sfc_integrations.sfc_integrations.utils import create_sfc_log
 from mbw_audit.utils import appconst
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import os
 
 BASE_URL = frappe.utils.get_request_site_address()
 
@@ -55,18 +58,31 @@ def draw_detections(img, box, label):
     (label_width, label_height), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     label_x = x1
     label_y = y1 - 10 if y1 - 10 > label_height else y1 + 10
-
-    # Sử dụng một font hỗ trợ Unicode như 'DejaVuSans'
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.5
-    font_thickness = 1
-    line_type = cv2.LINE_AA
-
     # Vẽ hình chữ nhật xung quanh văn bản
     cv2.rectangle(img, (label_x, label_y - label_height), (label_x + label_width, label_y + label_height), (255,255,255), cv2.FILLED)
-
     # Hiển thị văn bản tiếng Việt
-    cv2.putText(img, label, (label_x, label_y), font, font_scale, (0, 0, 0), font_thickness, line_type)
+    cv2.putText(img, label, (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+
+def base64_to_pillow_image(base64str):
+    image_data = base64.b64decode(base64str)
+    image = Image.open(BytesIO(image_data))
+    return image
+
+def draw_box_label_pillow(img, box, label):
+    draw = ImageDraw.Draw(img)
+    x1, y1, x2, y2 = box
+    # Vẽ hộp bao quanh vùng được chỉ định bởi (x1, y1) và (x2, y2)
+    draw.rectangle([x1, y1, x2, y2], outline="red", width=2)
+    (label_width, label_height), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_x = x1
+    label_y = y1 - 23 if y1 - 23 > label_height else y1 + 23
+    # Sử dụng một font hỗ trợ Unicode như 'DejaVuSans'
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    fonts_directory = os.path.join(current_directory, "fonts")
+    font_path = os.path.join(fonts_directory, "Arimo-Regular.ttf")
+    font_size = 23
+    font = ImageFont.truetype(font_path, font_size)
+    draw.text((label_x, label_y), label, fill=(255,255,255), font=font)
 
 def process_request(data, event):
 

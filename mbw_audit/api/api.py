@@ -9,18 +9,18 @@ sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
 from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService)
 from datetime import datetime
-from mbw_audit.api.common import (post_images, gen_response, base64_to_cv2, draw_detections, create_folder)
+from mbw_audit.api.common import (gen_response, create_folder, base64_to_pillow_image, draw_box_label_pillow)
 from frappe.utils.file_manager import (
     save_file
 )
 from frappe.core.doctype.file.utils import delete_file
-from frappe.utils import get_site_path, now_datetime
+from frappe.utils import now_datetime
 from datetime import datetime
 import base64
-import cv2
 from mbw_audit.utils import appconst
 from mbw_sfc_integrations.sfc_integrations.utils import create_sfc_log
 from frappe import _, msgprint
+from io import BytesIO
 
 @frappe.whitelist(methods=["POST"])
 def test_queue(*args,**kwargs):
@@ -295,14 +295,16 @@ def render_image_ai(verbose):
     for item in verbose:
         base64_image = item.get("base64_image")
         locates = item.get("locates", [])
-        image = base64_to_cv2(base64_image)
+        image = base64_to_pillow_image(base64_image)
         for locate in locates:
             if locate.get("label") != "Unknow":
-                draw_detections(image, locate.get("bbox"), locate.get("label"))
+                draw_box_label_pillow(image, locate.get("bbox"), locate.get("label"))
         timestamp = datetime.timestamp(datetime.now())
         # Mã hóa hình ảnh thành chuỗi Base64
-        _, buffer = cv2.imencode('.jpg', image)
-        base64_image_encoded = base64.b64encode(buffer).decode("utf-8")
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG')
+        encoded_image = buffer.getvalue()
+        base64_image_encoded = base64.b64encode(encoded_image).decode("utf-8")
         current_datetime = now_datetime()
         path_folder = create_folder(f"{current_datetime.month}", f"booth_product_ai/{frappe.session.user}/{current_datetime.year}")
         fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_product_ai", path_folder)
@@ -316,14 +318,16 @@ def render_check_image_ai(verbose):
     for item in verbose:
         base64_image = item.get("base64_image")
         locates = item.get("locates", [])
-        image = base64_to_cv2(base64_image)
+        image = base64_to_pillow_image(base64_image)
         for locate in locates:
             if locate.get("label") != "Unknow":
-                draw_detections(image, locate.get("bbox"), locate.get("label"))
+                draw_box_label_pillow(image, locate.get("bbox"), locate.get("label"))
         timestamp = datetime.timestamp(datetime.now())
         # Mã hóa hình ảnh thành chuỗi Base64
-        _, buffer = cv2.imencode('.jpg', image)
-        base64_image_encoded = base64.b64encode(buffer).decode("utf-8")
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG')
+        encoded_image = buffer.getvalue()
+        base64_image_encoded = base64.b64encode(encoded_image).decode("utf-8")
         current_datetime = now_datetime()
         path_folder = create_folder(f"{current_datetime.month}", f"booth_check_image_ai/{frappe.session.user}/{current_datetime.year}")
         fileInfo = save_file(f"draw_checkimage_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_check_image_ai", path_folder)
@@ -445,6 +449,18 @@ def update_report(*args,**kwargs):
                     report_sku.sum_product_human = product.get("sum_product_human")
                     report_sku.scoring_human = product.get("scoring_human")
                     break
+        doc.save(ignore_permissions=True)
+        return gen_response(200, "ok", {"data": "success"})
+    except Exception as e:
+        return gen_response(500, "error", {"data": str(e)})
+
+@frappe.whitelist(methods=["POST"])
+def update_scorehuman_by_name(*args, **kwargs):
+    name = kwargs.get('name')
+    scoring = kwargs.get('scoring_human')
+    try:
+        doc = frappe.get_doc('VGM_Report', name)
+        doc.scoring_human = scoring
         doc.save(ignore_permissions=True)
         return gen_response(200, "ok", {"data": "success"})
     except Exception as e:
