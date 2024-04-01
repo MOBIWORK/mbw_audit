@@ -10,11 +10,12 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined
 } from "@ant-design/icons";
-import { Input, TableColumnsType, DatePicker, Select,Image } from "antd";
+import { Input, TableColumnsType, DatePicker, Select,Image, message } from "antd";
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { log } from "console";
 
 declare var require: any;
 
@@ -170,7 +171,6 @@ export default function ReportDetail() {
     fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
   }, []);
 
-
   const columns: TableColumnsType<DataTypeReport> = [
     {
       title: "STT",
@@ -252,16 +252,46 @@ export default function ReportDetail() {
     {
       title: "Điểm trưng bày giám sát chấm",
       dataIndex: "scoring_human",
-      render: (scoring_human: number) => (
-        <>
-          {scoring_human === 1 && <span style={{ display: 'flex' }}><CheckCircleOutlined style={{fontSize: '17px', color: 'green', paddingRight: '3px'}} /> <span style={{color: 'green', verticalAlign: 'middle'}}>Đạt</span></span>}
-          {scoring_human === 0 && <span style={{ display: 'flex' }}><CloseCircleOutlined style={{fontSize: '17px', color: 'red', paddingRight: '3px'}} /> <span style={{color: 'red', verticalAlign: 'middle'}}>Không đạt</span></span>}
-        </>
+      render: (scoring_human: number, item:any) => (
+        <a 
+          onClick={(event)=>{
+            event.stopPropagation();
+          }}>
+            <Select defaultValue={scoring_human} onChange={() => handleChange(item)}>
+        <Select.Option value={1}>
+          <span style={{ display: 'flex' }}>
+            <CheckCircleOutlined style={{ fontSize: '17px', color: 'green', paddingRight: '3px' }} />
+            <span style={{ color: 'green', verticalAlign: 'middle' }}>Đạt</span>
+          </span>
+        </Select.Option>
+        <Select.Option value={0}>
+          <span style={{ display: 'flex' }}>
+            <CloseCircleOutlined style={{ fontSize: '17px', color: 'red', paddingRight: '3px' }} />
+            <span style={{ color: 'red', verticalAlign: 'middle' }}>Không đạt</span>
+          </span>
+        </Select.Option>
+      </Select>
+         </a>
       )
     }
   ];
 
-
+  const handleChange = async(value:any,item:any) => {
+    console.log(value);
+    
+    let objReportSKU = {
+      'name': recordData.name,
+      'scoring_human': value.scoring_human,
+      'arr_product': reportSKUs
+    }
+    let urlReportUpdate = "/api/method/mbw_audit.api.api.update_report";
+    const res = await AxiosService.post(urlReportUpdate, objReportSKU);
+    if(res != null && res.message == "ok" && res.result != null && res.result.data == "success"){
+      message.success("Cập nhật thành công")
+    }else{
+      message.error("Cập nhật thất bại");
+    }
+  };
 
   const expandedColumns = [
     // { title: "STT", dataIndex: "stt" },
