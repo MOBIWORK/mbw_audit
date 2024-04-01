@@ -135,18 +135,18 @@ export default function Campaign() {
         
                                 let objDataImport = {
                                     'campaign_name': data[i][0],
-                                    'campaign_description': data[i][1],
+                                    'campaign_description': data[i][1] ? data[i][1] : "",
                                     'campaign_start': (startDate.getTime() / 1000).toString(),
                                     'campaign_end': (endDate.getTime() / 1000).toString(),
                                     'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
-                                    'campaign_categories': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : "",
-                                    'campaign_employees': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : "",
-                                    'campaign_customers': data[i][5] ? (JSON.parse(data[i][5].replace('“', '"').replace('”', '"'))).toString() : ""
+                                    'campaign_categories': data[i][5] ? (data[i][5].replace('“', '"').replace('”', '"')) : "",
+                                    'campaign_employees': data[i][6] ? (data[i][6].replace('“', '"').replace('”', '"')) : "",
+                                    'campaign_customers': data[i][7] ? (data[i][7].replace('“', '"').replace('”', '"')) : ""
                                 }
                                 dataImport.push(objDataImport);
-                                
                             }
                         }
+                        console.log(dataImport);
                         setLstCampaignImport(dataImport);
                     };
                     reader.readAsArrayBuffer(file);
