@@ -107,7 +107,6 @@ export default function  ReportView() {
     // Kiểm tra nếu không phải là record cuối cùng trong danh sách
     if (currentIndex !== null && currentIndex < dataReports.length - 1) {
       const nextRecord = dataReports[currentIndex + 1];
-      // Xử lý với record kế tiếp ở đây
       localStorage.setItem('recordData', JSON.stringify(nextRecord));
       setUpdateStorage(prevState => !prevState);
     }else{
@@ -129,18 +128,6 @@ export default function  ReportView() {
       localStorage.setItem('recordData', JSON.stringify(previousRecord));
       setUpdateStorage(prevState => !prevState);
     }
-  };
-
-  const handleNavigateToNext = () => {
-    let dataReports = JSON.parse(localStorage.getItem('dataReports'));
-    const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
-    if (currentIndex < dataReports.length - 1) {
-      const nextRecord = dataReports[currentIndex + 1];
-      localStorage.setItem('recordData', JSON.stringify(nextRecord));
-      setUpdateStorage(prevState => !prevState);
-    }
-    
-    
   };
 
   const renderTitle = () => {
@@ -180,21 +167,13 @@ const handleNavigateToReports = () => {
             disabled: firstRecord 
           },
           {
-            label: "sau",
-            type: "default",
-            size: "20px",
-            className: "flex items-center mr-2",
-            icon: <DoubleRightOutlined />,
-            action: handleNavigateToNext,
-            disabled: lastRecord 
-          },
-          {
             label: "Lưu lại",
             type: "primary",
             size: "20px",
             className: "flex items-center",
             loading: loadingUpdate,
-            action: handleSaveReport
+            action: handleSaveReport,
+            disabled: lastRecord 
           },
         ]}
       />
