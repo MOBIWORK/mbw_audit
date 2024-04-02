@@ -1,7 +1,7 @@
 .ant-collapse-header .ant-collapse-arrow {
     position: absolute;
-    left: 150px;
-    top: 50%;
+    /* left: 150px;
+    top: 50%; */
     transform: translateY(-50%);
     
   }

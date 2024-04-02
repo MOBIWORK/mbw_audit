@@ -217,7 +217,15 @@ export default function Product({
     );
     let arrSequenceProduct = result.map((x) => x.name);
     onChangeSequenceProducts(arrSequenceProduct);
-    setProductSort(result);
+    const resultSorted = result.sort((a, b) => {
+      // Chuyển đổi giá trị của sequence_product về kiểu số trước khi so sánh
+      const sequenceA = parseInt(a.sequence_product);
+      const sequenceB = parseInt(b.sequence_product);
+    
+      // Sắp xếp các phần tử theo giá trị của sequence_product
+      return sequenceA - sequenceB;
+    });
+    setProductSort(resultSorted);
     handleCancelProduct();
   };
 
@@ -383,7 +391,7 @@ export default function Product({
       label: (
         <Checkbox checked={checkExistProduct} onClick={(event) => {event.stopPropagation()}} onChange={handleChangeCheckExist}>
           {" "}
-          <span style={{ fontWeight: 700, fontSize: "15px" }}>
+          <span style={{ fontWeight: 700, fontSize: "15px" }} onClick={(event) => {event.stopPropagation()}}>
             {" "}
             1. Tiêu chí tồn tại sản phẩm
           </span>{" "}
@@ -404,7 +412,7 @@ export default function Product({
           onChange={handleChangeCheckSequence}
         >
           {" "}
-          <span style={{ fontWeight: 700, fontSize: "15px" }}>
+          <span style={{ fontWeight: 700, fontSize: "15px" }} onClick={(event) => {event.stopPropagation()}}>
             {" "}
             2. Tiêu chí sắp xếp sản phẩm
           </span>{" "}

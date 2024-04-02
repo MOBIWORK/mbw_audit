@@ -566,9 +566,16 @@ export default function ProductCampaignEdit({
     let arrSequenceProduct = result.map((x) => x.name);
     //onChangeSequenceProducts(arrSequenceProduct);
     //Fire event ra component cha
-    console.log(arrSequenceProduct);
     onChangeSequenceProducts(arrSequenceProduct);
-    setProductSort(result);
+    const resultSorted = result.sort((a, b) => {
+      // Chuyển đổi giá trị của sequence_product về kiểu số trước khi so sánh
+      const sequenceA = parseInt(a.sequence_product);
+      const sequenceB = parseInt(b.sequence_product);
+    
+      // Sắp xếp các phần tử theo giá trị của sequence_product
+      return sequenceA - sequenceB;
+    });
+    setProductSort(resultSorted);
     handleCancelAddProductSequence();
   };
   const onSelectChangeProduct = (

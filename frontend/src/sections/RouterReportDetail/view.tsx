@@ -960,6 +960,7 @@ export default function ReportDetail() {
               bordered
               columns={columnsReportByCampaign}
               dataSource={dataReportsByCampaign}
+              pagination={dataReportsByCampaign.length > 5}
               scroll={{ y: 540, x: 2000 }}
               onRow={(record, rowIndex) => {
                 return {
@@ -974,7 +975,7 @@ export default function ReportDetail() {
               columns={columns}
               dataSource={dataReports}
               scroll={{ y: 540, x: 1300 }}
-              pagination={false}
+              pagination={dataReports.length > 5}
               onRow={(record, rowIndex) => {
                 return {
                   onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng

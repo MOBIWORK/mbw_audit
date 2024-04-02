@@ -32,7 +32,7 @@ export default function GeneralInformation({ form,recordData, onChangeScoringHum
         campaign_name: recordData.campaign_name,
         employee_code: recordData.employee_name,
         quatity: recordData.quantity_cate,
-        time_report: recordData.images_time,
+        time_report: render(recordData.images_time),
         scoring_machine: recordData.scoring_machine == 1? "Đạt" : recordData.scoring_machine == 0? "Không đạt" : "",
         scoring_human: recordData.scoring_human
       });
@@ -86,7 +86,29 @@ export default function GeneralInformation({ form,recordData, onChangeScoringHum
       setScoringHuman(val)
       onChangeScoringHuman(val)
     }
-
+    const render = (time) => {
+      // Chuyển đổi chuỗi thời gian thành đối tượng Date
+      let dateObj = new Date(time);
+  
+      // Lấy ngày, tháng và năm từ đối tượng Date
+      let day = dateObj.getDate();
+      let month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0 nên cần cộng thêm 1
+      let year = dateObj.getFullYear();
+  
+      // Lấy giờ và phút từ đối tượng Date
+      let hours = dateObj.getHours();
+      let minutes = dateObj.getMinutes();
+  
+      // Biến đổi thành chuỗi thời gian theo định dạng "dd/MM/yyyy hh:mm"
+      let formattedTime = `${day.toString().padStart(2, "0")}/${month
+        .toString()
+        .padStart(2, "0")}/${year} ${hours
+        .toString()
+        .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  
+      // Trả về chuỗi thời gian đã được định dạng
+      return formattedTime;
+    }
     return (
       <>
         <div className="p-4 pt-6 pb-[40px]">
