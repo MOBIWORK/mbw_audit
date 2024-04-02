@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import { log } from "console";
+
 declare var require: any;
 
 interface DataTypeReport {
@@ -62,6 +63,7 @@ export default function ReportDetail() {
   const [searchEmployee, setSearchEmployee] = useState("all"); // Mặc định là 'all'
   const [searchAIEvalue, setSearchAIEvalue] = useState("all");
   const [searchHumanEvalue, setSearchHumanEvalue] = useState("all");
+  const [hoveredSelect, setHoveredSelect] = useState(null);
 
   const [imageButtonClick, setImageButtonClick] = useState(false);
 
@@ -340,7 +342,7 @@ export default function ReportDetail() {
     {
       title: "Điểm trưng bày giám sát chấm",
       dataIndex: "scoring_human",
-      render: (scoring_human: number, item: any) => (
+      render: (scoring_human: number, item: any, index: number) => (
         <div
           onClick={(event) => {
             event.stopPropagation();
@@ -349,7 +351,9 @@ export default function ReportDetail() {
           <Select
             defaultValue={scoring_human}
             onChange={() => handleChange(item)}
-            bordered={false}
+            bordered={hoveredSelect === index}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={handleMouseLeave}
           >
             <Select.Option value={1}>
               <span style={{ display: "flex" }}>
@@ -384,28 +388,7 @@ export default function ReportDetail() {
       ),
     },
   ];
-
-  const handleChange = async (value: any) => {
-    const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
-
-    let objReportSKU = {
-      name: value.name,
-      scoring_human: newScoringHuman,
-    };
-    let urlReportUpdate =
-      "/api/method/mbw_audit.api.api.update_scorehuman_by_name";
-    const res = await AxiosService.post(urlReportUpdate, objReportSKU);
-    if (
-      res != null &&
-      res.message == "ok" &&
-      res.result != null &&
-      res.result.data == "success"
-    ) {
-      message.success("Cập nhật thành công");
-    } else {
-      message.error("Cập nhật thất bại");
-    }
-  };
+ 
 
   const expandedColumns = [
     // { title: "STT", dataIndex: "stt" },
@@ -569,6 +552,35 @@ export default function ReportDetail() {
     }
   };
 
+  const handleMouseEnter = (index:any) => {
+    setHoveredSelect(index);
+  };
+
+    const handleMouseLeave = () => {
+      setHoveredSelect(false);
+    };
+  const handleChange = async (value: any) => {
+    const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
+
+    let objReportSKU = {
+      name: value.name,
+      scoring_human: newScoringHuman,
+    };
+    let urlReportUpdate =
+      "/api/method/mbw_audit.api.api.update_scorehuman_by_name";
+    const res = await AxiosService.post(urlReportUpdate, objReportSKU);
+    if (
+      res != null &&
+      res.message == "ok" &&
+      res.result != null &&
+      res.result.data == "success"
+    ) {
+      message.success("Cập nhật thành công");
+    } else {
+      message.error("Cập nhật thất bại");
+    }
+  };
+  
   const initDataEmployee = async () => {
     try {
       let urlEmployee =
