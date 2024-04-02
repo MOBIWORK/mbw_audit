@@ -974,6 +974,7 @@ export default function ReportDetail() {
               columns={columns}
               dataSource={dataReports}
               scroll={{ y: 540, x: 1300 }}
+              pagination={false}
               onRow={(record, rowIndex) => {
                 return {
                   onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng

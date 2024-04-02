@@ -146,7 +146,6 @@ export default function Campaign() {
                                 dataImport.push(objDataImport);
                             }
                         }
-                        console.log(dataImport);
                         setLstCampaignImport(dataImport);
                     };
                     reader.readAsArrayBuffer(file);
@@ -187,7 +186,7 @@ export default function Campaign() {
   }, [searchCampaign]);
 
   const initDataCampaigns = async () => {
-    let urlCampaigns = `/api/resource/VGM_Campaign?fields=["*"]`;
+    let urlCampaigns = `/api/resource/VGM_Campaign?fields=["*"]&limit_page_length=500`;
     if(searchCampaign != null && searchCampaign != ""){
       urlCampaigns += `&filters=[["campaign_name","like","%${searchCampaign}%"]]`;
     }

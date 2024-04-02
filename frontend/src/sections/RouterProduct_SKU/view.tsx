@@ -489,7 +489,7 @@ export default function Product_SKU() {
   const fetchDataCategories = async () => {
     try {
       //setLoading(true);
-      let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
+      let urlCategory = '/api/resource/VGM_Category?fields=["*"]&limit_page_length=500';
       if (searchCategory != null && searchCategory != "") {
         let filterComand = `[["category_name", "like", "%${searchCategory}%"]]`;
         urlCategory += `&filters=${filterComand}`;
