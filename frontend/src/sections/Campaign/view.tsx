@@ -166,6 +166,8 @@ export default function Campaign() {
 
 
   const [campaigns, setCampaigns] = useState<TypeCampaign[]>([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<TypeCampaign[]>([]);
+
   const [searchCampaign, setSearchCampaign] = useState("");
   const [itemCampaignDelete, setItemCampaignDelete] = useState({});
   const [isModalOpenDeleteCampaign, setIsModalOpenDeleteCampaign] = useState(false);
@@ -176,34 +178,40 @@ export default function Campaign() {
   const [lstCampaignImport, setLstCampaignImport] = useState([]);
 
   const [fileListExport , setFileListExport] = useState<any[]>([]);
-  
   useEffect(() => {
-    initDataCampaigns();
+    initDataCampaigns(); // Gọi hàm initDataCampaigns khi component được tạo lần đầu
   }, []);
-
   useEffect(() => {
-    initDataCampaigns();
-  }, [searchCampaign]);
+    if (searchCampaign !== null && searchCampaign !== "") {
+      // Nếu có từ khóa tìm kiếm, lọc dữ liệu dựa trên từ khóa đó
+      const filteredData = campaigns.filter(campaign =>
+        campaign.campaign_name.toLowerCase().includes(searchCampaign.toLowerCase())
+      );
+      setFilteredCampaigns(filteredData);
+    } else {
+      // Nếu không có từ khóa tìm kiếm, hiển thị toàn bộ dữ liệu
+      setFilteredCampaigns(campaigns);
+    }
+  }, [searchCampaign, campaigns]);
 
   const initDataCampaigns = async () => {
-    let urlCampaigns = `/api/resource/VGM_Campaign?fields=["*"]&limit_page_length=500`;
-    if(searchCampaign != null && searchCampaign != ""){
-      urlCampaigns += `&filters=[["campaign_name","like","%${searchCampaign}%"]]`;
-    }
-    let res = await AxiosService.get(urlCampaigns);
-    if (res && res.data) {
-      // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
-      let dataCampaigns: TypeCampaign[] = res.data.map((item: TypeCampaign) => {
-        return {
+    try {
+      let urlCampaigns = `/api/resource/VGM_Campaign?fields=["*"]&limit_page_length=500`;
+      let res = await AxiosService.get(urlCampaigns);
+      if (res && res.data) {
+        // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
+        let dataCampaigns: TypeCampaign[] = res.data.map((item: TypeCampaign) => ({
           ...item,
           key: item.name
-        }
-      })
-      setCampaigns(dataCampaigns);
-    }else{
+        }));
+        setCampaigns(dataCampaigns);
+      } else {
+        setCampaigns([]);
+      }
+    } catch (error) {
       setCampaigns([]);
     }
-  }
+  };
 
   const onChangeFilterCampaign = (event) => {
     setSearchCampaign(event.target.value);
@@ -348,14 +356,14 @@ export default function Campaign() {
             placeholder="Tìm kiếm chiến dịch" prefix={<SearchOutlined />} />
         </FormItemCustom>
         <div>
-          <TableCustom
-            rowSelection={{
-              type: selectionType,
-              ...rowSelection,
-            }}
-            columns={columnCampaigns}
-            dataSource={campaigns}
-          />
+        <TableCustom
+    rowSelection={{
+      type: selectionType,
+      ...rowSelection,
+    }}
+    columns={columnCampaigns}
+    dataSource={filteredCampaigns}
+  />
         </div>
       </div>
 

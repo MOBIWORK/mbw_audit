@@ -119,6 +119,8 @@ export default function Product_SKU() {
     useState<boolean>(false);
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  
   const [searchProduct, setSearchProduct] = useState("");
   const [fileUploadAddProduct, setFileUploadAddProduct] = useState([]);
   const [deleteItemProduct, setDeleteItemProduct] = useState({});
@@ -762,16 +764,27 @@ export default function Product_SKU() {
   }, [barcodeEditProduct]);
 
   useEffect(() => {
-    initDataProductByCategory();
-  }, [searchProduct]);
+    // Nếu không có từ khóa tìm kiếm, hiển thị tất cả sản phẩm
+    if (!searchProduct || searchProduct.trim() === "") {
+      setFilteredProducts(products);
+      return;
+    }
+  
+    // Nếu có từ khóa tìm kiếm, lọc sản phẩm thỏa mãn điều kiện
+    const filtered = products.filter(product =>
+      product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [searchProduct, products]);
 
   const initDataProductByCategory = async () => {
     let urlProducts = "";
-    if (searchProduct != null && searchProduct != "") {
-      urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"],["product_name","like","%${searchProduct}%"]]`;
-    } else {
-      urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
-    }
+    // if (searchProduct != null && searchProduct != "") {
+    //   urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
+    // } else {
+     
+    // }
+    urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
     let res = await AxiosService.get(urlProducts);
     if (res && res.data) {
       // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
@@ -1511,7 +1524,7 @@ export default function Product_SKU() {
               <Input
                 value={searchProduct}
                 onChange={onChangeFilterProduct}
-                placeholder="Tìm kiếm sản phẩm"
+                placeholder="Tìm kiếm tên sản phẩm"
                 prefix={<SearchOutlined />}
               />
             </FormItemCustom>
@@ -1522,7 +1535,7 @@ export default function Product_SKU() {
                   ...rowSelectionProduct,
                 }}
                 columns={columnProducts}
-                dataSource={products}
+                dataSource={filteredProducts}
               />
             </div>
           </div>
