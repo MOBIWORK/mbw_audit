@@ -1832,7 +1832,7 @@ export default function Product_SKU() {
                   maxHeight: "100%",
                   objectFit: "cover",
                   alignSelf: "center",
-                  borderRadius: "10px",
+                  borderRadius: "5px",
                 }}
               />
               <div
