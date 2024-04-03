@@ -167,7 +167,7 @@ const handleNavigateToReports = () => {
             disabled: firstRecord 
           },
           {
-            label: "Lưu lại",
+            label: "Lưu lại và Tiếp",
             type: "primary",
             size: "20px",
             className: "flex items-center",
