@@ -108,28 +108,32 @@ export default function ReportDetail() {
     {
       title: "Ảnh gian hàng",
       dataIndex: "images",
-      render: (item) => (
+      render: (item:any) => (
         <a
           onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+            if (item && item.length > 5) {
+              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+            }
           }}
         >
-          Xem hình ảnh
+         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
         </a>
       ),
     },
     {
       title: "Ảnh gian hàng AI",
       dataIndex: "images_ai",
-      render: (item) => (
+      render: (item:any) => (
         <a
           onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+            if (item && item.length > 5) {
+              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+            }
           }}
         >
-          Xem hình ảnh
+         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
         </a>
       ),
     },
@@ -172,33 +176,49 @@ export default function ReportDetail() {
     {
       title: "Điểm trưng bày giám sát chấm",
       dataIndex: "scoring_human",
-      render: (scoring_human: number) => (
-        <>
-          {scoring_human === 1 && (
-            <span style={{ display: "flex" }}>
-              <CheckCircleOutlined
-                style={{
-                  fontSize: "17px",
-                  color: "green",
-                  paddingRight: "3px",
-                }}
-              />{" "}
-              <span style={{ color: "green", verticalAlign: "middle" }}>
-                Đạt
+     render: (scoring_human: number, item: any, index: number) => (
+        <div
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <Select
+            defaultValue={scoring_human}
+            onChange={() => handleChange(item)}
+            bordered={hoveredSelect === index}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Select.Option value={1}>
+              <span style={{ display: "flex" }}>
+                <CheckCircleOutlined
+                  style={{
+                    fontSize: "17px",
+                    color: "green",
+                    paddingRight: "3px",
+                  }}
+                />
+                <span style={{ color: "green", verticalAlign: "middle" }}>
+                  Đạt
+                </span>
               </span>
-            </span>
-          )}
-          {scoring_human === 0 && (
-            <span style={{ display: "flex" }}>
-              <CloseCircleOutlined
-                style={{ fontSize: "17px", color: "red", paddingRight: "3px" }}
-              />{" "}
-              <span style={{ color: "red", verticalAlign: "middle" }}>
-                Không đạt
+            </Select.Option>
+            <Select.Option value={0}>
+              <span style={{ display: "flex" }}>
+                <CloseCircleOutlined
+                  style={{
+                    fontSize: "17px",
+                    color: "red",
+                    paddingRight: "3px",
+                  }}
+                />
+                <span style={{ color: "red", verticalAlign: "middle" }}>
+                  Không đạt
+                </span>
               </span>
-            </span>
-          )}
-        </>
+            </Select.Option>
+          </Select>
+        </div>
       ),
     },
   ]);
@@ -259,10 +279,12 @@ export default function ReportDetail() {
         <a
           onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+            if (item && item.length > 5) {
+              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+            }
           }}
         >
-          Xem hình ảnh
+         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
         </a>
       ),
     },
@@ -273,10 +295,12 @@ export default function ReportDetail() {
         <a
           onClick={(event) => {
             event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh
+            if (item && item.length > 5) {
+              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+            }
           }}
         >
-          Xem hình ảnh
+          {item && item.length > 5 ? "Xem hình ảnh" : "Không có hình ảnh"}
         </a>
       ),
     },
@@ -553,6 +577,8 @@ export default function ReportDetail() {
   };
 
   const handleMouseEnter = (index:any) => {
+    console.log('log123');
+    
     setHoveredSelect(index);
   };
 
@@ -648,130 +674,107 @@ export default function ReportDetail() {
 
     cell.style = style;
   };
+
   const onExportDataToExcelByCampaign = async (table, columns, title) => {
+    console.log(table);
+    console.log(columns);
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Sheet1");
- 
-    // Thiết lập độ rộng cột mặc định và cột A
-    sheet.properties.defaultColWidth = 20;
-    sheet.getColumn("A").width = 30;
-
-    // Merge ô A2:J2 và thiết lập giá trị cho ô đó
-    sheet.mergeCells("A2:J2");
-    sheet.getCell("A2").value = "BÁO CÁO THEO CHIẾN DỊCH";
-
-    // Thiết lập style cho header
-    const headerStyle = {
-        font: { bold: true, name: "Times New Roman", size: 14 },
-        alignment: { vertical: "middle", horizontal: "center" },
-        fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFCC00" } }, // Màu nền
-        border: { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } } // Đường viền
-    };
-
-    // Áp dụng style cho header
-    sheet.getCell("A2").fill = headerStyle.fill;
-    sheet.getCell("A2").border = headerStyle.border;
-    sheet.getCell("A2").alignment = headerStyle.alignment;
-    sheet.getCell("A2").font = headerStyle.font;
 
     let currentColumnIndex = 1; // Chỉ số cột hiện tại
     columns.forEach((column, index) => {
-        const startColumnIndex = currentColumnIndex; // Chỉ số cột bắt đầu
+      const startColumnIndex = currentColumnIndex; // Chỉ số cột bắt đầu
 
-        // Đặt tiêu đề và chiều rộng cho cột
-        if (currentColumnIndex === 1) {
-            // Cố định chiều rộng cột đầu tiên
-            sheet.getColumn(currentColumnIndex).width = 10;
-        } else {
-            // Đặt chiều rộng theo giá trị mặc định hoặc được chỉ định
-            sheet.getColumn(currentColumnIndex).width = column.width || 20; // Set default width if not provided
+      // Đặt tiêu đề và chiều rộng cho cột
+      if (currentColumnIndex === 1) {
+        // Cố định chiều rộng cột đầu tiên
+        sheet.getColumn(currentColumnIndex).width = 10;
+      } else {
+        // Đặt chiều rộng theo giá trị mặc định hoặc được chỉ định
+        sheet.getColumn(currentColumnIndex).width = column.width || 20; // Set default width if not provided
+      }
+
+      const cell = sheet.getCell(1, currentColumnIndex);
+      cell.value = column.title;
+      applyCommonCellStyle(cell, true); // Áp dụng viền đậm cho ô tiêu đề cột
+
+      // Kiểm tra nếu cột có children
+      if (column.children && column.children.length > 0) {
+        // Tính tổng số cột con
+        const totalChildColumns = column.children.length;
+
+        // Gộp các ô cho cột cha nếu chưa được gộp
+        const isMerged = cell.isMerged;
+        if (!isMerged) {
+          sheet.mergeCells(
+            1,
+            currentColumnIndex,
+            1,
+            currentColumnIndex + totalChildColumns - 1
+          );
         }
 
-        const cell = sheet.getCell(4, currentColumnIndex); // Bắt đầu từ hàng 4
-        cell.value = column.title;
-        cell.style = {
-            font: { bold: true, name: "Times New Roman", size: 12, italic: true },
-            alignment: { vertical: "middle", horizontal: "center" },
-            border: headerStyle.border // Áp dụng đường viền cho cột
-        };
+        // Thêm tiêu đề cho các cột con
+        column.children.forEach((child, childIndex) => {
+          const childColumnIndex = startColumnIndex + childIndex;
+          const childCell = sheet.getCell(2, childColumnIndex);
+          childCell.value = child.title;
+          applyCommonCellStyle(childCell);
+        });
+
+        // Cập nhật chỉ số cột hiện tại cho vòng lặp tiếp theo
+        currentColumnIndex += totalChildColumns;
+      } else {
+        // Nếu cột không có children, di chuyển đến cột tiếp theo
+        currentColumnIndex++;
+      }
+    });
+
+    // Điền dữ liệu từ bảng vào Excel
+    const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
+    table.forEach((row, rowIndex) => {
+      currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
+      columns.forEach((column, columnIndex) => {
+        const dataIndex = column.dataIndex; // Tên của thuộc tính trong dữ liệu tương ứng với cột
+        let cellValue = row[dataIndex]; // Lấy giá trị từ dữ liệu
 
         // Kiểm tra nếu cột có children
         if (column.children && column.children.length > 0) {
-            // Tính tổng số cột con
-            const totalChildColumns = column.children.length;
-
-            // Gộp các ô cho cột cha nếu chưa được gộp
-            const isMerged = cell.isMerged;
-            if (!isMerged) {
-                sheet.mergeCells(4, currentColumnIndex, 4, currentColumnIndex + totalChildColumns - 1);
-            }
-
-            // Thêm tiêu đề cho các cột con
-            column.children.forEach((child, childIndex) => {
-                const childColumnIndex = startColumnIndex + childIndex;
-                const childCell = sheet.getCell(5, childColumnIndex); // Bắt đầu từ hàng 5
-                childCell.value = child.title;
-                childCell.style = {
-                    font: { bold: true, name: "Times New Roman", size: 12 },
-                    alignment: { vertical: "middle", horizontal: "center" },
-                    border: headerStyle.border // Áp dụng đường viền cho cột con
-                };
-            });
-
-            // Cập nhật chỉ số cột hiện tại cho vòng lặp tiếp theo
-            currentColumnIndex += totalChildColumns;
-        } else {
-            // Nếu cột không có children, di chuyển đến cột tiếp theo
-            cell.style = {
-                font: { bold: true, name: "Times New Roman", size: 12, italic: true },
-                alignment: { vertical: "middle", horizontal: "center" },
-                border: headerStyle.border // Áp dụng đường viền cho cột
-            };
-            currentColumnIndex++;
+          // Không làm gì với cột cha có children
+          return;
         }
+
+        // Kiểm tra nếu cột là 'title_ai' hoặc 'title_human'
+        if (dataIndex.endsWith("_ai") || dataIndex.endsWith("_human")) {
+          // Tách tên cột và loại sản phẩm (ai/human)
+          const [title, type] = column.title.split(" "); // Giả sử tiêu đề của cột là 'Tên sản phẩm ai'
+          // Tìm dữ liệu tương ứng từ dữ liệu của hàng
+          const productData = row[title.toLowerCase()]; // title.toLowerCase() sẽ trở thành 'dove_1' hoặc 'dove_2'
+          if (productData && Array.isArray(productData)) {
+            // Lọc dữ liệu theo loại (ai/human)
+            const filteredData = productData.filter(
+              (product) => product.product_name === title
+            );
+            // Tạo chuỗi dữ liệu từ các sản phẩm
+            cellValue = filteredData
+              .map((product) => `${product.product_name}: ${product.sum}`)
+              .join("\n");
+          }
+        }
+
+        // Gán giá trị vào ô Excel
+        const cell = sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex);
+        cell.value = cellValue;
+        applyCommonCellStyle(cell, false);
+
+        // Di chuyển đến cột tiếp theo
+        currentColumnIndex++;
+      });
     });
-
-    // Điền dữ liệu từ mảng vào bảng
-    table.forEach((data, rowIndex) => {
-        const row = sheet.addRow(); // Tạo dòng mới
-        let currentColumnIndex = 0; // Reset chỉ số cột hiện tại cho mỗi hàng mới
-        columns.forEach((column, columnIndex) => {
-            if (column.children && column.children.length > 0) {
-                // Nếu là cột có children, điền dữ liệu cho từng ô con
-                column.children.forEach((child, childIndex) => {
-                    const childValue = data[child.dataIndex] || ''; // Lấy giá trị từ dữ liệu hoặc để trống nếu không có
-                    const cell = row.getCell(currentColumnIndex + childIndex + 1); // Tính toán vị trí cột cho ô con và lấy ô tương ứng
-                    cell.value = childValue; // Gán giá trị cho ô con
-                    // Áp dụng style cho font
-                    cell.style = {
-                        font: { name: "Times New Roman", size: 12 },
-                        border: headerStyle.border // Áp dụng đường viền cho cột
-                    };
-                });
-                currentColumnIndex += column.children.length; // Cập nhật chỉ số cột hiện tại
-            } else {
-                // Nếu không có children, điền dữ liệu vào ô
-                const value = data[column.dataIndex] || ''; // Lấy giá trị từ dữ liệu hoặc để trống nếu không có
-                const cell = row.getCell(currentColumnIndex + 1); // Lấy ô tương ứng
-                cell.value = value; // Gán giá trị cho ô
-                // Áp dụng style cho font
-                cell.style = {
-                    font: { name: "Times New Roman", size: 12 },
-                    border: headerStyle.border // Áp dụng đường viền cho cột
-                };
-                currentColumnIndex++; // Di chuyển sang cột tiếp theo
-            }
-        });
-    });
-
-    // Loại bỏ đường kẻ giữa hàng 4 và 5
-    sheet.getCell("A5").style.border = { top: { style: "none" } };
-
-
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAsExcelFile(buffer, "custom_excel_file");
-};
+    saveAsExcelFile(buffer, "report");
+  };
 
   const onExportDataToExcel = async (table, title) => {
     //const ExcelJS = require('exceljs');
