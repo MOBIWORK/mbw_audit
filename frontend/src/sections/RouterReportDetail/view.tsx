@@ -2,7 +2,7 @@ import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { AxiosService } from "../../services/server";
 import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs"; // Giả sử exceljs hỗ trợ cú pháp mô-đun ES6
-import { VerticalAlignBottomOutlined } from "@ant-design/icons";
+import { DownOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
 import * as FileSaver from "file-saver";
 import {
   SearchOutlined,
@@ -211,6 +211,7 @@ export default function ReportDetail() {
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
+            suffixIcon={hoveredSelect === index ? (<DownOutlined/>):null}
           >
             <Select.Option value={1}>
               <span style={{ display: "flex" }}>
@@ -401,6 +402,7 @@ export default function ReportDetail() {
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
+            suffixIcon={hoveredSelect === index ? (<DownOutlined/>):null}
           >
             <Select.Option value={1}>
               <span style={{ display: "flex" }}>
@@ -600,8 +602,6 @@ export default function ReportDetail() {
   };
 
   const handleMouseEnter = (index:any) => {
-    console.log('log123');
-    
     setHoveredSelect(index);
   };
 
