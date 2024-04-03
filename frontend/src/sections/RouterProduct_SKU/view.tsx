@@ -1,4 +1,5 @@
 import { LuUploadCloud, LuImport } from "react-icons/lu";
+import { v4 as uuidv4 } from "uuid";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import ObjectDetectionResult from "./ObjectDetectionResult";
@@ -12,6 +13,8 @@ import {
   PlusOutlined,
   SearchOutlined,
   VerticalAlignBottomOutlined,
+  LeftOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -120,7 +123,7 @@ export default function Product_SKU() {
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  
+
   const [searchProduct, setSearchProduct] = useState("");
   const [fileUploadAddProduct, setFileUploadAddProduct] = useState([]);
   const [deleteItemProduct, setDeleteItemProduct] = useState({});
@@ -138,8 +141,9 @@ export default function Product_SKU() {
   const [isModelOpenDeleteList, setIsModelOpenDeleteList] = useState(false);
   const [isModalOpenCheckProduct, setIsModalOpenCheckProduct] = useState(false);
   const [fileUploadCheckProduct, setFileUploadCheckProduct] = useState([]);
-  const [urlImageCheckProductResult, setUrlImageCheckProductResult] =
-    useState("");
+  const [urlImageCheckProductResult, setUrlImageCheckProductResult] = useState(
+    []
+  );
   const [resultProductCheck, setResultProductCheck] = useState([]);
   const [isModelResultProduct, setIsModelResultProduct] = useState(false);
   const [isModalAddProductFromERP, setIsModalAddProductFromERP] =
@@ -151,7 +155,7 @@ export default function Product_SKU() {
   const [productFromERP, setProductFromERP] = useState<any[]>([]);
 
   const [fileListImage, setFileListImage] = useState<any[]>([]);
-  const [urlImageAI, setUrlImageAI] = useState("");
+  const [urlImageAI, setUrlImageAI] = useState([]);
   const [objectBoxes, setObjectBoxes] = useState<any[]>([]);
   const [isModalOpenImportFileExcel, setIsModalOpenImportFileExcel] =
     useState(false);
@@ -392,9 +396,23 @@ export default function Product_SKU() {
     },
   };
   const propUploadCheckProducts: UploadProps = {
-    onRemove: () => {
-      setFileListImage([]);
-      setFileUploadCheckProduct([]);
+    onRemove: (file) => {
+      // Tìm vị trí của tệp cần xóa trong fileListImage
+      const indexToRemove = fileListImage.findIndex(
+        (item) => item.uid === file.uid
+      );
+      if (indexToRemove !== -1) {
+        // Xóa phần tử khỏi fileListImage
+        const updatedFileList = [...fileListImage];
+        updatedFileList.splice(indexToRemove, 1);
+        // Cập nhật fileListImage với danh sách tệp đã được loại bỏ
+        setFileListImage(updatedFileList);
+
+        const updatedFileUrls = [...fileUploadCheckProduct];
+        updatedFileUrls.splice(indexToRemove, 1);
+        // Cập nhật fileUploadCheckProduct với danh sách URL tệp đã được loại bỏ
+        setFileUploadCheckProduct(updatedFileUrls);
+      }
     },
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     accept: "image/png, image/jpeg",
@@ -426,15 +444,15 @@ export default function Product_SKU() {
       );
       if (response.message == "ok") {
         //fileListUpload.push(response.message);
-        let listFile = [];
-        let obj = {
-          uid: "-1",
+        // Tạo một đối tượng mới đại diện cho file vừa tải lên
+        const newFile = {
+          uid: uuidv4(), // Sử dụng uuid để tạo uid ngẫu nhiên cho mỗi file
           name: response.result.date_time,
           status: "done",
           url: response.result.file_url,
         };
-        listFile.push(obj);
-        setFileListImage(listFile);
+        // Cập nhật danh sách file đã upload
+        setFileListImage((prevFileList) => [...prevFileList, newFile]);
         setFileUploadCheckProduct((prevFileUpload) => [
           ...prevFileUpload,
           response.result.file_url,
@@ -491,7 +509,8 @@ export default function Product_SKU() {
   const fetchDataCategories = async () => {
     try {
       //setLoading(true);
-      let urlCategory = '/api/resource/VGM_Category?fields=["*"]&limit_page_length=500';
+      let urlCategory =
+        '/api/resource/VGM_Category?fields=["*"]&limit_page_length=500';
       if (searchCategory != null && searchCategory != "") {
         let filterComand = `[["category_name", "like", "%${searchCategory}%"]]`;
         urlCategory += `&filters=${filterComand}`;
@@ -769,9 +788,9 @@ export default function Product_SKU() {
       setFilteredProducts(products);
       return;
     }
-  
+
     // Nếu có từ khóa tìm kiếm, lọc sản phẩm thỏa mãn điều kiện
-    const filtered = products.filter(product =>
+    const filtered = products.filter((product) =>
       product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
     );
     setFilteredProducts(filtered);
@@ -782,7 +801,7 @@ export default function Product_SKU() {
     // if (searchProduct != null && searchProduct != "") {
     //   urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
     // } else {
-     
+
     // }
     urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
     let res = await AxiosService.get(urlProducts);
@@ -955,7 +974,10 @@ export default function Product_SKU() {
     if (objProduct.product_code) {
       let productFilter = products.filter(
         (x) =>
-          x.product_code.toLowerCase() === objProduct.product_code.toLowerCase() && x.product_code.toLowerCase() !== editItemProduct.product_code.toLowerCase()
+          x.product_code.toLowerCase() ===
+            objProduct.product_code.toLowerCase() &&
+          x.product_code.toLowerCase() !==
+            editItemProduct.product_code.toLowerCase()
       );
       if (productFilter.length > 0) {
         message.error("Mã sản phẩm đã tồn tại");
@@ -1127,7 +1149,7 @@ export default function Product_SKU() {
         collection_name: categorySelected.name,
         linkimages:
           fileUploadCheckProduct.length > 0
-            ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
+            ? JSON.stringify(fileUploadCheckProduct)
             : "",
       };
 
@@ -1147,9 +1169,8 @@ export default function Product_SKU() {
           message.error("Không thể kiểm tra ảnh sản phẩm");
         } else {
           if (res.message.results.verbose[0]) {
-            setUrlImageAI(res.message.results.verbose[0]);
+            setUrlImageAI(res.message.results.verbose);
           }
-
           // setUrlImageAI(
           //   "data:image/png;base64," +
           //     res.message.results.verbose[0].base64_image
@@ -1180,11 +1201,7 @@ export default function Product_SKU() {
         }
       }
 
-      setUrlImageCheckProductResult(
-        fileUploadCheckProduct.length > 0
-          ? fileUploadCheckProduct[fileUploadCheckProduct.length - 1]
-          : ""
-      ); //import.meta.env.VITE_BASE_URL+
+      setUrlImageCheckProductResult(fileUploadCheckProduct); //import.meta.env.VITE_BASE_URL+
       setLoadingCheckProduct(false);
       setResultProductCheck(arrProductDetect);
       setIsModelResultProduct(true);
@@ -1469,6 +1486,37 @@ export default function Product_SKU() {
       fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
     );
   };
+  const [mainImageIndex, setMainImageIndex] = useState<number>(0);
+  const [mainImageIndexAI, setMainImageIndexAI] = useState<number>(0);
+  const handleImageClick = (index: number) => {
+    setMainImageIndex(index);
+  };
+  const handleImageClickAI = (index: number) => {
+    setMainImageIndexAI(index);
+  };
+
+  const handlePrevImage = () => {
+    if (mainImageIndex > 0) {
+      setMainImageIndex(mainImageIndex - 1);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (mainImageIndex < urlImageCheckProductResult.length - 1) {
+      setMainImageIndex(mainImageIndex + 1);
+    }
+  };
+  const handlePrevImageAI = () => {
+    if (mainImageIndexAI > 0) {
+      setMainImageIndexAI(mainImageIndexAI - 1);
+    }
+  };
+
+  const handleNextImageAI = () => {
+    if (mainImageIndexAI < urlImageAI.length - 1) {
+      setMainImageIndexAI(mainImageIndexAI + 1);
+    }
+  };
   return (
     <>
       <HeaderPage
@@ -1658,26 +1706,215 @@ export default function Product_SKU() {
         >
           {/* Cột 1: Hình ảnh sản phẩm */}
           <div style={{ flex: 1, marginRight: "10px" }}>
-            <h3 style={{ textAlign: "center" }}>Hình ảnh sản phẩm</h3>
-            <Image.PreviewGroup>
+            <h3 style={{ textAlign: "center" }}>Hình ảnh gian hàng</h3>
+            {/* <Image.PreviewGroup>
               <Image
                 key="1"
                 style={{ width: "100%", height: "auto" }} // Set width to 100% and let height adjust automatically
                 src={urlImageCheckProductResult}
               />
-            </Image.PreviewGroup>
+            </Image.PreviewGroup> */}
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "auto",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Image
+                src={urlImageCheckProductResult[mainImageIndex]}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "cover",
+                  alignSelf: "center",
+                  borderRadius: "5px",
+                }}
+              />
+              <div
+                onClick={handlePrevImage}
+                style={{
+                  height: "50px",
+                  width: "35px",
+                  display: "flex",
+                  justifyContent: "center",
+                  borderRadius: "5px",
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "24px",
+                  zIndex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.2)", // Chỉnh màu của biểu tượng nếu cần
+                }}
+              >
+                <LeftOutlined
+                  onClick={handlePrevImage}
+                  style={{ color: "white" }}
+                />
+              </div>
+              <div
+                onClick={handleNextImage}
+                style={{
+                  height: "50px",
+                  width: "35px",
+                  display: "flex",
+                  justifyContent: "center",
+                  borderRadius: "5px",
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "24px",
+                  zIndex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.2)", // Chỉnh màu của biểu tượng nếu cần
+                }}
+              >
+                <RightOutlined
+                  onClick={handleNextImage}
+                  style={{ color: "white" }}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                gap: "10px",
+                overflowX: "hidden",
+                marginTop: "10px",
+              }}
+            >
+              {urlImageCheckProductResult.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  onClick={() => handleImageClick(index)}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    borderRadius: "10px",
+                    boxShadow: index === mainImageIndex ? "rgba(3, 102, 214, 0.3) 0px 3px 0px 3px" : "none" // Thêm shadow cho ảnh đang được hiển thị
+                  
+                  }}
+                  preview={false}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Cột 2: Hình ảnh AI */}
           <div style={{ flex: 1, marginLeft: "10px" }}>
             <h3 style={{ textAlign: "center" }}>Hình ảnh AI</h3>
-            <Image.PreviewGroup>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "auto",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Image
+                src={urlImageAI[mainImageIndexAI]}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "cover",
+                  alignSelf: "center",
+                  borderRadius: "10px",
+                }}
+              />
+              <div
+                onClick={handlePrevImageAI}
+                style={{
+                  height: "50px",
+                  width: "35px",
+                  display: "flex",
+                  justifyContent: "center",
+                  borderRadius: "5px",
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "24px",
+                  zIndex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.2)", // Chỉnh màu của biểu tượng nếu cần
+                }}
+              >
+                <LeftOutlined
+                  onClick={handlePrevImageAI}
+                  style={{ color: "white" }}
+                />
+              </div>
+              <div
+                onClick={handleNextImageAI}
+                style={{
+                  height: "50px",
+                  width: "35px",
+                  display: "flex",
+                  justifyContent: "center",
+                  borderRadius: "5px",
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "24px",
+                  zIndex: 1,
+                  backgroundColor: "rgba(0, 0, 0, 0.2)", // Chỉnh màu của biểu tượng nếu cần
+                }}
+              >
+                <RightOutlined
+                  onClick={handleNextImageAI}
+                  style={{ color: "white" }}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                gap: "10px",
+                overflowX: "hidden",
+                marginTop: "10px",
+              }}
+            >
+              {urlImageAI.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  onClick={() => handleImageClickAI(index)}
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    objectFit: "cover",
+                    cursor: "pointer",
+                    borderRadius: "10px",
+                    boxShadow: index === mainImageIndexAI ? "rgba(3, 102, 214, 0.3) 0px 3px 0px 3px" : "none" // Thêm shadow cho ảnh đang được hiển thị
+                  }}
+                  preview={false}
+                />
+              ))}
+            </div>
+            {/* <Image.PreviewGroup>
               <Image
                 key="2"
                 style={{ width: "100%", height: "auto" }} // Set width to 100% and let height adjust automatically
                 src={urlImageAI}
               />
-            </Image.PreviewGroup>
+            </Image.PreviewGroup> */}
           </div>
         </div>
 

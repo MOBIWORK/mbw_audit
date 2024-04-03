@@ -60,31 +60,38 @@ def deleteListByDoctype(*args,**kwargs):
 
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
-def checkImageProductExist(*args,**kwargs):
+def checkImageProductExist(*args, **kwargs):
     vectordb_dir = frappe.get_site_path()
     deep_vision: DeepVision = DeepVision(vectordb_dir)
     recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
     base_url = frappe.utils.get_request_site_address()
     collection_name = kwargs.get('collection_name')
-    link_image = kwargs.get('linkimages')
+    link_image = json.loads(kwargs.get('linkimages'))
+
     # url_images = post_images_check(image_base64)
-    image_path = [link_image]
+    image_path = link_image
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
-    
     # return response
     if response.get('status') == 'completed':
-        image_ais = render_check_image_ai(response.get("results",{}).get("verbose", []))
-        response['results']['verbose'] = image_ais 
-        return response
-        # count_value = response.get('results', {}).get('count', {})
-        # return count_value
-        # self.set('sum', count_value)
+        # Tính tổng của các danh sách sản phẩm từ mảng
+        count_result = {}
+        verbose_result = []
+
+        for result in response.get("results", []):
+            count = result.get("results", {}).get("count", {})
+            verbose = result.get("results", {}).get("verbose", {})
+            for key, value in count.items():
+                count_result[key] = count_result.get(key, 0) + value
+            verbose_ais = render_check_image_ai([verbose])  # Xử lý qua hàm render_check_image_ai
+            verbose_result.extend(verbose_ais)
+
+        # Trả về kết quả dưới dạng `{count: {...}, verbose: [...]}`
+        return {"status": "completed", "results": {"count": count_result, "verbose": verbose_result}}
     else:
         return {"status": "error", 'message': response}
-        # self.set('sum', self.sum)
-        
+     
 @frappe.whitelist(methods=["POST"])      
 def delete_check_image_ai(*args, **kwargs):
     delete = delete_file( kwargs.get('file_name'))
