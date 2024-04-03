@@ -140,6 +140,29 @@ export default function ReportDetail() {
     {
       title: "Thời gian thực hiện",
       dataIndex: "images_time",
+      render: (time) => {
+        // Chuyển đổi chuỗi thời gian thành đối tượng Date
+        const dateObj = new Date(time);
+
+        // Lấy ngày, tháng và năm từ đối tượng Date
+        const day = dateObj.getDate();
+        const month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0 nên cần cộng thêm 1
+        const year = dateObj.getFullYear();
+
+        // Lấy giờ và phút từ đối tượng Date
+        const hours = dateObj.getHours();
+        const minutes = dateObj.getMinutes();
+
+        // Biến đổi thành chuỗi thời gian theo định dạng "dd/MM/yyyy hh:mm"
+        const formattedTime = `${day.toString().padStart(2, "0")}/${month
+          .toString()
+          .padStart(2, "0")}/${year} ${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+
+        // Trả về chuỗi thời gian đã được định dạng
+        return <div>{formattedTime}</div>;
+      },
     },
     {
       title: "Điểm trưng bày AI chấm",
