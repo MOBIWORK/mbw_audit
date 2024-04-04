@@ -108,34 +108,40 @@ export default function ReportDetail() {
     {
       title: "Ảnh gian hàng",
       dataIndex: "images",
-      render: (item:any) => (
-        <a
-          onClick={(event) => {
-            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            if (item && item.length > 5) {
-              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
-            }
-          }}
-        >
-         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
-        </a>
-      ),
+      render: (item: any) => {
+        let imageArray = JSON.parse(item);
+        return (
+          <a
+            onClick={(event) => {
+              event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+              if (imageArray.length > 0) {
+                handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+              }
+            }}
+          >
+            {imageArray.length > 0 ? "Xem hình ảnh" : "Không có hình ảnh"}
+          </a>
+        );
+      },
     },
     {
       title: "Ảnh gian hàng AI",
       dataIndex: "images_ai",
-      render: (item:any) => (
-        <a
-          onClick={(event) => {
-            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            if (item && item.length > 5) {
-              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
-            }
-          }}
-        >
-         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
-        </a>
-      ),
+      render: (item: any) => {
+        let imageArray = JSON.parse(item);
+        return (
+          <a
+            onClick={(event) => {
+              event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+              if (imageArray.length > 0) {
+                handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+              }
+            }}
+          >
+            {imageArray.length > 0 ? "Xem hình ảnh" : "Không có hình ảnh"}
+          </a>
+        );
+      },
     },
     {
       title: "Thời gian thực hiện",
@@ -199,7 +205,7 @@ export default function ReportDetail() {
     {
       title: "Điểm trưng bày giám sát chấm",
       dataIndex: "scoring_human",
-     render: (scoring_human: number, item: any, index: number) => (
+      render: (scoring_human: number, item: any, index: number) => (
         <div
           onClick={(event) => {
             event.stopPropagation();
@@ -211,7 +217,7 @@ export default function ReportDetail() {
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
-            suffixIcon={hoveredSelect === index ? (<DownOutlined/>):null}
+            suffixIcon={hoveredSelect === index ? <DownOutlined /> : null}
           >
             <Select.Option value={1}>
               <span style={{ display: "flex" }}>
@@ -299,34 +305,40 @@ export default function ReportDetail() {
     {
       title: "Ảnh gian hàng",
       dataIndex: "images",
-      render: (item) => (
-        <a
-          onClick={(event) => {
-            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            if (item && item.length > 5) {
-              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
-            }
-          }}
-        >
-         {item && item.length > 5? "Xem hình ảnh" : "Không có hình ảnh"}
-        </a>
-      ),
+      render: (item: any) => {
+        let imageArray = JSON.parse(item);
+        return (
+          <a
+            onClick={(event) => {
+              event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+              if (imageArray.length > 0) {
+                handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+              }
+            }}
+          >
+            {imageArray.length > 0 ? "Xem hình ảnh" : "Không có hình ảnh"}
+          </a>
+        );
+      },
     },
     {
       title: "Ảnh gian hàng AI",
       dataIndex: "images_ai",
-      render: (item) => (
-        <a
-          onClick={(event) => {
-            event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
-            if (item && item.length > 5) {
-              handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
-            }
-          }}
-        >
-          {item && item.length > 5 ? "Xem hình ảnh" : "Không có hình ảnh"}
-        </a>
-      ),
+      render: (item: any) => {
+        let imageArray = JSON.parse(item);
+        return (
+          <a
+            onClick={(event) => {
+              event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
+              if (imageArray.length > 0) {
+                handleImageClick(item); // Gọi hàm xử lý hiển thị hình ảnh nếu có hình ảnh trả về
+              }
+            }}
+          >
+            {imageArray.length > 0 ? "Xem hình ảnh" : "Không có hình ảnh"}
+          </a>
+        );
+      },
     },
     {
       title: "Thời gian thực hiện",
@@ -402,7 +414,7 @@ export default function ReportDetail() {
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
-            suffixIcon={hoveredSelect === index ? (<DownOutlined/>):null}
+            suffixIcon={hoveredSelect === index ? <DownOutlined /> : null}
           >
             <Select.Option value={1}>
               <span style={{ display: "flex" }}>
@@ -437,7 +449,6 @@ export default function ReportDetail() {
       ),
     },
   ];
- 
 
   const expandedColumns = [
     // { title: "STT", dataIndex: "stt" },
@@ -601,13 +612,13 @@ export default function ReportDetail() {
     }
   };
 
-  const handleMouseEnter = (index:any) => {
+  const handleMouseEnter = (index: any) => {
     setHoveredSelect(index);
   };
 
-    const handleMouseLeave = () => {
-      setHoveredSelect(false);
-    };
+  const handleMouseLeave = () => {
+    setHoveredSelect(false);
+  };
   const handleChange = async (value: any) => {
     const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
 
@@ -629,7 +640,7 @@ export default function ReportDetail() {
       message.error("Cập nhật thất bại");
     }
   };
-  
+
   const initDataEmployee = async () => {
     try {
       let urlEmployee =
