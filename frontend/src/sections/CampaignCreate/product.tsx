@@ -11,6 +11,7 @@ import {
   TableColumnsType,
   Collapse,
   Checkbox,
+  message,
 } from "antd";
 import "./view.css";
 import type { CollapseProps } from "antd";
@@ -341,10 +342,16 @@ export default function Product({
       ) => (
         <Input
           style={{ width: "120px" }}
+          min={1} // Thiết lập giá trị tối thiểu là 1
           defaultValue={item}
-          onChange={(e) =>
-            handleQuantityChange(index, parseInt(e.target.value))
-          } // Sử dụng index trong handleQuantityChange
+          onChange={(e) => {
+            const newValue = parseInt(e.target.value);
+            if (!isNaN(newValue) && newValue >= 1) {
+              handleQuantityChange(index, newValue);
+            } else {
+              message.warning("Số lượng ít nhất là 1")
+            }
+          }}
         />
       ),
     },

@@ -803,7 +803,7 @@ export default function Product_SKU() {
     // } else {
 
     // }
-    urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]`;
+    urlProducts = `/api/resource/VGM_Product?fields=["*"]&filters=[["category","=","${categorySelected.name}"]]&limit_page_length=500`;
     let res = await AxiosService.get(urlProducts);
     if (res && res.data) {
       // Thêm key cho mỗi phần tử trong mảng, sử dụng trường 'name'
