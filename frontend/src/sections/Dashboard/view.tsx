@@ -403,6 +403,7 @@ export default function Dashboard() {
         source: resCampaign.result.data
           .map((item, index) => ({
             stt: ("0" + (index + 1)).slice(-2),
+            campaign_code: item.id,
             campaign_name: item.campaign_name,
             tyle: item.processing,
           }))
