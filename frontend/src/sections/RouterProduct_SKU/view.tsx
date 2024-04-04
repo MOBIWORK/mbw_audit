@@ -1164,6 +1164,7 @@ export default function Product_SKU() {
         });
       }
       if (res != null && res.message != null) {
+        console.log(res);
         if (res.message.status == "error") {
           setLoadingCheckProduct(false);
           message.error("Không thể kiểm tra ảnh sản phẩm");
@@ -1231,10 +1232,16 @@ export default function Product_SKU() {
     setIsModalOpenCheckProduct(false);
   };
 
-  const handleCancelResultCheckProduct = () => {
+  const handleCancelResultCheckProduct = async () => {
     setIsModelResultProduct(false);
     setFileListImage([]);
     setFileUploadCheckProduct([]);
+    const fileNames = urlImageAI.map(url => url.split('/').pop());
+    let dataPost = {
+      file_name: JSON.stringify(fileNames),
+    };
+    let urlPostData = apiUrl + ".api.delete_check_image_ai";
+    let res = await AxiosService.post(urlPostData, dataPost);
     setUrlImageAI([])
     setUrlImageCheckProductResult([])
   };

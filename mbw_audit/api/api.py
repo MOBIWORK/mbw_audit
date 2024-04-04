@@ -100,20 +100,22 @@ def delete_check_image_ai(*args, **kwargs):
     if file_names:
         messages = []
         for file_name in file_names:
-            file_path = frappe.utils.get_files_path(file_name)
-            try:
-                # Xóa tệp tin nếu tồn tại
-                if os.path.exists(file_path):
-                    os.remove(file_path)
+            # Tìm bản ghi trong Doctype 'File' có 'file_url' như được cung cấp
+            file_docs = frappe.get_all("File", filters={"file_name": file_name})
+
+            if file_docs:
+                try:
+                    # Xóa tất cả các bản ghi tệp
+                    for file_doc in file_docs:
+                        frappe.delete_doc("File", file_doc.name)
                     messages.append(f"Đã xóa tệp tin {file_name} thành công.")
-                else:
-                    messages.append(f"Tệp tin {file_name} không tồn tại.")
-            except Exception as e:
-                messages.append(f"Lỗi khi xóa tệp tin {file_name}: {e}")
+                except Exception as e:
+                    messages.append(f"Lỗi khi xóa tệp tin {file_name}: {e}")
+            else:
+                messages.append(f"Tệp tin {file_name} không tồn tại trong Doctype 'File'.")
         return {"messages": messages}
     else:
         return {"message": "Danh sách tên tệp tin không được cung cấp."}
-
     
 @frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
