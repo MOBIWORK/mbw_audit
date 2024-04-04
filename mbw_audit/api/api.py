@@ -73,6 +73,7 @@ def checkImageProductExist(*args, **kwargs):
     # product_id = self.product
     # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
     response = recognition.count(collection_name, image_path)
+    return {"status": "error", 'message': response}
     # return response
     if response.get('status') == 'completed':
         # Tính tổng của các danh sách sản phẩm từ mảng
