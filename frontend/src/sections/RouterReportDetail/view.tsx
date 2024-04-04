@@ -112,6 +112,10 @@ export default function ReportDetail() {
         let imageArray = JSON.parse(item);
         return (
           <a
+          style={{
+            pointerEvents: imageArray.length > 0 ? "auto" : "none",
+            cursor: imageArray.length > 0 ? "pointer" : "default"
+          }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -131,6 +135,10 @@ export default function ReportDetail() {
         let imageArray = JSON.parse(item);
         return (
           <a
+          style={{
+            pointerEvents: imageArray.length > 0 ? "auto" : "none",
+            cursor: imageArray.length > 0 ? "pointer" : "default"
+          }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -309,6 +317,10 @@ export default function ReportDetail() {
         let imageArray = JSON.parse(item);
         return (
           <a
+          style={{
+            pointerEvents: imageArray.length > 0 ? "auto" : "none",
+            cursor: imageArray.length > 0 ? "pointer" : "default"
+          }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -328,6 +340,10 @@ export default function ReportDetail() {
         let imageArray = JSON.parse(item);
         return (
           <a
+          style={{
+            pointerEvents: imageArray.length > 0 ? "auto" : "none",
+            cursor: imageArray.length > 0 ? "pointer" : "default"
+          }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
