@@ -1164,11 +1164,12 @@ export default function Product_SKU() {
         });
       }
       if (res != null && res.message != null) {
-        if (res.message.status == "failed") {
+        if (res.message.status == "error") {
           setLoadingCheckProduct(false);
           message.error("Không thể kiểm tra ảnh sản phẩm");
+          return
         } else {
-          if (res.message.results.verbose[0]) {
+          if (res.message.results.verbose.length > 0) {
             setUrlImageAI(res.message.results.verbose);
           }
           // setUrlImageAI(
@@ -1234,6 +1235,8 @@ export default function Product_SKU() {
     setIsModelResultProduct(false);
     setFileListImage([]);
     setFileUploadCheckProduct([]);
+    setUrlImageAI([])
+    setUrlImageCheckProductResult([])
   };
 
   const [fileList, setFileList] = useState<UploadFile[]>([]);

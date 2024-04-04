@@ -92,27 +92,28 @@ def checkImageProductExist(*args, **kwargs):
     else:
         return {"status": "error", 'message': response}
      
-@frappe.whitelist(methods=["POST"])      
+@frappe.whitelist(methods=["POST"])
 def delete_check_image_ai(*args, **kwargs):
-    delete = delete_file( kwargs.get('file_name'))
-    return
-    # file_name = kwargs.get('file_name')
+    file_names = json.loads(kwargs.get('file_name'))
 
-    # # Kiểm tra xem tên tệp tin có tồn tại không
-    # if file_name:
-    #     path_file = "/files/" + file_name
-        
-    #     try:
-    #         # Xóa tệp tin nếu tồn tại
-    #         if os.path.exists(path_file):
-    #             os.remove(path_file)
-    #             return {"message": f"Đã xóa tệp tin {file_name} thành công."}
-    #         else:
-    #             return {"message": f"Tệp tin {file_name} không tồn tại."}
-    #     except Exception as e:
-    #         return {"message": f"Lỗi khi xóa tệp tin {file_name}: {e}"}
-    # else:
-    #     return {"message": "Tên tệp tin không được cung cấp."}
+    # Kiểm tra xem danh sách tên tệp tin có tồn tại không
+    if file_names:
+        messages = []
+        for file_name in file_names:
+            file_path = frappe.utils.get_files_path(file_name)
+            try:
+                # Xóa tệp tin nếu tồn tại
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    messages.append(f"Đã xóa tệp tin {file_name} thành công.")
+                else:
+                    messages.append(f"Tệp tin {file_name} không tồn tại.")
+            except Exception as e:
+                messages.append(f"Lỗi khi xóa tệp tin {file_name}: {e}")
+        return {"messages": messages}
+    else:
+        return {"message": "Danh sách tên tệp tin không được cung cấp."}
+
     
 @frappe.whitelist(methods=["POST"])
 # param {collection_name: ''}
