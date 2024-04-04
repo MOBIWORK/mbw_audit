@@ -109,7 +109,14 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng",
       dataIndex: "images",
       render: (item: any) => {
-        let imageArray = JSON.parse(item);
+        let imageArray: any[] = [];
+        if (item !== null) {
+          try {
+            imageArray = JSON.parse(item);
+          } catch (error) {
+            console.error("Error parsing item:", error);
+          }
+        }
         return (
           <a
           style={{
@@ -132,7 +139,14 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng AI",
       dataIndex: "images_ai",
       render: (item: any) => {
-        let imageArray = JSON.parse(item);
+        let imageArray: any[] = [];
+        if (item !== null) {
+          try {
+            imageArray = JSON.parse(item);
+          } catch (error) {
+            console.error("Error parsing item:", error);
+          }
+        }
         return (
           <a
           style={{
@@ -314,7 +328,14 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng",
       dataIndex: "images",
       render: (item: any) => {
-        let imageArray = JSON.parse(item);
+        let imageArray: any[] = [];
+        if (item !== null) {
+          try {
+            imageArray = JSON.parse(item);
+          } catch (error) {
+            console.error("Error parsing item:", error);
+          }
+        }
         return (
           <a
           style={{
@@ -337,7 +358,14 @@ export default function ReportDetail() {
       title: "Ảnh gian hàng AI",
       dataIndex: "images_ai",
       render: (item: any) => {
-        let imageArray = JSON.parse(item);
+        let imageArray: any[] = [];
+        if (item !== null) {
+          try {
+            imageArray = JSON.parse(item);
+          } catch (error) {
+            console.error("Error parsing item:", error);
+          }
+        }
         return (
           <a
           style={{
