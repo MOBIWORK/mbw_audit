@@ -1164,7 +1164,6 @@ export default function Product_SKU() {
         });
       }
       if (res != null && res.message != null) {
-        console.log(res);
         if (res.message.status == "error") {
           setLoadingCheckProduct(false);
           message.error("Không thể kiểm tra ảnh sản phẩm");
