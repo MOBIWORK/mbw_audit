@@ -120,8 +120,7 @@ export default function ReportDetail() {
         return (
           <a
           style={{
-            pointerEvents: imageArray.length > 0 ? "auto" : "none",
-            cursor: imageArray.length > 0 ? "pointer" : "default"
+          cursor: imageArray.length > 0 ? "pointer" : "default"
           }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
@@ -150,8 +149,7 @@ export default function ReportDetail() {
         return (
           <a
           style={{
-            pointerEvents: imageArray.length > 0 ? "auto" : "none",
-            cursor: imageArray.length > 0 ? "pointer" : "default"
+          cursor: imageArray.length > 0 ? "pointer" : "default"
           }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
@@ -339,8 +337,7 @@ export default function ReportDetail() {
         return (
           <a
           style={{
-            pointerEvents: imageArray.length > 0 ? "auto" : "none",
-            cursor: imageArray.length > 0 ? "pointer" : "default"
+          cursor: imageArray.length > 0 ? "pointer" : "default"
           }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
@@ -369,8 +366,7 @@ export default function ReportDetail() {
         return (
           <a
           style={{
-            pointerEvents: imageArray.length > 0 ? "auto" : "none",
-            cursor: imageArray.length > 0 ? "pointer" : "default"
+          cursor: imageArray.length > 0 ? "pointer" : "default"
           }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
