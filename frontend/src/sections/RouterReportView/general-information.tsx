@@ -34,6 +34,9 @@ export default function GeneralInformation({
     { label: "Đạt", value: 1 },
     { label: "Không đạt", value: 0 },
   ]);
+  const [_defaultImage, setDefaultImage] = useState(false)
+  const [_defaultImageAi, setDefaultImageAi] = useState(false)
+
   useEffect(() => {
     if (recordData) {
       form.setFieldsValue({
@@ -56,10 +59,19 @@ export default function GeneralInformation({
         let objArrImage = JSON.parse(recordData.images);
         arrImageStore = objArrImage;
       }
+      if (arrImageStore.length === 0) {
+        console.log('khong co anh');
+        setDefaultImage(true)
+      }
+      
       let arrImageStoreAI = [];
       if (recordData.images_ai != null && recordData.images_ai != "") {
         let objArrImage = JSON.parse(recordData.images_ai);
         arrImageStoreAI = objArrImage;
+      }
+      if (arrImageStoreAI.length === 0) {
+        console.log('khong co anh ai');
+        setDefaultImageAi(true)
       }
       setLstImage(arrImageStore);
       setLstImageAI(arrImageStoreAI);
@@ -236,7 +248,7 @@ export default function GeneralInformation({
                     borderRadius: "10px",
                   }}
                 />
-                <div
+               {!_defaultImage && ( <div
                   onClick={handlePrevImage}
                   style={{
                     height: "50px",
@@ -258,8 +270,8 @@ export default function GeneralInformation({
                     onClick={handlePrevImage}
                     style={{ color: "white" }}
                   />
-                </div>
-                <div
+                </div>)}
+              {!_defaultImage && (  <div
                   onClick={handleNextImage}
                   style={{
                     height: "50px",
@@ -281,7 +293,7 @@ export default function GeneralInformation({
                     onClick={handleNextImage}
                     style={{ color: "white" }}
                   />
-                </div>
+                </div>)}
               </div>
               <div
                 style={{
@@ -338,7 +350,7 @@ export default function GeneralInformation({
                     borderRadius: "10px",
                   }}
                 />
-                <div
+               {!_defaultImageAi && ( <div
                   onClick={handlePrevImageAI}
                   style={{
                     height: "50px",
@@ -360,8 +372,8 @@ export default function GeneralInformation({
                     onClick={handlePrevImageAI}
                     style={{ color: "white" }}
                   />
-                </div>
-                <div
+                </div>)}
+                {!_defaultImageAi && (<div
                   onClick={handleNextImageAI}
                   style={{
                     height: "50px",
@@ -383,7 +395,7 @@ export default function GeneralInformation({
                     onClick={handleNextImageAI}
                     style={{ color: "white" }}
                   />
-                </div>
+                </div>)}
               </div>
               <div
                 style={{
