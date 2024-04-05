@@ -57,13 +57,15 @@ export default function CampaignEdit() {
         setCustomerEdit(JSON.parse(res.data.retails));
         if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){
           let objSettingScoreAudit = JSON.parse(res.data.setting_score_audit);
-          if(objSettingScoreAudit.sequence_product != null) setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
+          if(objSettingScoreAudit.sequence_product != null) {
+            setCheckSequenceProduct(true)
+            setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
+          }
           
         }
         let objSettingScore = JSON.parse(res.data.setting_score_audit);
         if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
 
-        console.log(object);
     }
   }
 

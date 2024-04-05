@@ -93,7 +93,7 @@ export default function ProductCampaignEdit({
 
   const initDataCategoriesWithOutFilter = async () => {
     setSelectedRowKeys(categoryEdit);
-    
+    console.log(productEdit);
     let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
     const response = await AxiosService.get(urlCategory);
     // Kiểm tra xem kết quả từ API có chứa dữ liệu không
@@ -144,28 +144,30 @@ export default function ProductCampaignEdit({
           let categoryCopy = { ...dataCategoryFilter[0] };
           // Thêm trường "name" của category vào mỗi phần tử trong mảng "products"
           // Gán min_product từ dữ liệu vào mỗi sản phẩm trong mảng products
-          categoryCopy.products = categoryCopy.products.map((product) => {
+          categoryCopy.products = categoryCopy.products
+          .filter((product) => productEdit.hasOwnProperty(product.name))
+          .map((product) => {
             // Lấy giá trị min_product tương ứng với product_code của sản phẩm
-            const minProductValue = productEdit[product.name]?.min_product || 0;
-
+            const minProductValue = productEdit[product.name]?.min_product || 1;
+        
             if (
               productEdit[product.name] != null &&
               productEdit[product.name]?.min_product != null &&
               !checkExistProduct
-            )
+            ) {
               setCheckExistProduct(true);
+            }
+        
             // Gán giá trị cate_name và min_product cho sản phẩm
-
             return {
               ...product,
               cate_name: categoryCopy.category_name,
               product_num: minProductValue.toString(),
             };
           });
-
-          allProducts = allProducts.concat(categoryCopy.products);
-
-          categoryInitSelected.push(categoryCopy);
+        
+         allProducts = allProducts.concat(categoryCopy.products);
+         categoryInitSelected.push(categoryCopy);
         }
       }
       // Khởi tạo mảng rỗng để chứa danh sách sản phẩm theo thứ tự và có trường "sequence_product"
@@ -190,6 +192,7 @@ export default function ProductCampaignEdit({
         categoryInitSelected[idx].stt = idx + 1
       }
       setCategoriesSelected(categoryInitSelected);
+      setChangeCategories(categoryInitSelected)
     }
   };
 
@@ -228,7 +231,7 @@ export default function ProductCampaignEdit({
           });
           dataCategories[i].products = arrProducts;
         } else {
-          dataCategories[i].product_num = 0;
+          dataCategories[i].product_num = 1;
           dataCategories[i].products = [];
         }
       }
@@ -280,6 +283,7 @@ export default function ProductCampaignEdit({
     }
     setProductSelected(allProducts);
     setCategoriesSelected(arrCategorySelect);
+    setChangeCategories(arrCategorySelect)
     onChangeCategory(arrCategorySelect);
     handleCancelAddCategory();
   };
@@ -307,16 +311,39 @@ export default function ProductCampaignEdit({
     const updatedProductSelected = productSelected.filter(
       (product) => product.cate_name !== item.category_name
     );
+    setArrProductCategory(updatedProductSelected);
+    if (productSort.length > 0) {
+      // Lọc ra các phần tử có cate_name khác với objToDelete
+      const filteredArray = productSort.filter(
+        (x) => x.cate_name !== item.category_name
+      );
+
+      // Đánh số lại sequence_product
+      let sequenceCount = 1;
+      const renumberedArray = filteredArray.map((item) => {
+        item.sequence_product = sequenceCount++;
+        return item;
+      });
+      setProductSort(renumberedArray);
+    }
+    setArrPro(updatedProductSelected);
+    
     setProductSelected(updatedProductSelected);
     setCategoriesSelected(updatedCategoriesSelected);
-    onChangeCategory(updatedCategoriesSelected);
+    const updatedArray = updatedCategoriesSelected.map(x => ({
+      ...x,
+      products: x.products.filter(product => productSelected.some(item2 => item2.name === product.name))
+  }));
+    onChangeCategory(updatedArray);
   };
 
   const handleChangeCheckExist = (e) => {
     setCheckExistProduct(e.target.checked);
     onChangeCheckExistProduct(e.target.checked);
   };
-
+  const [changecategories, setChangeCategories] = useState<TypeCategory[]>(
+    []
+  );
   const columnProduct: TableColumnsType<DataType> = [
     { title: "Mã sản phẩm", dataIndex: "product_code" },
     { title: "Tên sản phẩm", dataIndex: "product_name" },
@@ -338,12 +365,31 @@ export default function ProductCampaignEdit({
               handleQuantityChange(index, newValue);
             } else {
               message.warning("Số lượng ít nhất là 1")
+              handleQuantityChange(index, 1);
             }
           }}
         />
       ),
     },
+    {
+      title: "",
+      key: "",
+      render: (item) => (
+        <DeleteOutlined onClick={() => handleDeleteProductExist(item)} />
+      ),
+    },
   ];
+  const handleDeleteProductExist = (item) => {
+    const result = productSelected.filter(x => x.name !== item.name);
+    setProductSelected(result)
+  
+    const updatedArray = changecategories.map(x => ({
+    ...x,
+    products: x.products.filter(product => result.some(item2 => item2.name === product.name))
+  }));
+    setChangeCategories(updatedArray)
+    onChangeCategory(updatedArray)
+   }
   const columnProductSort: TableColumnsType<DataType> = [
     { key: "sort" },
     { title: "STT", dataIndex: "sequence_product" },
@@ -362,7 +408,12 @@ export default function ProductCampaignEdit({
     updatedRowData[index].product_num = newValue;
     // Cập nhật trạng thái của bảng
     setProductSelected(updatedRowData);
-    onChangeCategory(categoriesSelected);
+    const updatedArray = changecategories.map(x => ({
+      ...x,
+      products: x.products.filter(product => updatedRowData.some(item2 => item2.name === product.name))
+    }));
+    setChangeCategories(updatedArray)
+    onChangeCategory(updatedArray);
   };
 
   // const handleChangeCheckSequence = (e) => {
@@ -395,10 +446,7 @@ export default function ProductCampaignEdit({
   });
    
     setArrProductCategory(allProducts);
-    
     setArrPro(allProducts);
-    console.log(objSettingSequenceProduct);
-    console.log(allProducts);
     setSelectedProductRowKeys(objSettingSequenceProduct)
   };
 

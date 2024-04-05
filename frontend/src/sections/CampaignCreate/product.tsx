@@ -72,6 +72,10 @@ export default function Product({
   const [categoriesSelected, setCategoriesSelected] = useState<TypeCategory[]>(
     []
   );
+  const [changecategories, setChangeCategories] = useState<TypeCategory[]>(
+    []
+  );
+  
   const [productSelected, setProductSelected] = useState<TypeCategory[]>([]);
   const [checkExistProduct, setCheckExistProduct] = useState(true);
   const [checkSequenceProduct, setCheckSequenceProduct] = useState(false);
@@ -208,7 +212,10 @@ export default function Product({
       }
     }
     setProductSelected(allProducts);
+    setArrProductCategory(allProducts);
+    setArrPro(allProducts);
     setCategoriesSelected(arrCategorySelect);
+    setChangeCategories(arrCategorySelect)
     onChangeCategory(arrCategorySelect);
     handleCancelAddCategory();
   };
@@ -222,7 +229,7 @@ export default function Product({
       // Chuyển đổi giá trị của sequence_product về kiểu số trước khi so sánh
       const sequenceA = parseInt(a.sequence_product);
       const sequenceB = parseInt(b.sequence_product);
-    
+
       // Sắp xếp các phần tử theo giá trị của sequence_product
       return sequenceA - sequenceB;
     });
@@ -237,20 +244,20 @@ export default function Product({
   };
   const showModalProduct = () => {
     setIsModalOpenProduct(true);
-    // Tạo mảng chứa tất cả sản phẩm
-    const allProducts = [];
-    // Duyệt qua mỗi danh mục
-    categoriesSelected.forEach((category) => {
-      // Thêm sản phẩm của từng danh mục vào mảng allProducts
-      allProducts.push(
-        ...category.products.map((product) => ({
-          ...product,
-          cate_name: category.category_name,
-        }))
-      );
-    });
-    setArrProductCategory(allProducts); // In ra mảng chứa tất cả sản phẩm của từng danh mục
-    setArrPro(allProducts);
+    // // Tạo mảng chứa tất cả sản phẩm
+    // const allProducts = [];
+    // // Duyệt qua mỗi danh mục
+    // categoriesSelected.forEach((category) => {
+    //   // Thêm sản phẩm của từng danh mục vào mảng allProducts
+    //   allProducts.push(
+    //     ...category.products.map((product) => ({
+    //       ...product,
+    //       cate_name: category.category_name,
+    //     }))
+    //   );
+    // });
+    // setArrProductCategory(allProducts); // In ra mảng chứa tất cả sản phẩm của từng danh mục
+    // setArrPro(allProducts);
   };
 
   const handleOkAddCategory = () => {
@@ -266,17 +273,37 @@ export default function Product({
 
   const handleDeleteCategory = (item) => {
     const updatedCategoriesSelected = categoriesSelected
-    .filter((category) => category.name !== item.name)
-    .map((category, index) => ({
-      ...category,
-      stt: index + 1,
-    }));
+      .filter((category) => category.name !== item.name)
+      .map((category, index) => ({
+        ...category,
+        stt: index + 1,
+      }));
     const updatedProductSelected = productSelected.filter(
       (product) => product.cate_name !== item.category_name
     );
     setProductSelected(updatedProductSelected);
+    setArrProductCategory(updatedProductSelected);
+    if (productSort.length > 0) {
+      // Lọc ra các phần tử có cate_name khác với objToDelete
+      const filteredArray = productSort.filter(
+        (x) => x.cate_name !== item.category_name
+      );
+
+      // Đánh số lại sequence_product
+      let sequenceCount = 1;
+      const renumberedArray = filteredArray.map((item) => {
+        item.sequence_product = sequenceCount++;
+        return item;
+      });
+      setProductSort(renumberedArray);
+    }
+    setArrPro(updatedProductSelected);
     setCategoriesSelected(updatedCategoriesSelected);
-    onChangeCategory(updatedCategoriesSelected);
+    const updatedArray = updatedCategoriesSelected.map(x => ({
+      ...x,
+      products: x.products.filter(product => productSelected.some(item2 => item2.name === product.name))
+  }));
+    onChangeCategory(updatedArray);
   };
 
   const handleChangeCheckExist = (e) => {
@@ -349,13 +376,32 @@ export default function Product({
             if (!isNaN(newValue) && newValue >= 1) {
               handleQuantityChange(index, newValue);
             } else {
-              message.warning("Số lượng ít nhất là 1")
+              message.warning("Số lượng ít nhất là 1");
+              handleQuantityChange(index, 1);
             }
           }}
         />
       ),
     },
+    {
+      title: "",
+      key: "",
+      render: (item) => (
+        <DeleteOutlined onClick={() => handleDeleteProductExist(item)} />
+      ),
+    },
   ];
+ const handleDeleteProductExist = (item) => {
+  const result = productSelected.filter(x => x.name !== item.name);
+  setProductSelected(result)
+
+  const updatedArray = changecategories.map(x => ({
+  ...x,
+  products: x.products.filter(product => result.some(item2 => item2.name === product.name))
+}));
+  setChangeCategories(updatedArray)
+  onChangeCategory(updatedArray)
+ }
   const columnProductSort: TableColumnsType<DataType> = [
     { key: "sort" },
     { title: "STT", dataIndex: "sequence_product" },
@@ -374,18 +420,23 @@ export default function Product({
     updatedRowData[index].product_num = newValue;
     // Cập nhật trạng thái của bảng
     setProductSelected(updatedRowData);
-    onChangeCategory(categoriesSelected);
+    const updatedArray = changecategories.map(x => ({
+      ...x,
+      products: x.products.filter(product => updatedRowData.some(item2 => item2.name === product.name))
+    }));
+    setChangeCategories(updatedArray)
+    onChangeCategory(updatedArray);
   };
   const handleQuantityChangeProduct = (index: number, newValue: number) => {
-    setArrProductCategory(prevState => {
+    setArrProductCategory((prevState) => {
       return prevState.map((item, idx) => {
-          if (idx === index) {
-              const prevValue = item.sequence_product || 0; // Lấy giá trị trước đó, nếu không có thì mặc định là 0
-              return { ...item, sequence_product: prevValue + newValue };
-          }
-          return item;
+        if (idx === index) {
+          const prevValue = item.sequence_product || 0; // Lấy giá trị trước đó, nếu không có thì mặc định là 0
+          return { ...item, sequence_product: prevValue + newValue };
+        }
+        return item;
       });
-  });
+    });
   };
   const handleDragRowEvent = (data: any) => {
     let arrSequenceProduct = data.map((x) => x.name);
@@ -396,9 +447,20 @@ export default function Product({
     {
       key: "1",
       label: (
-        <Checkbox checked={checkExistProduct} onClick={(event) => {event.stopPropagation()}} onChange={handleChangeCheckExist}>
+        <Checkbox
+          checked={checkExistProduct}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onChange={handleChangeCheckExist}
+        >
           {" "}
-          <span style={{ fontWeight: 700, fontSize: "15px" }} onClick={(event) => {event.stopPropagation()}}>
+          <span
+            style={{ fontWeight: 700, fontSize: "15px" }}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             {" "}
             1. Tiêu chí tồn tại sản phẩm
           </span>{" "}
@@ -414,12 +476,19 @@ export default function Product({
       key: "2",
       label: (
         <Checkbox
-          onClick={(event) => {event.stopPropagation()}}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
           checked={checkSequenceProduct}
           onChange={handleChangeCheckSequence}
         >
           {" "}
-          <span style={{ fontWeight: 700, fontSize: "15px" }} onClick={(event) => {event.stopPropagation()}}>
+          <span
+            style={{ fontWeight: 700, fontSize: "15px" }}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
             {" "}
             2. Tiêu chí sắp xếp sản phẩm
           </span>{" "}
@@ -586,6 +655,7 @@ export default function Product({
         <div className="pt-4">
           <TableCustom
             rowSelection={rowSelectionProduct}
+            scroll={{ y: 350 }}
             columns={[
               {
                 title: "Mã sản phẩm",
