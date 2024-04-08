@@ -8,7 +8,7 @@ import {
   Select
 } from "antd";
 import { TableCustom } from "../../components";
-import { useState } from "react"; 
+import { useEffect, useState } from "react"; 
 
 interface ExpandedDataType {
   key: React.Key;
@@ -73,7 +73,7 @@ export default function Product(props) {
       ) => (
         <Input
           style={{ width: "120px" }}
-          defaultValue={item}
+          value={item}
           onChange={(e) =>
             handleChangeProductHuman(index, parseInt(e.target.value), rowData)
           }
@@ -94,23 +94,32 @@ const mainColumns = [
   { title: "Số lượng sản phẩm", dataIndex: "number_product" }
 ];
 // Xây dựng dữ liệu mở rộng cho mỗi danh mục sản phẩm
-const expandedRowData = props.recordData?.category_names.map((category, index) => {
-  const categoryCode = Object.keys(category)[0];
-  const details = props.recordData?.detail_skus.filter(item => item.category === categoryCode);
-  return details.map((detailItem, detailIndex) => ({
-      key: `${index}-${detailIndex}`,
-      stt: `${(detailIndex + 1).toString().padStart(2, '0')}`,
-      name_product: detailItem.product_name,
-      sum_product: detailItem.sum_product.toString(),
-      image: detailItem.images,
-      creation: detailItem.creation,
-      scoring_machine: detailItem.scoring_machine,
-      scoring_human: detailItem.scoring_human,
-      sum_product_human: detailItem.sum_product_human,
-      name: detailItem.name,
-      index_category: index
-  }));
-});
+const [expandedRowData, setExpandedRowData] = useState([]);
+
+useEffect(() => {
+  if (props.recordData) {
+    const newData = props.recordData.category_names.map((category, index) => {
+      const categoryCode = Object.keys(category)[0];
+      const details = props.recordData.detail_skus.filter(item => item.category === categoryCode);
+      return details.map((detailItem, detailIndex) => ({
+        key: `${index}-${detailIndex}`,
+        stt: `${(detailIndex + 1).toString().padStart(2, '0')}`,
+        name_product: detailItem.product_name,
+        sum_product: detailItem.sum_product.toString(),
+        image: detailItem.images,
+        creation: detailItem.creation,
+        scoring_machine: detailItem.scoring_machine,
+        scoring_human: detailItem.scoring_human,
+        sum_product_human: detailItem.sum_product_human,
+        name: detailItem.name,
+        index_category: index
+      }));
+    });
+
+    setExpandedRowData(newData);
+  }
+  
+}, [props.recordData]);
 
   return (
    
@@ -127,8 +136,8 @@ const expandedRowData = props.recordData?.category_names.map((category, index) =
                 />
               </div>
             ),
-            rowExpandable: (record) => expandedRowData[record.key].length > 0
-        }}
+            rowExpandable: (record) => expandedRowData[record.key] && expandedRowData[record.key].length > 0
+          }}
           dataSource={mainTableData}
         />
       </>
