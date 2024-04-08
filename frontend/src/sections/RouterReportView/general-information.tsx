@@ -60,7 +60,6 @@ export default function GeneralInformation({
         arrImageStore = objArrImage;
       }
       if (arrImageStore.length === 0) {
-        console.log('khong co anh');
         setDefaultImage(true)
       }
       
@@ -70,7 +69,6 @@ export default function GeneralInformation({
         arrImageStoreAI = objArrImage;
       }
       if (arrImageStoreAI.length === 0) {
-        console.log('khong co anh ai');
         setDefaultImageAi(true)
       }
       setLstImage(arrImageStore);

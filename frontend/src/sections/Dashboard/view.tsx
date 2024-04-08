@@ -38,13 +38,16 @@ export default function Dashboard() {
     localStorage.setItem('campaign_dashboard', JSON.stringify(record));
     navigate(`/reports`);
 };
-
+  const pad =(num:any)=> {
+    return num < 10 ? '0' + num : num;
+  }
   const colTableTyLe = {
     columns: [
       {
         title: "STT",
         dataIndex: "stt",
         width: "10%",
+        render: (_, __, index:any) => pad(index+1),
       },
       {
         title: "Chiến dịch",
