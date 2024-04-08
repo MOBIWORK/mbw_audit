@@ -49,7 +49,47 @@
 			"collection_name" : "5439ebcea2",
 			"linkimages": "/files/ca_trung_400g.jpg"
 		}
+** API Kiểm tra Sản phẩm lân cận
+	Url: {{domain}}/api/method/mbw_audit.api.api.ai_adjacencies
+	Method: POST
+	DataPost: 
+		{
+			"category":"0c6ddb94c5",
+			"image_path": "[\"http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg\"]",
+			"list_product":"[\"sp1231\", \"phomaivien\"]"
+		}
+
+** API Kiểm tra phân tách danh mục
+	Url: {{domain}}/api/method/mbw_audit.api.api.ai_separating_categories
+	Method: POST
+	DataPost: 
+		{
+			"category":"0c6ddb94c5",
+			"image_path": "[\"http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg\"]",
+			"list_product":"[\"sp1231\", \"phomaivien\"]"
+		}
+** API Kiểm tra Sơ đồ hình ảnh
+	Url: {{domain}}/api/method/mbw_audit.api.api.ai_big_picture_planogram
+	Method: POST
+	DataPost: 
+		{
+			"category":"0c6ddb94c5",
+			"image_path": "[\"http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg\"]",
+			"planogram_path": "http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg"
+		}
+
+** API Kiểm tra Sơ đồ chính xác 
+	Url: {{domain}}/api/method/mbw_audit.api.api.ai_planogram_extract
+	Method: POST
+	DataPost: 
+		{
+			"category":"0c6ddb94c5",
+			"image_path": "[\"http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg\"]",
+			"planogram_path": "http://vgm.ts:8003/files/phomai_que_nemchua_ran_gianhang.jpg"
+		}
+
 	
+
 ** API Xóa danh mục
 	Url: {{domain}}/api/method/mbw_audit.api.api.deleteCategory
 	Method: POST
