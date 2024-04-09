@@ -1,4 +1,4 @@
-import { Col, Input, Select, Button, Image } from "antd";
+import { Col, Input, Select, Button, Image, message } from "antd";
 import { useState, useEffect } from "react";
 import RowCustom from "../RouterCreate/styled";
 import { FormItemCustom } from "../../components";
@@ -70,6 +70,7 @@ export default function GeneralInformation({
       }
       if (arrImageStoreAI.length === 0) {
         setDefaultImageAi(true)
+        message.warning("không tải được ảnh AI")
       }
       setLstImage(arrImageStore);
       setLstImageAI(arrImageStoreAI);
