@@ -59,6 +59,8 @@ export default function Product(props) {
           number_product: sumProductByCategory[categoryCode] || 0 // Sử dụng tổng sum_product của danh mục
       };
   });
+  const [editingIndex, setEditingIndex] = useState(null);
+
   const expandedColumns = [
     { title: "STT", dataIndex: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name_product" },
@@ -73,10 +75,13 @@ export default function Product(props) {
       ) => (
         <Input
           style={{ width: "120px" }}
-          value={item}
+          value={editingIndex !== null ? undefined : item}
+          defaultValue={editingIndex !== null ? item : undefined}
           onChange={(e) =>
             handleChangeProductHuman(index, parseInt(e.target.value), rowData)
           }
+          onFocus={() => setEditingIndex(index)}
+          onBlur={() => setEditingIndex(null)}
         />
       ),
     },
@@ -118,11 +123,10 @@ useEffect(() => {
 
     setExpandedRowData(newData);
   }
-  
+
 }, [props.recordData]);
 
   return (
-   
       < >
         <TableCustom
           columns={mainColumns}
