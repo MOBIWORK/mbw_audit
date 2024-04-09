@@ -282,6 +282,100 @@ def process_report_sku(input_sku): #name, report_images, category, setting_score
     except Exception as e:
         write_upload_log(status=False, input_sku=input_sku, name_report=name, method="mbw_audit.api.api.process_report_sku")
 
+def process_report_sku_update(input_sku): #name, report_images, category, setting_score_audit
+    try:
+        name = input_sku["name_doc"]
+        report_images = input_sku["report_images"]
+        category = input_sku["category"]
+        setting_score_audit = input_sku["setting_score_audit"]
+        products_by_category = []
+        score_by_products = []
+        for category_id in category:
+            # Truy vấn các sản phẩm có category tương ứng
+            products_in_category = frappe.get_all("VGM_Product", filters={"category": category_id}, fields=["*"])
+            # Lấy danh sách tên sản phẩm
+            info_products = [{"name": product.name, "product_name": product.product_name} for product in products_in_category]
+            # Thêm danh sách tên sản phẩm vào từ điển theo category
+            products_by_category.append({"category_id": category_id, "products": info_products})
+        #Thêm các trường vào doctype con VGM_ReportDetailSKU
+        if setting_score_audit.get("adjacencies") is not None:
+            adjacencies = ai_adjacencies(collection_name,report_images,list_product)
+        if products_by_category:
+            
+            for category_data in products_by_category:
+                category_id = category_data["category_id"]
+                info_products = category_data["products"]
+                lst_product_check = {}
+                lst_product_sequence = []
+                resultExistProduct = {}
+                resultSequenceProduct = {}
+                #Sinh điều kiện sản phẩm tồn tại trong AI, nếu không có cấu hình thì mặc định là 0 để thực hiện lấy số lượng
+                if setting_score_audit.get("min_product") is not None:
+                    for info_product in info_products:
+                        objMinProduct = setting_score_audit.get("min_product", {})
+                        if objMinProduct is not None:
+                            lst_product_check[info_product.get("product_name")] = objMinProduct.get(info_product.get("name"))
+                    resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                else:
+                    for info_product in info_products:
+                        lst_product_check[info_product.get("product_name")] = 0
+                    resultExistProduct = shelf_availability_by_category(category_id, report_images, lst_product_check)
+                #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
+                if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
+                    obj_setting_sequences = setting_score_audit.get("sequence_product", [])
+                    setting_sequence_dict = {obj["name"]: obj["product_name"] for obj in info_products}
+                    lst_product_sequence = [setting_sequence_dict[id] for id in obj_setting_sequences if id in setting_sequence_dict]
+                    resultSequenceProduct = sequence_of_product_by_category(category_id, report_images, lst_product_sequence)
+                    if resultSequenceProduct.get("status") == "completed":
+                        process_result_sequence = resultSequenceProduct.get("process_results", {})
+                        sequence_of_product = process_result_sequence.get("sequence_of_product")
+                        score_by_products.append(1 if sequence_of_product == 1 else 0)
+                    
+                #Sinh dữ liệu báo cáo SKU
+                for info_product in info_products:
+                    num_product_recog = 0
+                    is_exist_product = 0 
+                    if resultExistProduct.get("status") == "completed":
+                        process_results = resultExistProduct.get("process_results")
+                        count_product_recog = process_results.get("count")
+        
+                        num_product_recog = count_product_recog.get(info_product.get("product_name"), 0)
+                        product_availability = process_results.get("on_shelf_availability", {}).get("availability_result",{}).get("product_availability")
+                       
+                        is_exist_product = 1 if product_availability is not None and info_product.get("product_name") in product_availability else 0
+                        score_by_products.append(is_exist_product)
+                    child_doc = frappe.new_doc('VGM_ReportDetailSKU')
+                    child_doc.update({
+                        'parent': name, 
+                        'parentfield': 'report_sku',
+                        'parenttype': 'VGM_Report',
+                        'category': category_id,
+                        'sum_product': num_product_recog,
+                        'product': info_product.get("name"),
+                        'scoring_machine': is_exist_product,
+                        'sum_product_human': num_product_recog,
+                        'scoring_human': is_exist_product
+                    })
+                    child_doc.insert()
+                if resultExistProduct.get("status") == "completed":
+                    image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps(image_ais))
+                else:
+                    frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps([]))
+            if setting_score_audit is not None:
+                doc_report = frappe.get_doc("VGM_Report", name)
+                doc_report.scoring_machine = 0 if 0 in score_by_products else 1 if 1 in score_by_products else 0
+                doc_report.scoring_human = 0 if 0 in score_by_products else 1 if 1 in score_by_products else 0
+                doc_report.save()
+            else:
+                doc_report = frappe.get_doc("VGM_Report", name)
+                doc_report.scoring_machine = 0
+                doc_report.scoring_human = 0
+                doc_report.save()
+        write_upload_log(status=True, input_sku=input_sku, name_report=name, method="mbw_audit.api.api.process_report_sku")
+    except Exception as e:
+        write_upload_log(status=False, input_sku=input_sku, name_report=name, method="mbw_audit.api.api.process_report_sku")
+
 def write_upload_log(status: bool, input_sku, name_report, method="mbw_audit.api.api.process_report_sku"):
     if not status:
         msg = f"Failed to counting product to sfc " + "<br>"
@@ -845,13 +939,10 @@ def import_campaign(*args, **kwargs):
 
 
 @frappe.whitelist(methods="POST")
-def ai_adjacencies(*args, **kwargs):
+def ai_adjacencies(collection_name,image_path,list_product):
     vectordb_dir = frappe.get_site_path()
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir)
     adjacencies: AdjacenciesyService = deep_vision.init_audit_adjacencies_service(appconst.KEY_API_AI)
-    collection_name = kwargs.get('category')
-    image_path = json.loads(kwargs.get('image_path'))
-    adj = json.loads(kwargs.get('list_product'))
     response = adjacencies.run(collection_name, image_path, adj)
     
     if response.get('status') == 'completed':
