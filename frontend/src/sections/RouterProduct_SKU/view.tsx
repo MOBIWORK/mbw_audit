@@ -804,7 +804,7 @@ export default function Product_SKU() {
       setFilteredProducts(filtered);
     } else {
       // Nếu không có từ khóa tìm kiếm, hiển thị toàn bộ dữ liệu
-      setFilteredProducts(products);
+      setFilteredProducts(productRefesh);
     }
   }, [searchProduct, products]);
 

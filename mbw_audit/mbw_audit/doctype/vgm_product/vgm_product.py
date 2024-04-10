@@ -65,11 +65,11 @@ class VGM_Product(Document):
         product_name = self.product_name
         json_string = self.images
         images_dict = json.loads(json_string)
-        print('123')
         # Kiểm tra xem images_dict có phần tử không
         if images_dict:
             base_url = frappe.utils.get_request_site_address()
             image_paths = [base_url + value if 'http' not in value else value for value in images_dict]
+            print(image_paths)
             collection_name = self.category
             product_id = str(uuid.uuid4())
             # Khởi tạo danh sách để chứa các image_ids

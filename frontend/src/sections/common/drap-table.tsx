@@ -46,7 +46,7 @@ export default function DrapTable({columnsTable, datasTable, keyPros, onDragRowE
         ...(isDragging
             ? {
                 position: 'relative',
-                zIndex: 9999,
+                zIndex: 100,
             }
             : {}),
         };
@@ -104,6 +104,7 @@ export default function DrapTable({columnsTable, datasTable, keyPros, onDragRowE
                 rowKey="key"
                 columns={columns}
                 dataSource={dataSource}
+                pagination={false}
             />
         </SortableContext>
         </DndContext>
