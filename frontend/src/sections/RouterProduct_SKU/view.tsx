@@ -122,6 +122,8 @@ export default function Product_SKU() {
     useState<boolean>(false);
   const [categorySelected, setCategorySelected] = useState({});
   const [products, setProducts] = useState<any[]>([]);
+  const [productRefesh, setProductRefesh] = useState<any[]>([]);
+  
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
   const [searchProduct, setSearchProduct] = useState("");
@@ -783,17 +785,27 @@ export default function Product_SKU() {
   }, [barcodeEditProduct]);
 
   useEffect(() => {
-    // Nếu không có từ khóa tìm kiếm, hiển thị tất cả sản phẩm
-    if (!searchProduct || searchProduct.trim() === "") {
-      setFilteredProducts(products);
-      return;
-    }
+    // // Nếu không có từ khóa tìm kiếm, hiển thị tất cả sản phẩm
+    // if (!searchProduct || searchProduct.trim() === "") {
+    //   setFilteredProducts(productRefesh);
+    //   return;
+    // }
 
-    // Nếu có từ khóa tìm kiếm, lọc sản phẩm thỏa mãn điều kiện
-    const filtered = products.filter((product) =>
-      product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
-    );
-    setFilteredProducts(filtered);
+    // // Nếu có từ khóa tìm kiếm, lọc sản phẩm thỏa mãn điều kiện
+    // const filtered = products.filter((product) =>
+    //   product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
+    // );
+    // setFilteredProducts(filtered);
+    if (searchProduct !== null && searchProduct !== "") {
+      // Nếu có từ khóa tìm kiếm, lọc dữ liệu dựa trên từ khóa đó
+      const filtered = products.filter(product =>
+        product.product_name.toLowerCase().includes(searchProduct.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      // Nếu không có từ khóa tìm kiếm, hiển thị toàn bộ dữ liệu
+      setFilteredProducts(products);
+    }
   }, [searchProduct, products]);
 
   const initDataProductByCategory = async () => {
@@ -816,6 +828,7 @@ export default function Product_SKU() {
       });
       dataProducts = sortAlphabet(dataProducts, "product_name");
       setProducts(dataProducts);
+      setProductRefesh(dataProducts)
     }
   };
 
@@ -1372,7 +1385,21 @@ export default function Product_SKU() {
             ? [productFromERPSelected[i].image]
             : [],
       };
+      if (
+        products.some(
+          (product) =>
+            product.product_code === itemProduct.product_code &&
+            product.product_name === itemProduct.product_name
+        )
+      ){
+        continue; // Nếu đã tồn tại thì bỏ qua và chuyển sang dòng tiếp theo
+      }
       arrProductPost.push(itemProduct);
+    }
+    if(arrProductPost.length == 0){
+      message.error('Danh sách sản phẩm đã tồn tại')
+      setLoadingAddListProduct(false);
+      return
     }
     let dataPost = {
       listproduct: JSON.stringify(arrProductPost),

@@ -294,7 +294,7 @@ export default function ReportDetail() {
   useEffect(() => {
     initDataEmployee();
     initDataCampaigns();
-    fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
+    // fetchDataReport(); // Sau đó lấy dữ liệu báo cáo
   }, []);
 
   const columns: TableColumnsType<DataTypeReport> = [
@@ -953,7 +953,9 @@ export default function ReportDetail() {
     setPreviewVisible(false); // Đặt previewVisible thành false khi chế độ xem preview đóng lại
     setItemImage([]);
   };
-
+// Filter `option.label` match the user type `input`
+const filterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.children ?? '').toLowerCase().includes(input.toLowerCase());
   const handleImageClick = (item) => {
     const imageArray = JSON.parse(item);
     setItemImage(imageArray);
@@ -986,10 +988,13 @@ export default function ReportDetail() {
           >
             <label style={{ paddingBottom: "5px" }}>Chiến dịch:</label>
             <Select
+              showSearch
               className="w-[150px] h-[36px]"
               value={searchCampaign}
               onChange={(value) => onChangeCampaign(value)}
               defaultValue="all"
+              filterOption={filterOption}
+              optionFilterProp="children"
             >
               <Select.Option value="all">Tất cả</Select.Option>
               {campaignSources.map((campaign) => (
@@ -1014,10 +1019,13 @@ export default function ReportDetail() {
           >
             <label style={{ paddingBottom: "5px" }}>Nhân viên:</label>
             <Select
+              showSearch
               className="w-[150px] h-[36px]"
               value={searchEmployee}
               onChange={(value) => setSearchEmployee(value)}
               defaultValue="all"
+              filterOption={filterOption}
+              optionFilterProp="children"
             >
               <Select.Option value="all">Tất cả</Select.Option>
               {dataEmployee.map((employee) => (
@@ -1033,10 +1041,13 @@ export default function ReportDetail() {
           >
             <label style={{ paddingBottom: "5px" }}>Điểm AI chấm:</label>
             <Select
+              showSearch
               className="w-[150px] h-[36px]"
               value={searchAIEvalue}
               onChange={(value) => setSearchAIEvalue(value)}
               defaultValue="all"
+              filterOption={filterOption}
+              optionFilterProp="children"
             >
               <Select.Option value="all">Tất cả</Select.Option>
               {arrSourceEvalue.map((source) => (
@@ -1056,6 +1067,9 @@ export default function ReportDetail() {
               value={searchHumanEvalue}
               onChange={(value) => setSearchHumanEvalue(value)}
               defaultValue="all"
+              filterOption={filterOption}
+              optionFilterProp="children"
+              showSearch
             >
               <Select.Option value="all">Tất cả</Select.Option>
               {arrSourceEvalue.map((source) => (
