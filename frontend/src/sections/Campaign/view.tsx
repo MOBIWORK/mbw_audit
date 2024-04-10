@@ -407,7 +407,7 @@ export default function Campaign() {
         ]}
       >
         <p className="text-[#637381] font-normal text-sm">
-          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/mbw_audit/data_sample/campaign_sample.xlsx">tại đây</a>
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/public/data_sample/campaign_sample.xlsx">tại đây</a>
         </p>
         <Dragger {...propUploadImportFileExcel}  fileList={fileListImport}>
           <p className="ant-upload-drag-icon">
