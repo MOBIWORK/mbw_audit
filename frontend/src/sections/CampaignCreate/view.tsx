@@ -66,7 +66,11 @@ export default function CampaignCreate() {
         setLoadingAddCampaign(false);
         return;
       }
-
+      if(objFrm.campaign_name == null || objFrm.campaign_name == ""){
+        message.error("Vui lòng nhập tên chiến dịch.");
+        setLoadingAddCampaign(false);
+        return;
+      }
       let arrCategory = categoriesSelected.map((x) => x.name);
       let arrEmployee = employeesSelected.map((x) => x.name);
       let arrCustomer = customersSelected.map((x) => x.name);

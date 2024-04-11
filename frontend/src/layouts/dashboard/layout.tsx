@@ -35,7 +35,8 @@ export default function DashboardLayout({ children }: Props) {
           <Header />
           <Layout
             style={{
-              padding: "24px 0",
+              height: `calc(100vh - 60px)`,
+              overflow:'auto',
               background: "#fff",
               borderRadius: "8px",
               margin: "0 auto"

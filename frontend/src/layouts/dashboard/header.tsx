@@ -44,8 +44,8 @@ export default function Header() {
     },
   ];
   return (
-    <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
-      <Row className="justify-end max-w-full ">
+    <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4 " style={{ height: '56px' }}>
+      <Row className="justify-end max-w-full " style={{ alignItems:'center',height:'100%'}}>
         <Dropdown
             menu={{ items }}
             trigger={["click"]}
@@ -57,7 +57,7 @@ export default function Header() {
             )}
           >
             <Avatar
-              style={{ backgroundColor: "#f56a00" }}
+              style={{ backgroundColor: "#f56a00", marginRight:'10px',cursor:'pointer' }}
               size={32}
               {...(empDetail?.image ? { src: empDetail?.image } : {})}
             >

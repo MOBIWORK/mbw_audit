@@ -117,7 +117,11 @@ export default function CampaignEdit() {
             setLoadingEditCampaign(false);
             return; // Dừng lại nếu có lỗi
         }
-
+        if(objFrm.campaign_name == null || objFrm.campaign_name == ""){
+          message.error("Vui lòng nhập tên chiến dịch.");
+          setLoadingEditCampaign(false);
+          return;
+        }
         let arrCategory = (categoriesSelected && categoriesSelected.length > 0) ? categoriesSelected.map(x => x.name) : categoryEdit;
         let arrEmployee = (employeesSelected && employeesSelected.length > 0) ? employeesSelected.map(x => x.name) : employeeEdit;
         let arrCustomer = (customersSelected && customersSelected.length > 0) ? customersSelected.map(x => x.name) : customerEdit;

@@ -109,7 +109,7 @@ export default function Product({
         }
       );
       for (let i = 0; i < dataCategories.length; i++) {
-        let urlProduct = `/api/resource/VGM_Product?fields=["name","product_code","product_name"]&&filters=[["category","=","${dataCategories[i].name}"]]`;
+        let urlProduct = `/api/resource/VGM_Product?fields=["name","product_code","product_name"]&&filters=[["category","=","${dataCategories[i].name}"]]&limit_page_length=500`;
         let res = await AxiosService.get(urlProduct);
 
         if (res != null && res.data != null) {
