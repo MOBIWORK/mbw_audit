@@ -76,34 +76,37 @@ export default function ReportDetail() {
     {
       title: "STT",
       dataIndex: "stt",
-      fixed: "left",
-      width: 100,
+      width:50,
     },
     {
       title: "Khách hàng",
       dataIndex: "customer_name",
-      fixed: "left",
+      width:100
     },
     {
       title: "Tên chiến dịch",
       dataIndex: "campaign_name",
-      fixed: "left",
+      width:100
     },
     {
       title: "Nhân viên thực hiện",
       dataIndex: "employee_name",
+      width:100
     },
     {
       title: "Số lượng danh mục",
       dataIndex: "quantity_cate",
+      width:100
     },
     {
       title: "Số lượng sản phẩm AI đếm",
       children: [],
+      width:300
     },
     {
       title: "Số lượng sản phẩm giám sát đếm",
       children: [],
+      width:300
     },
     {
       title: "Ảnh gian hàng",
@@ -133,6 +136,7 @@ export default function ReportDetail() {
           </a>
         );
       },
+      width:120
     },
     {
       title: "Ảnh gian hàng AI",
@@ -162,6 +166,7 @@ export default function ReportDetail() {
           </a>
         );
       },
+      width:120
     },
     {
       title: "Thời gian thực hiện",
@@ -189,6 +194,7 @@ export default function ReportDetail() {
         // Trả về chuỗi thời gian đã được định dạng
         return <div>{formattedTime}</div>;
       },
+      width:120
     },
     {
       title: "Điểm trưng bày AI chấm",
@@ -221,6 +227,7 @@ export default function ReportDetail() {
           )}
         </>
       ),
+      width:120
     },
     {
       title: "Điểm trưng bày giám sát chấm",
@@ -270,6 +277,7 @@ export default function ReportDetail() {
           </Select>
         </div>
       ),
+      width:120
     },
   ]);
   const [dataReportsByCampaign, setDataReportsByCampaign] = useState([]);
