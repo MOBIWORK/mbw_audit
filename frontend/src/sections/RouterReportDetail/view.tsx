@@ -858,8 +858,33 @@ export default function ReportDetail() {
     saveAsExcelFile(buffer, "report");
   };
 
-  const onExportDataToExcel = async (table, title) => {
+  const onExportDataToExcel = async (tableinput , title) => {
     //const ExcelJS = require('exceljs');
+    let table = tableinput.map((item) => {
+      // Chuyển đổi chuỗi thời gian thành đối tượng Date (giả sử thuộc tính thời gian của item là 'time')
+      const dateObj = new Date(item.images_time); // Sử dụng item.time để lấy thời gian từ từng item trong mảng
+  
+      // Lấy ngày, tháng và năm từ đối tượng Date
+      const day = dateObj.getDate();
+      const month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0 nên cộng thêm 1
+      const year = dateObj.getFullYear();
+  
+      // Lấy giờ và phút từ đối tượng Date
+      const hours = dateObj.getHours();
+      const minutes = dateObj.getMinutes();
+  
+      // Biến đổi thành chuỗi thời gian theo định dạng "dd/MM/yyyy hh:mm"
+      const formattedTime = `${day.toString().padStart(2, "0")}/${month
+          .toString()
+          .padStart(2, "0")}/${year} ${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      // Gán giá trị formattedTime vào thuộc tính images_time của item
+      item.images_time = formattedTime;
+  
+      // Trả về item đã được thêm thuộc tính images_time
+      return item;
+  });
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Sheet1");
     sheet.properties.defaultColWidth = 20;

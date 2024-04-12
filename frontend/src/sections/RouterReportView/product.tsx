@@ -5,7 +5,8 @@ import {
 import {
   Table,
   Input,
-  Select
+  Select,
+  message
 } from "antd";
 import { TableCustom } from "../../components";
 import { useEffect, useState } from "react"; 
@@ -75,13 +76,18 @@ export default function Product(props) {
       ) => (
         <Input
           style={{ width: "120px" }}
-          value={editingIndex !== null ? undefined : item}
-          defaultValue={editingIndex !== null ? item : undefined}
-          onChange={(e) =>
-            handleChangeProductHuman(index, parseInt(e.target.value), rowData)
-          }
-          onFocus={() => setEditingIndex(index)}
-          onBlur={() => setEditingIndex(null)}
+          // value={editingIndex !== null ? undefined : item}
+          defaultValue={item}
+          onChange={(e) => {
+            const newValue = parseInt(e.target.value);
+            if (!isNaN(newValue)) {
+              handleChangeProductHuman(index, newValue, rowData)
+            } else {
+              message.warning("Nhập số lượng");
+            }
+          }}
+          // onFocus={() => setEditingIndex(index)}
+          // onBlur={() => setEditingIndex(null)}
         />
       ),
     },
