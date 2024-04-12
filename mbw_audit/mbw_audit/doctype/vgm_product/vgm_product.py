@@ -16,6 +16,7 @@ from deepvision.service import ProductRecognitionService
 from deepvision.collections import Products
 from frappe.model.document import Document
 from mbw_audit.utils import appconst
+from datetime import datetime
 
 class VGM_Product(Document):
     def before_save(self):

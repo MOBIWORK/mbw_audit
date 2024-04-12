@@ -106,7 +106,9 @@ export default function Product_SKU() {
   const [loadingAddCategory, setLoadingAddCategory] = useState<boolean>(false);
   const [loadingDeleteProduct, setLoadingDeleteProduct] =
     useState<boolean>(false);
-
+    const [loadingDeletelistProduct, setLoadingDeletelistProduct] =
+    useState<boolean>(false);
+    
   const [loadingEditCategory, setLoadingEditCategory] =
     useState<boolean>(false);
 
@@ -175,6 +177,7 @@ export default function Product_SKU() {
     },
     beforeUpload: async (file) => {
       try {
+        setLstProductImport([]);
         const fileName = file.name.toLowerCase();
         if (
           fileName.endsWith(".xls") ||
@@ -204,6 +207,7 @@ export default function Product_SKU() {
             let dataImport = [];
             if (data.length >= 2) {
               for (let i = 1; i < data.length; i++) {
+                
                 if (!data[i][2]) {
                   continue; // Bỏ qua dòng không có giá trị cho product_name và chuyển sang dòng tiếp theo
                 }
@@ -215,7 +219,7 @@ export default function Product_SKU() {
                   product_name: data[i][2],
                   product_description: data[i][3],
                   url_images: data[i][4]
-                    ? JSON.parse(data[i][4].replace("“", '"').replace("”", '"'))
+                    ? JSON.parse(data[i][4].replace("“", '"').replace("”", '"').replace("'", '"'))
                     : [],
                 };
                 if (
@@ -1108,6 +1112,7 @@ export default function Product_SKU() {
 
   const handleDeleteListOkProduct = async () => {
     try {
+      setLoadingDeletelistProduct(true)
       let urlDeleteByList = apiUrl + ".api.deleteListByDoctype";
       let arrIdDelete = [];
       for (let i = 0; i < productSelected.length; i++)
@@ -1131,13 +1136,16 @@ export default function Product_SKU() {
         handleDeleteListCancelProduct();
       } else {
         message.error("Xóa thất bại, có sản phẩm đã tồn tại trong báo cáo");
+        setLoadingDeletelistProduct(false)
       }
     } catch (error) {
       message.error("Có lỗi xảy ra khi xóa sản phẩm");
+      setLoadingDeletelistProduct(false)
     }
   };
 
   const handleDeleteListCancelProduct = () => {
+    setLoadingDeletelistProduct(false)
     setIsModelOpenDeleteList(false);
   };
 
@@ -2287,6 +2295,19 @@ export default function Product_SKU() {
         onCancel={handleDeleteListCancelProduct}
         okText="Xác nhận"
         cancelText="Hủy"
+        footer={[
+          <Button key="submit" onClick={handleDeleteListCancelProduct}>
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={loadingDeletelistProduct}
+            onClick={handleDeleteListOkProduct}
+          >
+            Xác nhận
+          </Button>,
+        ]}
       >
         <div>
           Bạn có chắc muốn xóa {productSelected.length} sản phẩm ra khỏi hệ
