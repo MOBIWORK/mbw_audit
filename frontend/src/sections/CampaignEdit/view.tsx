@@ -39,7 +39,6 @@ export default function CampaignEdit() {
   const initDataByIdCampaign = async () => {
     let urlDetailCampaign = `/api/resource/VGM_Campaign/${name}`;
     let res = await AxiosService(urlDetailCampaign);
-    console.log(convertDateFormat(res.data.start_date),'datepicker');
     
     if(res != null && res.data != null){
         form.setFieldsValue({
@@ -52,19 +51,23 @@ export default function CampaignEdit() {
         setCampaignStatus(res.data.campaign_status)
         setStatusCampaignEdit(res.data.campaign_status);
         setCategoryEdit(JSON.parse(res.data.categories));
-        setProductEdit(convertSettingScoreAudit(JSON.parse(res.data.setting_score_audit)));
+        
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
-        if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){
+        console.log(res.data.setting_score_audit);
+        if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){       
           let objSettingScoreAudit = JSON.parse(res.data.setting_score_audit);
           if(objSettingScoreAudit.sequence_product != null) {
             setCheckSequenceProduct(true)
+            console.log(objSettingScoreAudit.sequence_product);
             setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
+          }
+          if(objSettingScoreAudit.min_product != null && Object.getOwnPropertyNames(objSettingScoreAudit.min_product).length > 0){
+            setCheckExistProduct(true);
+            setProductEdit(convertSettingScoreAudit(JSON.parse(res.data.setting_score_audit)));
           }
           
         }
-        let objSettingScore = JSON.parse(res.data.setting_score_audit);
-        if(objSettingScore.min_product != null && Object.getOwnPropertyNames(objSettingScore.min_product).length > 0) setCheckExistProduct(true);
 
     }
   }
@@ -78,6 +81,7 @@ export default function CampaignEdit() {
         objResult[item].min_product = objSetting.min_product[item];
       })
     }
+    console.log(objResult);
     return objResult;
   }
 
@@ -92,19 +96,23 @@ export default function CampaignEdit() {
         // Lấy giá trị từ form và các dữ liệu khác
         setLoadingEditCampaign(true);
         let objSettingScore = {};
-        let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
-        if (checkExistProduct) {
-            let objMinProduct = {};
-            propertiesSettingScore.forEach(item => {
-                let valSettingScore = productEdit[item];
-                objMinProduct[item] = valSettingScore.min_product;
-            })
-            objSettingScore["min_product"] = objMinProduct;
+        if(Object.keys(productEdit).length !== 0){
+          let propertiesSettingScore = Object.getOwnPropertyNames(productEdit);
+          if (checkExistProduct) {
+              let objMinProduct = {};
+              propertiesSettingScore.forEach(item => {
+                  let valSettingScore = productEdit[item];
+                  objMinProduct[item] = valSettingScore.min_product;
+              })
+              objSettingScore["min_product"] = objMinProduct;
+              console.log(objMinProduct);
+          }
         }
+        
         console.log(checkExistProduct);
-        console.log(checkSequenceProduct);
+        console.log(checkSequenceProduct);    
         if(checkSequenceProduct){
-          objSettingScore["sequence_product"] = sequenceProducts;
+          objSettingScore["sequence_product"] = settingSequenceProduct;
         }
         let objFrm = form.getFieldsValue();
         
@@ -170,6 +178,7 @@ export default function CampaignEdit() {
   }
 
   const handleChangeCategory = (val) => {
+    console.log(val);
     setCategoriesSelected(val);
       // Khởi tạo biến kết quả
       let result = {};
@@ -185,7 +194,7 @@ export default function CampaignEdit() {
       setProductEdit(result);
   }
   const handleChangeSequenceProducts = (val) => {
-    setSequenceProducts(val);
+    setSettingSequenceProduct(val);
   }
   const handleChangeEmployee = (val) => {
     setEmployeesSelected(val);

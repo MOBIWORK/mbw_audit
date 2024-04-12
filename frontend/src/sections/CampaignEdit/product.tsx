@@ -87,13 +87,14 @@ export default function ProductCampaignEdit({
     if (
       objSettingSequenceProduct != null &&
       objSettingSequenceProduct.length > 0
-    )
+    ){
       setCheckExistSequenceProduct(true);
+    }
+    
   }, []);
 
   const initDataCategoriesWithOutFilter = async () => {
     setSelectedRowKeys(categoryEdit);
-    console.log(productEdit);
     let urlCategory = '/api/resource/VGM_Category?fields=["*"]';
     const response = await AxiosService.get(urlCategory);
     // Kiểm tra xem kết quả từ API có chứa dữ liệu không
@@ -144,32 +145,46 @@ export default function ProductCampaignEdit({
           let categoryCopy = { ...dataCategoryFilter[0] };
           // Thêm trường "name" của category vào mỗi phần tử trong mảng "products"
           // Gán min_product từ dữ liệu vào mỗi sản phẩm trong mảng products
-          categoryCopy.products = categoryCopy.products
-          .filter((product) => productEdit.hasOwnProperty(product.name))
-          .map((product) => {
-            // Lấy giá trị min_product tương ứng với product_code của sản phẩm
-            const minProductValue = productEdit[product.name]?.min_product || 1;
+          if(Object.keys(productEdit).length !== 0){
+            categoryCopy.products = categoryCopy.products
+            .filter((product) => productEdit.hasOwnProperty(product.name))
+            .map((product) => {
+              
+              // Lấy giá trị min_product tương ứng với product_code của sản phẩm
+          
+              if (
+                productEdit[product.name] != null &&
+                productEdit[product.name]?.min_product != null &&
+                !checkExistProduct
+              ) {
+                const minProductValue = productEdit[product.name]?.min_product || 1;
+                setCheckExistProduct(true);
+                   // Gán giá trị cate_name và min_product cho sản phẩm
+              return {
+                ...product,
+                cate_name: categoryCopy.category_name,
+                product_num: minProductValue.toString(),
+              };
+              }
+            });
+           allProducts = allProducts.concat(categoryCopy.products);
+           categoryInitSelected.push(categoryCopy);
+          }
+          else{
+            categoryCopy.products = categoryCopy.products.map((product) => {
+              return {
+                ...product,
+                cate_name: categoryCopy.category_name,
+                product_num: "1",
+              };
+            })
+            allProducts = allProducts.concat(categoryCopy.products);
+            categoryInitSelected.push(categoryCopy);
+          }
         
-            if (
-              productEdit[product.name] != null &&
-              productEdit[product.name]?.min_product != null &&
-              !checkExistProduct
-            ) {
-              setCheckExistProduct(true);
-            }
-        
-            // Gán giá trị cate_name và min_product cho sản phẩm
-            return {
-              ...product,
-              cate_name: categoryCopy.category_name,
-              product_num: minProductValue.toString(),
-            };
-          });
-        
-         allProducts = allProducts.concat(categoryCopy.products);
-         categoryInitSelected.push(categoryCopy);
         }
       }
+      
       // Khởi tạo mảng rỗng để chứa danh sách sản phẩm theo thứ tự và có trường "sequence_product"
       const productsInOrder = objSettingSequenceProduct.map(
         (productName, index) => {
@@ -191,6 +206,7 @@ export default function ProductCampaignEdit({
       for(let idx = 0 ; idx < categoryInitSelected.length;idx++){
         categoryInitSelected[idx].stt = idx + 1
       }
+      onChangeCategory(categoryInitSelected);
       setCategoriesSelected(categoryInitSelected);
       setChangeCategories(categoryInitSelected)
     }
@@ -636,7 +652,6 @@ export default function ProductCampaignEdit({
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeCategory[]
   ) => {
-    console.log(newSelectedRowKeys);
     // Thêm trường sequence_product vào mỗi phần tử trong mảng dữ liệu
     const newData = arrPro.map((item, index) => {
       const sequenceIndex = newSelectedRowKeys.indexOf(item.name);
