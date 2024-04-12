@@ -138,7 +138,7 @@ export default function Campaign() {
                                     'campaign_description': data[i][1] ? data[i][1] : "",
                                     'campaign_start': (startDate.getTime() / 1000).toString(),
                                     'campaign_end': (endDate.getTime() / 1000).toString(),
-                                    'campaign_status': data[i][4] != "" ? data[i][4] : "Open",
+                                    'campaign_status': data[i][4] !== "" ? (data[i][4].toLowerCase() === "close" ? "Close" : "Open") : "Open",
                                     'campaign_categories': data[i][5] ? (data[i][5].replace('“', '"').replace('”', '"')) : "",
                                     'campaign_employees': data[i][6] ? (data[i][6].replace('“', '"').replace('”', '"')) : "",
                                     'campaign_customers': data[i][7] ? (data[i][7].replace('“', '"').replace('”', '"')) : ""
