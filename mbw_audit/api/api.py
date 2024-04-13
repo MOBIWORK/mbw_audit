@@ -7,7 +7,7 @@ __dir__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__)
 sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 from deepvision import DeepVision
-from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService,AdjacenciesyService,SeperateCategoriesService,BigPicturePlanogramService,PlanogramExtractService)
+from deepvision.service import (ProductCountService, OnShelfAvailabilityService, SequenceOfProductService)
 from datetime import datetime
 from mbw_audit.api.common import (gen_response, create_folder, base64_to_pillow_image, draw_box_label_pillow)
 from frappe.utils.file_manager import (
@@ -937,110 +937,3 @@ def import_campaign(*args, **kwargs):
     except Exception as e:
         return {'status': 'failed', 'message': str(e)}
 
-
-@frappe.whitelist(methods="POST")
-def ai_adjacencies(collection_name,image_path,list_product):
-    vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir)
-    adjacencies: AdjacenciesyService = deep_vision.init_audit_adjacencies_service(appconst.KEY_API_AI)
-    response = adjacencies.run(collection_name, image_path, adj)
-    
-    if response.get('status') == 'completed':
-        process_results = response.get("process_results", {})
-        
-        # Lấy danh sách verbose từ process_results
-        verbose = process_results.get("verbose", [])
-        
-        # Gọi hàm render_check_image_ai với danh sách verbose
-        verbose_ais = render_check_image_ai(verbose)
-        
-        # Thay đổi phần verbose trong process_results
-        process_results["verbose"] = verbose_ais
-        
-        return {"status": "completed", "results": process_results}
-    else:
-        return {"status": "fail", "results": process_results}
-@frappe.whitelist(methods="POST")
-def ai_separating_categories(*args, **kwargs):
-    vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir)
-
-    seperate_categories: SeperateCategoriesService = deep_vision.init_audit_seperate_categories_service(appconst.KEY_API_AI)
-
-    collection_name = kwargs.get('category')
-    given_separation = json.loads(kwargs.get('list_product'))
-    image_path = json.loads(kwargs.get('image_path'))
-    response = seperate_categories.run(collection_name, image_path, given_separation)
-    if response.get('status') == 'completed':
-        process_results = response.get("process_results", {})
-        
-        # Lấy danh sách verbose từ process_results
-        verbose = process_results.get("verbose", [])
-        
-        # Gọi hàm render_check_image_ai với danh sách verbose
-        verbose_ais = render_check_image_ai(verbose)
-        
-        # Thay đổi phần verbose trong process_results
-        process_results["verbose"] = verbose_ais
-        
-        return {"status": "completed", "results": process_results}
-    else:
-        return {"status": "fail", "results": process_results}
-
-@frappe.whitelist(methods="POST")
-def ai_big_picture_planogram(*args, **kwargs):
-    vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir)
-
-    big_picture_planogram: BigPicturePlanogramService = deep_vision.init_audit_big_picture_planogram_service(appconst.KEY_API_AI)
-
-    collection_name = kwargs.get('category')
-    planogram = kwargs.get('planogram_path')
-    image_path = json.loads(kwargs.get('image_path'))
-    response = big_picture_planogram.run(collection_name, image_path, planogram)
-    if response.get('status') == 'completed':
-        process_results = response.get("process_results", {})
-        verbose = process_results.get("verbose", {})
-        planogram = verbose.get("planogram", [])
-        images = verbose.get("images", [])
-        planogram_ais = render_check_image_ai(planogram)
-        images_ais = render_check_image_ai(images)
-        
-        verbose["planogram"] = planogram_ais
-        verbose["images"] = images_ais
-        
-        # Cập nhật lại verbose trong process_results
-        process_results["verbose"] = verbose
-        return {"status": "completed", "results": process_results}
-    else:
-        return {"status": "fail", "results": process_results}
-        
-@frappe.whitelist(methods="POST")
-def ai_planogram_extract(*args, **kwargs):
-    vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir)
-
-    planogram_extract: PlanogramExtractService = deep_vision.init_audit_planogram_extract_service(appconst.KEY_API_AI)
-
-    collection_name = kwargs.get('category')
-    planogram = kwargs.get('planogram_path')
-    image_path = json.loads(kwargs.get('image_path'))
-    response = planogram_extract.run(collection_name, image_path, planogram)
-    if response.get('status') == 'completed':
-        process_results = response.get("process_results", {})
-        verbose = process_results.get("verbose", {})
-        planogram = verbose.get("planogram", [])
-        images = verbose.get("images", [])
-        planogram_ais = render_check_image_ai(planogram)
-        images_ais = render_check_image_ai(images)
-        
-        verbose["planogram"] = planogram_ais
-        verbose["images"] = images_ais
-        
-        # Cập nhật lại verbose trong process_results
-        process_results["verbose"] = verbose
-        return {"status": "completed", "results": process_results}
-    else:
-        return {"status": "fail", "results": process_results}       
-
-    
