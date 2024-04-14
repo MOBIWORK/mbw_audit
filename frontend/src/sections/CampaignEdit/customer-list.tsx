@@ -15,6 +15,7 @@ import { AxiosService } from "../../services/server";
     customer_group: string;
     customer_primary_address: string;
     customer_code: string;
+    primary_address: string;
   }
   
   
@@ -70,7 +71,7 @@ import { AxiosService } from "../../services/server";
   
     const initDataCustomer = async () => {
       setSelectedRowKeys(customerEdit);
-      let urlCustomer = "/api/method/mbw_dms.api.selling.customer.list_customer";
+      let urlCustomer = "api/method/mbw_audit.api.api.get_list_customers";
       let res = await AxiosService.get(urlCustomer);
       let arrCustomerSource = [];
       if(res != null && res.message == "ok"){

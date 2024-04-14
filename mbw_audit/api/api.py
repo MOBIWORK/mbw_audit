@@ -163,6 +163,22 @@ def get_campaign_info(*args,**kwargs):
             valid_campaigns.append(campaign_record)
     return gen_response(200, "ok", {"data" : valid_campaigns})
 
+@frappe.whitelist(methods=["GET"])
+def get_list_employees():
+    try:
+        employees = frappe.get_all("Employee", fields=["designation","date_of_birth","image","personal_email","name","cell_number","employee_name"])
+        return gen_response(200, "ok", {"data" : employees})
+    except Exception as e:
+        return gen_response(500, "error", {"data" : []})
+
+@frappe.whitelist(methods=["GET"])
+def get_list_customers():
+    try:
+        customers = frappe.get_all("Customer", fields=["name","customer_name","customer_code","customer_type","customer_group","territory","industry","image","website","customer_primary_contact","customer_primary_address","custom_birthday","customer_location_primary","customer_details","primary_address"])
+        return gen_response(200, "ok", {"data" : customers})
+    except Exception as e:
+        return gen_response(500, "error", {"data" : []})
+
 @frappe.whitelist(methods=["POST"])
 def record_report_data(*args, **kwargs):
     images_time = datetime.now()
@@ -172,20 +188,19 @@ def record_report_data(*args, **kwargs):
     images_str = json.dumps(images)
     setting_score_audit = json.loads(kwargs.get('setting_score_audit')) if kwargs.get('setting_score_audit') is not None else None
     try:
-        data = {
-            'doctype': 'VGM_Report',
-            'retail_code': kwargs.get('customer_code'),
-            'employee_code': kwargs.get('e_name'),
-            'campaign_code': kwargs.get('campaign_code'),
-            'categories': categories_str,
-            'images_time': images_time,
-            'images': images_str,
-            'latitude_check_in': '',
-            'latitude_check_out': '',
-            'longitude_check_in': '',
-            'longitude_check_out': ''
-        }
-        doc = frappe.get_doc(data)
+        doc = frappe.new_doc('VGM_Report')
+        doc.retail_code = kwargs.get('customer_code')
+        doc.employee_code = kwargs.get('e_name')
+        doc.campaign_code = kwargs.get('campaign_code')
+        doc.categories = categories_str
+        doc.images_time = images_time
+        doc.images = images_str
+        doc.latitude_check_in = ''
+        doc.latitude_check_out = ''
+        doc.longitude_check_in = ''
+        doc.longitude_check_out = ''
+        doc.scoring_machine = 0
+        doc.scoring_human = 0
         doc.insert()
         input_report_sku = {"name_doc": doc.name, "report_images": images, "category": category, "setting_score_audit": setting_score_audit}
         process_report_sku(input_report_sku)
@@ -412,7 +427,6 @@ def render_image_ai(verbose):
         current_datetime = now_datetime()
         path_folder = create_folder(f"{current_datetime.month}", f"booth_product_ai/{frappe.session.user}/{current_datetime.year}")
         fileInfo = save_file(f"draw_ai_{int(timestamp)}.jpg", base64.b64decode(base64_image_encoded), "File", "booth_product_ai", path_folder)
-        print("Dòng 282 ", frappe.utils.get_request_site_address() )
         arr_image_ai.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
     return arr_image_ai
 

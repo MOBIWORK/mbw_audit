@@ -17,7 +17,8 @@ class VGM_Report(Document):
             filters={"campaign_code": campaign_code},
             fields=["name", "retail_code", "campaign_code", "employee_code", "images", "scoring_machine","scoring_human","images_time"]
         )
-		reports_campaign = [report for report in reports_campaign if report.images_time.date() == datetime.now().date()]	
+		valid_reports = [report for report in reports_campaign if report.images_time is not None]
+		reports_campaign = [report for report in valid_reports if report.images_time.date() == datetime.now().date()]	
 		arr_customer_process = []
 		total_picture = 0
 		for report in reports_campaign:
@@ -52,7 +53,8 @@ class VGM_Report(Document):
             filters={"employee_code": employee_code},
             fields=["name", "retail_code", "campaign_code", "employee_code", "images", "images_time"]
         )
-		reports_campaign = [report for report in reports_campaign if report.images_time.date() == datetime.now().date()]
+		valid_reports = [report for report in reports_campaign if report.images_time is not None]
+		reports_campaign = [report for report in valid_reports if report.images_time.date() == datetime.now().date()]
 		total_picture = 0
 		for report in reports_campaign:
 			if report.get("images") is not None:

@@ -6,13 +6,14 @@ import {
 import { FormItemCustom, TableCustom } from "../../components";
 import { Button, Input, Modal, TableProps } from "antd";
 import { useEffect, useState } from "react";
-import { AxiosService, AxiosServiceMBW } from "../../services/server";
+import { AxiosService } from "../../services/server";
 
 interface TypeEmployee{
   key?: React.Key;
   name: string;
   employee_name: string;
-  email: string
+  email: string;
+  personal_email: string;
 }
 
 const columnEmployees: TableProps<TypeEmployee>["columns"] = [
@@ -81,13 +82,14 @@ export default function EmployeeSell({onChangeEmployees}) {
   }, [searchEmployee]);
 
   const initDataEmployee = async () => {
-    let urlEmployee = "/api/method/mbw_service_v2.api.ess.employee.get_list_employee";
+    let urlEmployee = "/api/method/mbw_audit.api.api.get_list_employees";
     let res = await AxiosService.get(urlEmployee);
     let arrEmployeeSource = [];
     if(res != null && res.result != null && res.result.data != null){
       arrEmployeeSource = res.result.data.map((item: TypeEmployee) => {
         return {
           ...item,
+          email: item.personal_email,
           key: item.name
         }
       });
