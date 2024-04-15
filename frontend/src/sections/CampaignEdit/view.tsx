@@ -54,12 +54,10 @@ export default function CampaignEdit() {
         
         setEmployeeEdit(JSON.parse(res.data.employees));
         setCustomerEdit(JSON.parse(res.data.retails));
-        console.log(res.data.setting_score_audit);
         if(res.data.setting_score_audit != null && res.data.setting_score_audit != ""){       
           let objSettingScoreAudit = JSON.parse(res.data.setting_score_audit);
           if(objSettingScoreAudit.sequence_product != null) {
             setCheckSequenceProduct(true)
-            console.log(objSettingScoreAudit.sequence_product);
             setSettingSequenceProduct(objSettingScoreAudit.sequence_product);
           }
           if(objSettingScoreAudit.min_product != null && Object.getOwnPropertyNames(objSettingScoreAudit.min_product).length > 0){
@@ -81,7 +79,6 @@ export default function CampaignEdit() {
         objResult[item].min_product = objSetting.min_product[item];
       })
     }
-    console.log(objResult);
     return objResult;
   }
 
@@ -105,12 +102,8 @@ export default function CampaignEdit() {
                   objMinProduct[item] = valSettingScore.min_product;
               })
               objSettingScore["min_product"] = objMinProduct;
-              console.log(objMinProduct);
           }
-        }
-        
-        console.log(checkExistProduct);
-        console.log(checkSequenceProduct);    
+        }    
         if(checkSequenceProduct){
           objSettingScore["sequence_product"] = settingSequenceProduct;
         }
@@ -178,7 +171,6 @@ export default function CampaignEdit() {
   }
 
   const handleChangeCategory = (val) => {
-    console.log(val);
     setCategoriesSelected(val);
       // Khởi tạo biến kết quả
       let result = {};

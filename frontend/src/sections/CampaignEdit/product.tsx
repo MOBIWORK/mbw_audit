@@ -140,9 +140,19 @@ export default function ProductCampaignEdit({
         let dataCategoryFilter = dataCategories.filter(
           (x) => x.name == categoryEdit[i]
         );
+        // categoryInitSelected.push(dataCategoryFilter[0]);
+        let categoryCopy = { ...dataCategoryFilter[0] };
+            categoryCopy.products = categoryCopy.products.map((product) => {
+              return {
+                ...product,
+                cate_name: categoryCopy.category_name,
+                product_num: "1",
+              };
+            })
+            allProductSort  = allProductSort.concat(categoryCopy.products);
         if (dataCategoryFilter != null && dataCategoryFilter.length > 0) {
-          // categoryInitSelected.push(dataCategoryFilter[0]);
-          let categoryCopy = { ...dataCategoryFilter[0] };
+          
+          
           // Thêm trường "name" của category vào mỗi phần tử trong mảng "products"
           // Gán min_product từ dữ liệu vào mỗi sản phẩm trong mảng products
           if(Object.keys(productEdit).length !== 0){
@@ -178,7 +188,7 @@ export default function ProductCampaignEdit({
                 product_num: "1",
               };
             })
-            allProducts = allProducts.concat(categoryCopy.products);
+            allProduct  = allProduct.concat(categoryCopy.products);
             categoryInitSelected.push(categoryCopy);
           }
         
@@ -188,8 +198,8 @@ export default function ProductCampaignEdit({
       // Khởi tạo mảng rỗng để chứa danh sách sản phẩm theo thứ tự và có trường "sequence_product"
       const productsInOrder = objSettingSequenceProduct.map(
         (productName, index) => {
-          // Tìm sản phẩm có tên là productName trong mảng allProducts
-          const product = allProducts.find((item) => item.name === productName);
+          // Tìm sản phẩm có tên là productName trong mảng allProductSort
+          const product = allProductSort.find((item) => item.name === productName);
           // Nếu sản phẩm tồn tại, trả về một bản sao của sản phẩm với trường "sequence_product" được gán giá trị là index + 1
           if (product) {
             return {
@@ -199,7 +209,6 @@ export default function ProductCampaignEdit({
           }
         }
       );
-
       // Hiển thị danh sách sản phẩm theo thứ tự với trường "sequence_product"
       setProductSort(productsInOrder);
       setProductSelected(allProducts);
