@@ -174,7 +174,7 @@ def get_list_employees():
 @frappe.whitelist(methods=["GET"])
 def get_list_customers():
     try:
-        customers = frappe.get_all("Customer", fields=["name","customer_name","customer_code","customer_type","customer_group","territory","industry","image","website","customer_primary_contact","customer_primary_address","custom_birthday","customer_location_primary","customer_details","primary_address"])
+        customers = frappe.get_all("Customer", fields=["name", "customer_name","customer_code", "primary_address"])
         return gen_response(200, "ok", {"data" : customers})
     except Exception as e:
         return gen_response(500, "error", {"data" : []})
