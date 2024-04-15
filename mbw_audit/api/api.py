@@ -271,7 +271,10 @@ def process_report_sku(input_sku): #name, report_images, category, setting_score
                         count_product_recog = process_results.get("count")
                         num_product_recog = count_product_recog.get(info_product.get("product_name"), 0)
                         product_availability = process_results.get("on_shelf_availability", {}).get("availability_result",{}).get("product_availability")
-                        is_exist_product = 1 if product_availability is not None and info_product.get("product_name") in product_availability else 0
+                        if not desired_product_ids:
+                            is_exist_product = 1 
+                        else:
+                            is_exist_product = 1 if product_availability is not None and info_product.get("product_name") in product_availability else 0   
                         score_by_products.append(is_exist_product)
                     child_doc = frappe.new_doc('VGM_ReportDetailSKU')
                     child_doc.update({

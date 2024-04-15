@@ -23,7 +23,6 @@ export default function Product(props) {
   const sumProductByCategory = {};
   const [sourceReportSKUs, setSourceReportSKUs] = useState<any[]>([]);
   const [scoringSource, setScoringSource] = useState<any[]>([{'label': "Đạt", 'value': 1}, {'label': "Không đạt", 'value': 0}]);
-  console.log(props);
   // Tính tổng sum_product cho từng danh mục
   props.recordData?.detail_skus.forEach(detailItem => {
       const categoryCode = detailItem.category;
@@ -84,6 +83,7 @@ export default function Product(props) {
               handleChangeProductHuman(index, newValue, rowData)
             } else {
               message.warning("Nhập số lượng");
+              handleChangeProductHuman(index, 0, rowData)
             }
           }}
           // onFocus={() => setEditingIndex(index)}
@@ -126,7 +126,6 @@ useEffect(() => {
         index_category: index
       }));
     });
-
     setExpandedRowData(newData);
   }
 

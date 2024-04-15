@@ -49,6 +49,7 @@ export default function  ReportView() {
     let storedRecordData = localStorage.getItem('recordData');
     if (storedRecordData) {
       let objRecord = JSON.parse(storedRecordData);
+      console.log(objRecord);
       setRecordData(objRecord);
       setScoringHuman(objRecord.scoring_human);
       let arrReportSKU = [];
@@ -96,12 +97,17 @@ export default function  ReportView() {
       message.success("Cập nhật thành công");
       setLoadingUpdate(false);
       let dataReports  = JSON.parse(localStorage.getItem('dataReports'));
-      
       let record = JSON.parse(localStorage.getItem('recordData'));
       for (let i = 0; i< record.detail_skus.length;i++){
-        record.detail_skus[i].sum_product_human = reportSKUs[i].sum_product_human
-        record.detail_skus[i].scoring_human = reportSKUs[i].scoring_human
+        for(let j = 0; j < reportSKUs.length;j++){
+          if(record.detail_skus[i].name == reportSKUs[j].report_sku_id){
+            record.detail_skus[i].sum_product_human = reportSKUs[j].sum_product_human
+            record.detail_skus[i].scoring_human = reportSKUs[j].scoring_human
+          }
+        }
+        
       }
+      record.scoring_human = scoringHuman
       const currentIndex = dataReports.findIndex((item) => item.name === record.name);
 
     // Kiểm tra nếu không phải là record cuối cùng trong danh sách
@@ -112,8 +118,12 @@ export default function  ReportView() {
     }else{
     //localStorage.removeItem('recordData');
     return
-
     }
+      // Cập nhật lại record mới vào dataReports
+  dataReports[currentIndex] = record;
+
+  // Cập nhật lại dataReports trong local storage
+  localStorage.setItem('dataReports', JSON.stringify(dataReports));
     }else{
       message.error("Cập nhật thất bại");
       setLoadingUpdate(false);

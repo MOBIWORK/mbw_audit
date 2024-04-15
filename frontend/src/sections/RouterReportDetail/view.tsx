@@ -240,7 +240,7 @@ export default function ReportDetail() {
         >
           <Select
             defaultValue={scoring_human}
-            onChange={() => handleChange(item)}
+            onChange={() => handleChange(item,index)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -293,7 +293,7 @@ export default function ReportDetail() {
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
   const [campaignSources, setCampaignSources] = useState<any[]>([]);
 
-  const handleRowClick = (record) => {
+  const handleRowClick = (record,index) => {
     // Lưu record vào local storage
     localStorage.setItem("recordData", JSON.stringify(record));
     localStorage.setItem("dataReports", JSON.stringify(dataReports));
@@ -458,7 +458,7 @@ export default function ReportDetail() {
         >
           <Select
             defaultValue={scoring_human}
-            onChange={() => handleChange(item)}
+            onChange={() => handleChange(item,index)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -667,7 +667,7 @@ export default function ReportDetail() {
   const handleMouseLeave = () => {
     setHoveredSelect(false);
   };
-  const handleChange = async (value: any) => {
+  const handleChange = async (value: any,index:any) => {
     const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
 
     let objReportSKU = {
@@ -684,6 +684,11 @@ export default function ReportDetail() {
       res.result.data == "success"
     ) {
       message.success("Cập nhật thành công");
+      setDataReports(prevDataReports => {
+        const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
+        newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
+        return newDataReports; // Trả về mảng mới đã được thay đổi
+      });
     } else {
       message.error("Cập nhật thất bại");
     }
@@ -1123,7 +1128,7 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
               scroll={{ y: 540, x: 2000 }}
               onRow={(record, rowIndex) => {
                 return {
-                  onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
+                  onClick: () => handleRowClick(record,rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
               rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
@@ -1137,7 +1142,7 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
               pagination={dataReports.length > 5}
               onRow={(record, rowIndex) => {
                 return {
-                  onClick: () => handleRowClick(record), // Gọi hàm xử lý khi click vào dòng
+                  onClick: () => handleRowClick(record,rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
               rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
