@@ -778,7 +778,7 @@ export default function ReportDetail() {
         sheet.getColumn(currentColumnIndex).width = 10;
       } else {
         // Đặt chiều rộng theo giá trị mặc định hoặc được chỉ định
-        sheet.getColumn(currentColumnIndex).width = column.width || 20; // Set default width if not provided
+        sheet.getColumn(currentColumnIndex).width = 20; // Set default width if not provided
       }
 
       const cell = sheet.getCell(1, currentColumnIndex);
@@ -816,53 +816,66 @@ export default function ReportDetail() {
         currentColumnIndex++;
       }
     });
+   let newColume = extractChildColumns(columns)
+   const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
 
-    // Điền dữ liệu từ bảng vào Excel
-    const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
-    table.forEach((row, rowIndex) => {
-      currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
-      columns.forEach((column, columnIndex) => {
-        const dataIndex = column.dataIndex; // Tên của thuộc tính trong dữ liệu tương ứng với cột
-        let cellValue = row[dataIndex]; // Lấy giá trị từ dữ liệu
+table.forEach((row, rowIndex) => {
+  currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
 
-        // Kiểm tra nếu cột có children
-        if (column.children && column.children.length > 0) {
-          // Không làm gì với cột cha có children
-          return;
-        }
+  newColume.forEach((column, columnIndex) => {
+    const { dataIndex } = column;
+    let dataValue = null;
 
-        // Kiểm tra nếu cột là 'title_ai' hoặc 'title_human'
-        if (dataIndex.endsWith("_ai") || dataIndex.endsWith("_human")) {
-          // Tách tên cột và loại sản phẩm (ai/human)
-          const [title, type] = column.title.split(" "); // Giả sử tiêu đề của cột là 'Tên sản phẩm ai'
-          // Tìm dữ liệu tương ứng từ dữ liệu của hàng
-          const productData = row[title.toLowerCase()]; // title.toLowerCase() sẽ trở thành 'dove_1' hoặc 'dove_2'
-          if (productData && Array.isArray(productData)) {
-            // Lọc dữ liệu theo loại (ai/human)
-            const filteredData = productData.filter(
-              (product) => product.product_name === title
-            );
-            // Tạo chuỗi dữ liệu từ các sản phẩm
-            cellValue = filteredData
-              .map((product) => `${product.product_name}: ${product.sum}`)
-              .join("\n");
-          }
-        }
+    // Kiểm tra xem dataIndex có tồn tại trong dòng dữ liệu hiện tại không
+    if (row.hasOwnProperty(dataIndex)) {
+      if (dataIndex === "scoring_machine" || dataIndex === "scoring_human") {
+        // Xử lý scoring_machine và scoring_human thành chuỗi "Đạt" hoặc "Không đạt"
+        dataValue = getScoringLabel(row[dataIndex]);
+      } else {
+        // Giữ nguyên giá trị cho các dataIndex khác
+        dataValue = row[dataIndex];
+      }
+    }
 
-        // Gán giá trị vào ô Excel
-        const cell = sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex);
-        cell.value = cellValue;
-        applyCommonCellStyle(cell, false);
+    // Điền dữ liệu vào ô tương ứng trong bảng Excel
+    const cell = sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex + columnIndex);
+    cell.value = dataValue;
 
-        // Di chuyển đến cột tiếp theo
-        currentColumnIndex++;
-      });
-    });
+    // Áp dụng kiểu dáng cho ô
+    applyCommonCellStyle(cell);
+  });
+});
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "report");
   };
-
+  const getScoringLabel = (value) => {
+    if (value === 1) {
+      return "Đạt";
+    } else if (value === 0) {
+      return "Không đạt";
+    } else {
+      return ""; // Xử lý các giá trị khác (nếu cần)
+    }
+  };
+  function extractChildColumns(columns) {
+    const extractedColumns = [];
+  
+    function extract(column) {
+      if (column.children && column.children.length > 0) {
+        // Nếu có children, đệ quy gọi hàm extract với từng child
+        column.children.forEach((child) => extract(child));
+      } else {
+        // Nếu không có children, thêm column vào mảng extractedColumns
+        extractedColumns.push(column);
+      }
+    }
+  
+    // Duyệt qua từng column trong mảng columns ban đầu và gọi hàm extract
+    columns.forEach((column) => extract(column));
+  
+    return extractedColumns;
+  }
   const onExportDataToExcel = async (tableinput , title) => {
     //const ExcelJS = require('exceljs');
     let table = tableinput.map((item) => {

@@ -49,7 +49,6 @@ export default function  ReportView() {
     let storedRecordData = localStorage.getItem('recordData');
     if (storedRecordData) {
       let objRecord = JSON.parse(storedRecordData);
-      console.log(objRecord);
       setRecordData(objRecord);
       setScoringHuman(objRecord.scoring_human);
       let arrReportSKU = [];
