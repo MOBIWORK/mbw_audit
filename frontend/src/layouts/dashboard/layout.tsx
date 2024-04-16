@@ -37,7 +37,7 @@ export default function DashboardLayout({ children }: Props) {
             style={{
               height: `calc(100vh - 60px)`,
               overflow:'auto',
-              background: "#fff",
+              background: "rgb(244, 246, 248)",
               borderRadius: "8px",
               margin: "0 auto"
             }}

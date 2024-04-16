@@ -98,6 +98,7 @@ export default function Campaign() {
     multiple: false,
     beforeUpload: async (file) => {
         try {
+          setLstCampaignImport([]);
           const fileName = file.name.toLowerCase();
           if (fileName.endsWith('.xls') || 
           fileName.endsWith('.xlsx') || 
@@ -130,7 +131,7 @@ export default function Campaign() {
                                 const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
                                 let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
         
-                                const date_endMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
+                                const date_endMilliseconds = (data[i][3] - 1) * 24 * 60 * 60 * 1000;
                                 let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
         
                                 let objDataImport = {
@@ -142,6 +143,14 @@ export default function Campaign() {
                                     'campaign_categories': data[i][5] ? (data[i][5].replace('“', '"').replace('”', '"')) : "",
                                     'campaign_employees': data[i][6] ? (data[i][6].replace('“', '"').replace('”', '"')) : "",
                                     'campaign_customers': data[i][7] ? (data[i][7].replace('“', '"').replace('”', '"')) : ""
+                                }
+                                if (
+                                  campaigns.some(
+                                    (campaign) =>
+                                    campaign.campaign_name === objDataImport.campaign_name
+                                  )
+                                ) {
+                                  continue; // Nếu đã tồn tại thì bỏ qua và chuyển sang dòng tiếp theo
                                 }
                                 dataImport.push(objDataImport);
                             }
@@ -295,7 +304,7 @@ export default function Campaign() {
   const handleOkImportExcel = async() => {
     let url_import_campaign = apiUrl + ".api.import_campaign";
     if(lstCampaignImport.length == 0){
-      message.warning("Thêm file để tiếp tục");
+      message.error("Danh sách chiến dịch đã tồn tại hoặc Nhập file không chính xác");
       return 
     }
     let dataPost ={
