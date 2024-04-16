@@ -106,12 +106,13 @@ const mainColumns = [
 ];
 // Xây dựng dữ liệu mở rộng cho mỗi danh mục sản phẩm
 const [expandedRowData, setExpandedRowData] = useState([]);
-
+const [inputValues, setInputValues] = useState({});
 useEffect(() => {
   if (props.recordData) {
     const newData = props.recordData.category_names.map((category, index) => {
       const categoryCode = Object.keys(category)[0];
       const details = props.recordData.detail_skus.filter(item => item.category === categoryCode);
+   
       return details.map((detailItem, detailIndex) => ({
         key: `${index}-${detailIndex}`,
         stt: `${(detailIndex + 1).toString().padStart(2, '0')}`,

@@ -2439,7 +2439,7 @@ export default function Product_SKU() {
         <p className="text-[#637381] font-normal text-sm">
           Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ
           liệu mẫu{" "}
-          <a target="_blank" href="/mbw_audit/data_sample/product_sample.xlsx">
+          <a target="_blank" href="/public/data_sample/Mẫu_Nhập_Sản_Phẩm.xlsx">
             tại đây
           </a>
         </p>
