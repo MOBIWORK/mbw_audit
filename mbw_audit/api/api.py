@@ -61,36 +61,42 @@ def deleteListByDoctype(*args,**kwargs):
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def checkImageProductExist(*args, **kwargs):
-    vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir)
-    recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
-    base_url = frappe.utils.get_request_site_address()
-    collection_name = kwargs.get('collection_name')
-    link_image = json.loads(kwargs.get('linkimages'))
+    try:
+        vectordb_dir = frappe.get_site_path()
+        deep_vision: DeepVision = DeepVision(vectordb_dir)
+        recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
+        base_url = frappe.utils.get_request_site_address()
+        collection_name = kwargs.get('collection_name')
+        link_image = json.loads(kwargs.get('linkimages'))
 
-    # url_images = post_images_check(image_base64)
-    image_path = link_image
-    # product_id = self.product
-    # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
-    response = recognition.count(collection_name, image_path)
-    # return response
-    if response.get('status') == 'completed':
-        # Tính tổng của các danh sách sản phẩm từ mảng
-        count_result = {}
-        verbose_result = []
+        # url_images = post_images_check(image_base64)
+        image_path = link_image
+        # product_id = self.product
+        # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
+        response = recognition.count(collection_name, image_path)
+        
+        if response.get('status') == 'completed':
+            # Tính tổng của các danh sách sản phẩm từ mảng
+            count_result = {}
+            verbose_result = []
 
-        for result in response.get("results", []):
-            count = result.get("results", {}).get("count", {})
-            verbose = result.get("results", {}).get("verbose", {})
-            for key, value in count.items():
-                count_result[key] = count_result.get(key, 0) + value
-            verbose_ais = render_check_image_ai([verbose])  # Xử lý qua hàm render_check_image_ai
-            verbose_result.extend(verbose_ais)
+            for result in response.get("results", []):
+                count = result.get("results", {}).get("count", {})
+                verbose = result.get("results", {}).get("verbose", {})
+                for key, value in count.items():
+                    count_result[key] = count_result.get(key, 0) + value
+                verbose_ais = render_check_image_ai([verbose])  # Xử lý qua hàm render_check_image_ai
+                verbose_result.extend(verbose_ais)
 
-        # Trả về kết quả dưới dạng `{count: {...}, verbose: [...]}`
-        return {"status": "completed", "results": {"count": count_result, "verbose": verbose_result}}
-    else:
-        return {"status": "error", 'message': response}
+            # Trả về kết quả dưới dạng `{count: {...}, verbose: [...]}`
+            return {"status": "completed", "results": {"count": count_result, "verbose": verbose_result}}
+        else:
+            return {"status": "error", 'message': response}
+
+    except Exception as e:
+        # Xử lý các ngoại lệ xảy ra trong quá trình thực thi hàm
+        error_message = str(e)  # Lấy thông tin lỗi
+        return {"status": "error", "message": error_message}
      
 @frappe.whitelist(methods=["POST"])
 def delete_check_image_ai(*args, **kwargs):

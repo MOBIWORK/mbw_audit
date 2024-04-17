@@ -7,7 +7,7 @@ import {
   import { Button, Input, Modal, TableProps } from "antd";
   import { useEffect, useState } from "react";
 import { AxiosService } from "../../services/server";
-  
+import paths from "../AppConst/path.js";
   interface TypeCustomer {
     key: React.Key;
     name: string;
@@ -21,6 +21,7 @@ import { AxiosService } from "../../services/server";
   
   
   export default function CustomerCampaignEdit({onChangeCustomer, customerEdit}) {
+    const apiUrl = paths.apiUrl;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   
@@ -71,7 +72,7 @@ import { AxiosService } from "../../services/server";
   
     const initDataCustomer = async () => {
       setSelectedRowKeys(customerEdit);
-      let urlCustomer = "/api/method/mbw_audit.api.api.get_list_customers";
+      let urlCustomer = apiUrl + ".api.get_list_customers";
       let res = await AxiosService.get(urlCustomer);
       let arrCustomerSource = [];
       if(res != null && res.message == "ok"){
