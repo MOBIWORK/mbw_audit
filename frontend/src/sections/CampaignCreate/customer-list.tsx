@@ -70,7 +70,7 @@ export default function Customer({onChangeCustomer}) {
   }, [searchCustomer]);
 
   const initDataCustomer = async () => {
-    let urlCustomer = "api/method/mbw_audit.api.api.get_list_customers";
+    let urlCustomer = "/api/method/mbw_audit.api.api.get_list_customers";
     let res = await AxiosService.get(urlCustomer);
     let arrCustomerSource = [];
     if(res != null && res.message == "ok"){
