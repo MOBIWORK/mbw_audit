@@ -2,7 +2,11 @@ import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { AxiosService } from "../../services/server";
 import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs"; // Giả sử exceljs hỗ trợ cú pháp mô-đun ES6
-import { DownOutlined, VerticalAlignBottomOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  EllipsisOutlined,
+  VerticalAlignBottomOutlined,
+} from "@ant-design/icons";
 import * as FileSaver from "file-saver";
 import {
   SearchOutlined,
@@ -11,19 +15,22 @@ import {
 } from "@ant-design/icons";
 import {
   Input,
+  Tooltip,
+  Button,
   TableColumnsType,
   DatePicker,
   Select,
   Image,
   message,
   Form,
+  Dropdown,
 } from "antd";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import { log } from "console";
-
+import type { MenuProps } from "antd";
 declare var require: any;
 
 interface DataTypeReport {
@@ -45,6 +52,7 @@ interface DataTypeReport {
   detail_skus: Array<any>;
   category_names: Array<any>;
 }
+
 const { RangePicker } = DatePicker;
 // rowSelection object indicates the need for row selection
 const rowSelection = {
@@ -76,37 +84,37 @@ export default function ReportDetail() {
     {
       title: "STT",
       dataIndex: "stt",
-      width:50,
+      width: 50,
     },
     {
       title: "Khách hàng",
       dataIndex: "customer_name",
-      width:100
+      width: 100,
     },
     {
       title: "Tên chiến dịch",
       dataIndex: "campaign_name",
-      width:100
+      width: 100,
     },
     {
       title: "Nhân viên thực hiện",
       dataIndex: "employee_name",
-      width:100
+      width: 100,
     },
     {
       title: "Số lượng danh mục",
       dataIndex: "quantity_cate",
-      width:100
+      width: 100,
     },
     {
       title: "Số lượng sản phẩm AI đếm",
       children: [],
-      width:300
+      width: 300,
     },
     {
       title: "Số lượng sản phẩm giám sát đếm",
       children: [],
-      width:300
+      width: 300,
     },
     {
       title: "Ảnh gian hàng",
@@ -122,9 +130,9 @@ export default function ReportDetail() {
         }
         return (
           <a
-          style={{
-          cursor: imageArray.length > 0 ? "pointer" : "default"
-          }}
+            style={{
+              cursor: imageArray.length > 0 ? "pointer" : "default",
+            }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -136,7 +144,7 @@ export default function ReportDetail() {
           </a>
         );
       },
-      width:120
+      width: 120,
     },
     {
       title: "Ảnh gian hàng AI",
@@ -152,9 +160,9 @@ export default function ReportDetail() {
         }
         return (
           <a
-          style={{
-          cursor: imageArray.length > 0 ? "pointer" : "default"
-          }}
+            style={{
+              cursor: imageArray.length > 0 ? "pointer" : "default",
+            }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -166,7 +174,7 @@ export default function ReportDetail() {
           </a>
         );
       },
-      width:120
+      width: 120,
     },
     {
       title: "Thời gian thực hiện",
@@ -194,7 +202,7 @@ export default function ReportDetail() {
         // Trả về chuỗi thời gian đã được định dạng
         return <div>{formattedTime}</div>;
       },
-      width:120
+      width: 120,
     },
     {
       title: "Điểm trưng bày AI chấm",
@@ -227,7 +235,7 @@ export default function ReportDetail() {
           )}
         </>
       ),
-      width:120
+      width: 120,
     },
     {
       title: "Điểm trưng bày giám sát chấm",
@@ -239,8 +247,8 @@ export default function ReportDetail() {
           }}
         >
           <Select
-            defaultValue={scoring_human}
-            onChange={() => handleChange(item,index)}
+            value={scoring_human}
+            onChange={() => handleChange(item, index)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -277,7 +285,7 @@ export default function ReportDetail() {
           </Select>
         </div>
       ),
-      width:120
+      width: 120,
     },
   ]);
   const [dataReportsByCampaign, setDataReportsByCampaign] = useState([]);
@@ -293,7 +301,151 @@ export default function ReportDetail() {
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
   const [campaignSources, setCampaignSources] = useState<any[]>([]);
 
-  const handleRowClick = (record,index) => {
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <div onClick={() => handleClickUpdateAI()} className="w-[200px]">
+          Cập nhật theo điều kiện AI
+        </div>
+      ),
+      key: "0",
+    },
+    {
+      type: "divider",
+    },
+    {
+      label: <div onClick={() => handleClickUpdateHuman()}>Cập nhật Đạt theo điều kiện lọc</div>,
+      key: "1",
+    },
+    {
+      type: "divider",
+    },
+  ];
+  const handleClickUpdateAI = async () => {
+    if (!isGroupByCampaign) {
+      // Biến đổi mảng dữ liệu thành danh sách mới
+      if (dataReports.length > 0) {
+        const transformedList = dataReports.map((item) => {
+          return {
+            name: item.name,
+            scoring_human: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
+          };
+        });
+
+        let objReport = {
+          data_list: JSON.stringify(transformedList),
+        };
+
+        let urlReportUpdate =
+          "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
+
+        try {
+          const res = await AxiosService.post(urlReportUpdate, objReport);
+
+          if (res && res.message.status === "success") {
+            fetchDataReport()
+        message.success("Cập nhật thành công");
+          } else {
+            message.error("Cập nhật thất bại");
+          }
+        } catch (error) {
+          message.error("Cập nhật thất bại");
+        }
+      } else {
+        message.warning("Danh sách đang trống. Không thể cập nhật");
+      }
+    } else {
+      if (dataReportsByCampaign.length > 0) {
+        const transformedList = dataReportsByCampaign.map((item) => {
+          return {
+            name: item.name,
+            scoring_human: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
+          };
+        });
+
+        let objReport = {
+          data_list: JSON.stringify(transformedList),
+        };
+
+        let urlReportUpdate =
+          "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
+
+        try {
+          const res = await AxiosService.post(urlReportUpdate, objReport);
+
+          if (res && res.message.status === "success") {
+            fetchDataReport()
+            message.success("Cập nhật thành công");
+          } else {
+            message.error("Cập nhật thất bại");
+          }
+        } catch (error) {
+          message.error("Cập nhật thất bại");
+        }
+      } else {
+        message.warning("Danh sách đang trống. Không thể cập nhật");
+      }
+    }
+  };
+  const handleClickUpdateHuman = async () => {
+    if (!isGroupByCampaign) {
+    // Biến đổi mảng dữ liệu thành danh sách mới
+    if (dataReports.length > 0) {
+      const transformedList = dataReports
+  .filter((item) => item.scoring_human === 0) // Lọc các phần tử có scoring_human bằng 0
+  .map((item) => ({ ...item, scoring_human: 1 })); // Biến đổi các phần tử được lọc
+      let objReport = {
+        data_list: JSON.stringify(transformedList),
+      };
+
+      let urlReportUpdate =
+        "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
+
+      try {
+        const res = await AxiosService.post(urlReportUpdate, objReport);
+
+        if (res && res.message.status === "success") {
+          fetchDataReport()
+      message.success("Cập nhật thành công");
+        } else {
+          message.error("Cập nhật thất bại");
+        }
+      } catch (error) {
+        message.error("Cập nhật thất bại");
+      }
+    } else {
+      message.warning("Danh sách đang trống. Không thể cập nhật");
+    }
+    }else{
+      if (dataReportsByCampaign.length > 0) {
+        const transformedList = dataReportsByCampaign
+    .filter((item) => item.scoring_human === 0) // Lọc các phần tử có scoring_human bằng 0
+    .map((item) => ({ ...item, scoring_human: 1 })); // Biến đổi các phần tử được lọc
+        let objReport = {
+          data_list: JSON.stringify(transformedList),
+        };
+  
+        let urlReportUpdate =
+          "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
+  
+        try {
+          const res = await AxiosService.post(urlReportUpdate, objReport);
+  
+          if (res && res.message.status === "success") {
+            fetchDataReport()
+        message.success("Cập nhật thành công");
+          } else {
+            message.error("Cập nhật thất bại");
+          }
+        } catch (error) {
+          message.error("Cập nhật thất bại");
+        }
+      } else {
+        message.warning("Danh sách đang trống. Không thể cập nhật");
+      }
+    }
+  };
+  const handleRowClick = (record, index) => {
     // Lưu record vào local storage
     localStorage.setItem("recordData", JSON.stringify(record));
     localStorage.setItem("dataReports", JSON.stringify(dataReports));
@@ -344,9 +496,9 @@ export default function ReportDetail() {
         }
         return (
           <a
-          style={{
-          cursor: imageArray.length > 0 ? "pointer" : "default"
-          }}
+            style={{
+              cursor: imageArray.length > 0 ? "pointer" : "default",
+            }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -373,9 +525,9 @@ export default function ReportDetail() {
         }
         return (
           <a
-          style={{
-          cursor: imageArray.length > 0 ? "pointer" : "default"
-          }}
+            style={{
+              cursor: imageArray.length > 0 ? "pointer" : "default",
+            }}
             onClick={(event) => {
               event.stopPropagation(); // Ngăn chặn sự kiện click lan truyền ra ngoài
               if (imageArray.length > 0) {
@@ -457,8 +609,8 @@ export default function ReportDetail() {
           }}
         >
           <Select
-            defaultValue={scoring_human}
-            onChange={() => handleChange(item,index)}
+            value={scoring_human}
+            onChange={() => handleChange(item, index)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -667,7 +819,7 @@ export default function ReportDetail() {
   const handleMouseLeave = () => {
     setHoveredSelect(false);
   };
-  const handleChange = async (value: any,index:any) => {
+  const handleChange = async (value: any, index: any) => {
     const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
 
     let objReportSKU = {
@@ -684,11 +836,27 @@ export default function ReportDetail() {
       res.result.data == "success"
     ) {
       message.success("Cập nhật thành công");
-      setDataReports(prevDataReports => {
-        const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
-        newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
-        return newDataReports; // Trả về mảng mới đã được thay đổi
-      });
+      //fetchDataReport();
+      console.log(dataReportsByCampaign);
+      console.log(dataReports);
+      console.log(isGroupByCampaign);
+      if (!isGroupByCampaign) {
+        console.log('123');
+        setDataReports((prevDataReports) => {
+          const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
+          newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
+          return newDataReports; // Trả về mảng mới đã được thay đổi
+        });
+      }else{
+        console.log('13');
+        setDataReportsByCampaign((prevDataReports) => {
+          const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
+          newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
+          return newDataReports; // Trả về mảng mới đã được thay đổi
+        });
+      }
+
+     
     } else {
       message.error("Cập nhật thất bại");
     }
@@ -816,35 +984,41 @@ export default function ReportDetail() {
         currentColumnIndex++;
       }
     });
-   let newColume = extractChildColumns(columns)
-   const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
+    let newColume = extractChildColumns(columns);
+    const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
 
-table.forEach((row, rowIndex) => {
-  currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
+    table.forEach((row, rowIndex) => {
+      currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
 
-  newColume.forEach((column, columnIndex) => {
-    const { dataIndex } = column;
-    let dataValue = null;
+      newColume.forEach((column, columnIndex) => {
+        const { dataIndex } = column;
+        let dataValue = null;
 
-    // Kiểm tra xem dataIndex có tồn tại trong dòng dữ liệu hiện tại không
-    if (row.hasOwnProperty(dataIndex)) {
-      if (dataIndex === "scoring_machine" || dataIndex === "scoring_human") {
-        // Xử lý scoring_machine và scoring_human thành chuỗi "Đạt" hoặc "Không đạt"
-        dataValue = getScoringLabel(row[dataIndex]);
-      } else {
-        // Giữ nguyên giá trị cho các dataIndex khác
-        dataValue = row[dataIndex];
-      }
-    }
+        // Kiểm tra xem dataIndex có tồn tại trong dòng dữ liệu hiện tại không
+        if (row.hasOwnProperty(dataIndex)) {
+          if (
+            dataIndex === "scoring_machine" ||
+            dataIndex === "scoring_human"
+          ) {
+            // Xử lý scoring_machine và scoring_human thành chuỗi "Đạt" hoặc "Không đạt"
+            dataValue = getScoringLabel(row[dataIndex]);
+          } else {
+            // Giữ nguyên giá trị cho các dataIndex khác
+            dataValue = row[dataIndex];
+          }
+        }
 
-    // Điền dữ liệu vào ô tương ứng trong bảng Excel
-    const cell = sheet.getCell(dataRowIndex + rowIndex, currentColumnIndex + columnIndex);
-    cell.value = dataValue;
+        // Điền dữ liệu vào ô tương ứng trong bảng Excel
+        const cell = sheet.getCell(
+          dataRowIndex + rowIndex,
+          currentColumnIndex + columnIndex
+        );
+        cell.value = dataValue;
 
-    // Áp dụng kiểu dáng cho ô
-    applyCommonCellStyle(cell);
-  });
-});
+        // Áp dụng kiểu dáng cho ô
+        applyCommonCellStyle(cell);
+      });
+    });
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "report");
@@ -860,7 +1034,7 @@ table.forEach((row, rowIndex) => {
   };
   function extractChildColumns(columns) {
     const extractedColumns = [];
-  
+
     function extract(column) {
       if (column.children && column.children.length > 0) {
         // Nếu có children, đệ quy gọi hàm extract với từng child
@@ -870,39 +1044,39 @@ table.forEach((row, rowIndex) => {
         extractedColumns.push(column);
       }
     }
-  
+
     // Duyệt qua từng column trong mảng columns ban đầu và gọi hàm extract
     columns.forEach((column) => extract(column));
-  
+
     return extractedColumns;
   }
-  const onExportDataToExcel = async (tableinput , title) => {
+  const onExportDataToExcel = async (tableinput, title) => {
     //const ExcelJS = require('exceljs');
     let table = tableinput.map((item) => {
       // Chuyển đổi chuỗi thời gian thành đối tượng Date (giả sử thuộc tính thời gian của item là 'time')
       const dateObj = new Date(item.images_time); // Sử dụng item.time để lấy thời gian từ từng item trong mảng
-  
+
       // Lấy ngày, tháng và năm từ đối tượng Date
       const day = dateObj.getDate();
       const month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0 nên cộng thêm 1
       const year = dateObj.getFullYear();
-  
+
       // Lấy giờ và phút từ đối tượng Date
       const hours = dateObj.getHours();
       const minutes = dateObj.getMinutes();
-  
+
       // Biến đổi thành chuỗi thời gian theo định dạng "dd/MM/yyyy hh:mm"
       const formattedTime = `${day.toString().padStart(2, "0")}/${month
-          .toString()
-          .padStart(2, "0")}/${year} ${hours
-          .toString()
-          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+        .toString()
+        .padStart(2, "0")}/${year} ${hours
+        .toString()
+        .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
       // Gán giá trị formattedTime vào thuộc tính images_time của item
       item.images_time = formattedTime;
-  
+
       // Trả về item đã được thêm thuộc tính images_time
       return item;
-  });
+    });
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Sheet1");
     sheet.properties.defaultColWidth = 20;
@@ -991,9 +1165,11 @@ table.forEach((row, rowIndex) => {
 
   const onChangeCampaign = (val) => {
     setSearchCampaign(val);
+    console.log(val);
     if (val == "all") {
       setIsGroupByCampaign(false);
     } else {
+      console.log("true");
       setIsGroupByCampaign(true);
     }
   };
@@ -1004,9 +1180,11 @@ table.forEach((row, rowIndex) => {
     setPreviewVisible(false); // Đặt previewVisible thành false khi chế độ xem preview đóng lại
     setItemImage([]);
   };
-// Filter `option.label` match the user type `input`
-const filterOption = (input: string, option?: { label: string; value: string }) =>
-    (option?.children ?? '').toLowerCase().includes(input.toLowerCase());
+  // Filter `option.label` match the user type `input`
+  const filterOption = (
+    input: string,
+    option?: { label: string; value: string }
+  ) => (option?.children ?? "").toLowerCase().includes(input.toLowerCase());
   const handleImageClick = (item) => {
     const imageArray = JSON.parse(item);
     setItemImage(imageArray);
@@ -1033,104 +1211,134 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              paddingRight: "15px",
+              justifyContent: "space-between",
+              width: "100%",
             }}
           >
-            <label style={{ paddingBottom: "5px" }}>Chiến dịch:</label>
-            <Select
-              showSearch
-              className="w-[150px] h-[36px]"
-              value={searchCampaign}
-              onChange={(value) => onChangeCampaign(value)}
-              defaultValue="all"
-              filterOption={filterOption}
-              optionFilterProp="children"
-            >
-              <Select.Option value="all">Tất cả</Select.Option>
-              {campaignSources.map((campaign) => (
-                <Select.Option key={campaign.name} value={campaign.name}>
-                  {campaign.campaign_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </div>
-          <FormItemCustom
-            className="w-[250px] border-none mr-4"
-            label="Thời gian thực hiện"
-          >
-            <RangePicker
-              value={searchTime}
-              onChange={(dates) => setSearchTime(dates)}
-            />
-          </FormItemCustom>
-          <div
-            style={{ display: "flex", flexDirection: "column" }}
-            className="mr-4"
-          >
-            <label style={{ paddingBottom: "5px" }}>Nhân viên:</label>
-            <Select
-              showSearch
-              className="w-[150px] h-[36px]"
-              value={searchEmployee}
-              onChange={(value) => setSearchEmployee(value)}
-              defaultValue="all"
-              filterOption={filterOption}
-              optionFilterProp="children"
-            >
-              <Select.Option value="all">Tất cả</Select.Option>
-              {dataEmployee.map((employee) => (
-                <Select.Option key={employee.name} value={employee.name}>
-                  {employee.employee_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column" }}
-            className="mr-4"
-          >
-            <label style={{ paddingBottom: "5px" }}>Điểm AI chấm:</label>
-            <Select
-              showSearch
-              className="w-[150px] h-[36px]"
-              value={searchAIEvalue}
-              onChange={(value) => setSearchAIEvalue(value)}
-              defaultValue="all"
-              filterOption={filterOption}
-              optionFilterProp="children"
-            >
-              <Select.Option value="all">Tất cả</Select.Option>
-              {arrSourceEvalue.map((source) => (
-                <Select.Option key={source.value} value={source.value}>
-                  {source.label}
-                </Select.Option>
-              ))}
-            </Select>
-          </div>
-          <div
-            style={{ display: "flex", flexDirection: "column" }}
-            className="mr-4"
-          >
-            <label style={{ paddingBottom: "5px" }}>Điểm giám sát chấm:</label>
-            <Select
-              className="w-[150px] h-[36px]"
-              value={searchHumanEvalue}
-              onChange={(value) => setSearchHumanEvalue(value)}
-              defaultValue="all"
-              filterOption={filterOption}
-              optionFilterProp="children"
-              showSearch
-            >
-              <Select.Option value="all">Tất cả</Select.Option>
-              {arrSourceEvalue.map((source) => (
-                <Select.Option key={source.value} value={source.value}>
-                  {source.label}
-                </Select.Option>
-              ))}
-            </Select>
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  paddingRight: "15px",
+                }}
+              >
+                <label style={{ paddingBottom: "5px" }}>Chiến dịch:</label>
+                <Select
+                  showSearch
+                  className="w-[150px] h-[36px]"
+                  value={searchCampaign}
+                  onChange={(value) => onChangeCampaign(value)}
+                  defaultValue="all"
+                  filterOption={filterOption}
+                  optionFilterProp="children"
+                >
+                  <Select.Option value="all">Tất cả</Select.Option>
+                  {campaignSources.map((campaign) => (
+                    <Select.Option key={campaign.name} value={campaign.name}>
+                      {campaign.campaign_name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+              <FormItemCustom
+                className="w-[250px] border-none mr-4"
+                label="Thời gian thực hiện"
+              >
+                <RangePicker
+                  value={searchTime}
+                  onChange={(dates) => setSearchTime(dates)}
+                />
+              </FormItemCustom>
+              <div
+                style={{ display: "flex", flexDirection: "column" }}
+                className="mr-4"
+              >
+                <label style={{ paddingBottom: "5px" }}>Nhân viên:</label>
+                <Select
+                  showSearch
+                  className="w-[150px] h-[36px]"
+                  value={searchEmployee}
+                  onChange={(value) => setSearchEmployee(value)}
+                  defaultValue="all"
+                  filterOption={filterOption}
+                  optionFilterProp="children"
+                >
+                  <Select.Option value="all">Tất cả</Select.Option>
+                  {dataEmployee.map((employee) => (
+                    <Select.Option key={employee.name} value={employee.name}>
+                      {employee.employee_name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column" }}
+                className="mr-4"
+              >
+                <label style={{ paddingBottom: "5px" }}>Điểm AI chấm:</label>
+                <Select
+                  showSearch
+                  className="w-[150px] h-[36px]"
+                  value={searchAIEvalue}
+                  onChange={(value) => setSearchAIEvalue(value)}
+                  defaultValue="all"
+                  filterOption={filterOption}
+                  optionFilterProp="children"
+                >
+                  <Select.Option value="all">Tất cả</Select.Option>
+                  {arrSourceEvalue.map((source) => (
+                    <Select.Option key={source.value} value={source.value}>
+                      {source.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column" }}
+                className="mr-4"
+              >
+                <label style={{ paddingBottom: "5px" }}>
+                  Điểm giám sát chấm:
+                </label>
+                <Select
+                  className="w-[150px] h-[36px]"
+                  value={searchHumanEvalue}
+                  onChange={(value) => setSearchHumanEvalue(value)}
+                  defaultValue="all"
+                  filterOption={filterOption}
+                  optionFilterProp="children"
+                  showSearch
+                >
+                  <Select.Option value="all">Tất cả</Select.Option>
+                  {arrSourceEvalue.map((source) => (
+                    <Select.Option key={source.value} value={source.value}>
+                      {source.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end" }}>
+              <Dropdown
+                menu={{ items }}
+                trigger={["click"]}
+                placement={"bottomRight"}
+                dropdownRender={(menu) => (
+                  <div className="w-[200px]">
+                    {React.cloneElement(menu as React.ReactElement)}
+                  </div>
+                )}
+              >
+                <Tooltip title="Cập nhật danh sách báo cáo">
+                <Button type="primary" icon={<EllipsisOutlined />} />
+                </Tooltip>
+                
+              </Dropdown>
+            </div>
           </div>
         </div>
+
         <div>
           {isGroupByCampaign ? (
             <TableCustom
@@ -1141,7 +1349,7 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
               scroll={{ y: 540, x: 2000 }}
               onRow={(record, rowIndex) => {
                 return {
-                  onClick: () => handleRowClick(record,rowIndex), // Gọi hàm xử lý khi click vào dòng
+                  onClick: () => handleRowClick(record, rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
               rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
@@ -1155,7 +1363,7 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
               pagination={dataReports.length > 5}
               onRow={(record, rowIndex) => {
                 return {
-                  onClick: () => handleRowClick(record,rowIndex), // Gọi hàm xử lý khi click vào dòng
+                  onClick: () => handleRowClick(record, rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
               rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
@@ -1174,6 +1382,7 @@ const filterOption = (input: string, option?: { label: string; value: string }) 
           )}
         </div>
       </div>
+
       <Image.PreviewGroup
         preview={{
           visible: previewVisible,

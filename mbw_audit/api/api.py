@@ -601,6 +601,23 @@ def update_scorehuman_by_name(*args, **kwargs):
     except Exception as e:
         return gen_response(500, "error", {"data": str(e)})
 
+@frappe.whitelist(methods=["POST"])
+def updatelistreport_scorehuman_by_AI(*args, **kwargs):
+    response_list = []
+    data_list = json.loads(kwargs.get('data_list'))
+    for item in data_list:
+        name = item.get('name')
+        scoring = item.get('scoring_human')
+        try:
+            doc = frappe.get_doc('VGM_Report', name)
+            doc.scoring_human = scoring
+            doc.save(ignore_permissions=True)
+            response_list.append({"name": name, "status": "success"})
+        except Exception as e:
+            response_list.append({"name": name, "status": "error", "message": str(e)})
+            continue  # Tiếp tục vòng lặp ngay cả khi gặp lỗi
+    
+    return {"result": response_list, "status": "success"}
 @frappe.whitelist(methods=["GET"])
 def get_all_campaigns():
     try:
