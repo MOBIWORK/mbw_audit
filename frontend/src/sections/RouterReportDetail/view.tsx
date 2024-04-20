@@ -764,39 +764,87 @@ export default function ReportDetail() {
         let isRenderHeader = false;
         let arrChildColsProductAI = [];
         let arrChildColsProductHuman = [];
+        console.log(dataSources);
+        let maxProductsCount = 0;
+        let dataSourceWithMaxProducts = null;
+        let allProductNames = new Set();
+        
+        // Tìm dataSource có số lượng sản phẩm nhiều nhất và thu thập tất cả tên sản phẩm
         for (let j = 0; j < dataSources.length; j++) {
-          for (let i = 0; i < dataSources[j].info_products_ai.length; i++) {
-            if (!isRenderHeader) {
-              let objColProductAI = {
-                title: dataSources[j].info_products_ai[i].product_name,
-                dataIndex: `${dataSources[j].info_products_ai[i].product_name}_ai`,
-                key: `${dataSources[j].info_products_ai[i].product_name}_ai`,
-                width: 100,
-              };
-              let objColProductHuman = {
-                title: dataSources[j].info_products_ai[i].product_name,
-                dataIndex: `${dataSources[j].info_products_ai[i].product_name}_human`,
-                key: `${dataSources[j].info_products_ai[i].product_name}_human`,
-                width: 100,
-              };
-              arrChildColsProductAI.push(objColProductAI);
-              arrChildColsProductHuman.push(objColProductHuman);
-            }
-            dataSources[j][
-              `${dataSources[j].info_products_ai[i].product_name}_ai`
-            ] = dataSources[j].info_products_ai[i].sum;
-            dataSources[j][
-              `${dataSources[j].info_products_human[i].product_name}_human`
-            ] = dataSources[j].info_products_human[i].sum;
+          const dataSource = dataSources[j];
+          const infoProductsAI = dataSource.info_products_ai;
+          const numProducts = infoProductsAI.length;
+        
+          if (numProducts > maxProductsCount) {
+            maxProductsCount = numProducts;
+            dataSourceWithMaxProducts = dataSource;
           }
-          if (arrChildColsProductAI.length > 0) isRenderHeader = true;
+        
+          // Thu thập tất cả tên sản phẩm từ tất cả các dataSource
+          infoProductsAI.forEach((product) => {
+            allProductNames.add(product.product_name);
+          });
         }
+        
+        if (dataSourceWithMaxProducts) {
+          const infoProductsAI = dataSourceWithMaxProducts.info_products_ai;
+        
+          for (let i = 0; i < infoProductsAI.length; i++) {
+            const productName = infoProductsAI[i].product_name;
+        
+            const objColProductAI = {
+              title: productName,
+              dataIndex: `${productName}_ai`,
+              key: `${productName}_ai`,
+              width: 100,
+            };
+        
+            const objColProductHuman = {
+              title: productName,
+              dataIndex: `${productName}_human`,
+              key: `${productName}_human`,
+              width: 100,
+            };
+        
+            arrChildColsProductAI.push(objColProductAI);
+            arrChildColsProductHuman.push(objColProductHuman);
+          }
+        }
+        
+        // Duyệt qua tất cả các dataSource để cập nhật dữ liệu vào các cột đã tạo
+        const updatedDataSources = dataSources.map((dataSource) => {
+          const updatedDataSource = { ...dataSource };
+        
+          allProductNames.forEach((productName) => {
+            const matchingInfoProductAI = dataSource.info_products_ai.find(
+              (product) => product.product_name === productName
+            );
+        
+            const matchingInfoProductHuman = dataSource.info_products_human.find(
+              (product) => product.product_name === productName
+            );
+        
+            if (matchingInfoProductAI) {
+              updatedDataSource[`${productName}_ai`] = matchingInfoProductAI.sum;
+            }
+        
+            if (matchingInfoProductHuman) {
+              updatedDataSource[`${productName}_human`] = matchingInfoProductHuman.sum;
+            }
+          });
+        
+          return updatedDataSource;
+        });
+        
+        // Cập nhật lại columns và dataReportsByCampaign
         setColumnsReportByCampaign((preValue) => {
           preValue[5].children = arrChildColsProductAI;
           preValue[6].children = arrChildColsProductHuman;
           return preValue;
         });
-        setDataReportsByCampaign(dataSources);
+        
+        setDataReportsByCampaign(updatedDataSources);
+      
       }
     } else {
       if (isGroupByCampaign) {
@@ -815,7 +863,6 @@ export default function ReportDetail() {
   const handleMouseEnter = (index: any) => {
     setHoveredSelect(index);
   };
-
   const handleMouseLeave = () => {
     setHoveredSelect(false);
   };
