@@ -209,8 +209,8 @@ def record_report_data(*args, **kwargs):
         doc.scoring_human = 0
         doc.insert()
         input_report_sku = {"name_doc": doc.name, "report_images": images, "category": category, "setting_score_audit": setting_score_audit}
-        process_report_sku(input_report_sku)
-        #frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
+        #process_report_sku(input_report_sku)
+        frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
@@ -607,7 +607,7 @@ def updatelistreport_scorehuman_by_AI(*args, **kwargs):
     data_list = json.loads(kwargs.get('data_list'))
     for item in data_list:
         name = item.get('name')
-        scoring = item.get('scoring_human')
+        scoring = item.get('scoring_machine')
         try:
             doc = frappe.get_doc('VGM_Report', name)
             doc.scoring_human = scoring
@@ -616,7 +616,23 @@ def updatelistreport_scorehuman_by_AI(*args, **kwargs):
         except Exception as e:
             response_list.append({"name": name, "status": "error", "message": str(e)})
             continue  # Tiếp tục vòng lặp ngay cả khi gặp lỗi
-    
+    return {"result": response_list, "status": "success"}
+
+@frappe.whitelist(methods=["POST"])
+def update_list_report_by_val(*args, **kwargs):
+    response_list = []
+    data_list = json.loads(kwargs.get('data_list'))
+    val_score = kwargs.get('val_score')
+    for item in data_list:
+        name = item.get('name')
+        try:
+            doc = frappe.get_doc('VGM_Report', name)
+            doc.scoring_human = val_score
+            doc.save(ignore_permissions=True)
+            response_list.append({"name": name, "status": "success"})
+        except Exception as e:
+            response_list.append({"name": name, "status": "error", "message": str(e)})
+            continue  # Tiếp tục vòng lặp ngay cả khi gặp lỗi
     return {"result": response_list, "status": "success"}
 @frappe.whitelist(methods=["GET"])
 def get_all_campaigns():

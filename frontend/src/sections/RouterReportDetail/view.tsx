@@ -22,15 +22,17 @@ import {
   Select,
   Image,
   message,
-  Form,
-  Dropdown,
+  Space,
+  Radio,
+  Modal
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import paths from "../AppConst/path.js";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
-import { log } from "console";
+import type { RadioChangeEvent } from 'antd';
 import type { MenuProps } from "antd";
+
 declare var require: any;
 
 interface DataTypeReport {
@@ -300,27 +302,11 @@ export default function ReportDetail() {
   const [dataReports, setDataReports] = useState<any[]>([]);
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
   const [campaignSources, setCampaignSources] = useState<any[]>([]);
+  const [showFrmUpdateScore, setShowFrmUpdateScore] = useState<boolean>(false);
+  const [typeUpdateScore, setTypeUpdateScore] = useState<number>(0);
+  const [valScore, setValScore] = useState<number>(0);
+  const [loadingUpdateScores, setLoadingUpdateScores] = useState<boolean>(false);
 
-  const items: MenuProps["items"] = [
-    {
-      label: (
-        <div onClick={() => handleClickUpdateAI()} className="w-[200px]">
-          Cập nhật theo điều kiện AI
-        </div>
-      ),
-      key: "0",
-    },
-    {
-      type: "divider",
-    },
-    {
-      label: <div onClick={() => handleClickUpdateHuman()}>Cập nhật Đạt theo điều kiện lọc</div>,
-      key: "1",
-    },
-    {
-      type: "divider",
-    },
-  ];
   const handleClickUpdateAI = async () => {
     if (!isGroupByCampaign) {
       // Biến đổi mảng dữ liệu thành danh sách mới
@@ -328,20 +314,16 @@ export default function ReportDetail() {
         const transformedList = dataReports.map((item) => {
           return {
             name: item.name,
-            scoring_human: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
+            scoring_machine: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
           };
         });
-
         let objReport = {
           data_list: JSON.stringify(transformedList),
         };
-
         let urlReportUpdate =
           "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
-
         try {
           const res = await AxiosService.post(urlReportUpdate, objReport);
-
           if (res && res.message.status === "success") {
             fetchDataReport()
         message.success("Cập nhật thành công");
@@ -359,7 +341,7 @@ export default function ReportDetail() {
         const transformedList = dataReportsByCampaign.map((item) => {
           return {
             name: item.name,
-            scoring_human: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
+            scoring_machine: item.scoring_machine, // Gán lại scoring_human bằng scoring_machine
           };
         });
 
@@ -369,10 +351,8 @@ export default function ReportDetail() {
 
         let urlReportUpdate =
           "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
-
         try {
           const res = await AxiosService.post(urlReportUpdate, objReport);
-
           if (res && res.message.status === "success") {
             fetchDataReport()
             message.success("Cập nhật thành công");
@@ -387,20 +367,18 @@ export default function ReportDetail() {
       }
     }
   };
-  const handleClickUpdateHuman = async () => {
+  const handleClickUpdateHuman = async (valScore) => {
     if (!isGroupByCampaign) {
     // Biến đổi mảng dữ liệu thành danh sách mới
     if (dataReports.length > 0) {
-      const transformedList = dataReports
-  .filter((item) => item.scoring_human === 0) // Lọc các phần tử có scoring_human bằng 0
-  .map((item) => ({ ...item, scoring_human: 1 })); // Biến đổi các phần tử được lọc
+      const transformedList = dataReports.map((item) => ({ name: item.name })); // Biến đổi các phần tử được lọc
       let objReport = {
         data_list: JSON.stringify(transformedList),
+        val_score: valScore
       };
 
       let urlReportUpdate =
-        "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
-
+        "/api/method/mbw_audit.api.api.update_list_report_by_val";
       try {
         const res = await AxiosService.post(urlReportUpdate, objReport);
 
@@ -418,15 +396,14 @@ export default function ReportDetail() {
     }
     }else{
       if (dataReportsByCampaign.length > 0) {
-        const transformedList = dataReportsByCampaign
-    .filter((item) => item.scoring_human === 0) // Lọc các phần tử có scoring_human bằng 0
-    .map((item) => ({ ...item, scoring_human: 1 })); // Biến đổi các phần tử được lọc
+        const transformedList = dataReportsByCampaign.map((item) => ({ name: item.name })); // Biến đổi các phần tử được lọc
         let objReport = {
           data_list: JSON.stringify(transformedList),
+          val_score: valScore
         };
   
         let urlReportUpdate =
-          "/api/method/mbw_audit.api.api.updatelistreport_scorehuman_by_AI";
+          "/api/method/mbw_audit.api.api.update_list_report_by_val";
   
         try {
           const res = await AxiosService.post(urlReportUpdate, objReport);
@@ -1237,6 +1214,28 @@ export default function ReportDetail() {
     setItemImage(imageArray);
     setPreviewVisible(true); // Mở chế độ xem preview khi click vào hình ảnh
   };
+  const onShowFrmUpdateScore = () => {
+    setShowFrmUpdateScore(true);
+  }
+  const handleCancelUpdateScore = () => {
+    setShowFrmUpdateScore(false);
+  }
+  const handleOkUpdateScore = async () => {
+    setLoadingUpdateScores(true);
+    if(typeUpdateScore == 0){
+      await handleClickUpdateAI();
+    }else{
+      await handleClickUpdateHuman(valScore);
+    }
+    setLoadingUpdateScores(false);
+    handleCancelUpdateScore();
+  }
+  const onChangeTypeUpdateScore = (e: RadioChangeEvent) => {
+    setTypeUpdateScore(e.target.value);
+  };
+  const handleChangeScore = (e: number) => {
+    setValScore(e);
+  }
   return (
     <>
       <HeaderPage
@@ -1367,21 +1366,7 @@ export default function ReportDetail() {
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "flex-end" }}>
-              <Dropdown
-                menu={{ items }}
-                trigger={["click"]}
-                placement={"bottomRight"}
-                dropdownRender={(menu) => (
-                  <div className="w-[200px]">
-                    {React.cloneElement(menu as React.ReactElement)}
-                  </div>
-                )}
-              >
-                <Tooltip title="Cập nhật danh sách báo cáo">
-                <Button type="primary" icon={<EllipsisOutlined />} />
-                </Tooltip>
-                
-              </Dropdown>
+              <Button type="primary" onClick={onShowFrmUpdateScore}>Cập nhật điểm giám sát chấm</Button>
             </div>
           </div>
         </div>
@@ -1440,6 +1425,45 @@ export default function ReportDetail() {
           <Image style={{ display: "none" }} key={index} width={50} src={url} />
         ))}
       </Image.PreviewGroup>
+
+      <Modal
+        title="Cập nhật điểm trưng bày giám sát chấm"
+        open={showFrmUpdateScore}
+        width={600}
+        onOk={handleOkUpdateScore}
+        onCancel={handleCancelUpdateScore}
+        footer={[
+          <Button key="back" onClick={handleCancelUpdateScore}>
+            Hủy
+          </Button>,
+          <Button key="submit" type="primary" onClick={handleOkUpdateScore} loading={loadingUpdateScores}>
+            Lưu lại
+          </Button>,
+        ]}
+      >
+        <p className="text-[#637381] font-normal text-sm">
+          Dữ liệu chấm điểm trưng bày giám sát chấm sẽ được cập nhật dựa theo một trong các tiêu chí
+        </p>
+        <Radio.Group onChange={onChangeTypeUpdateScore} value={typeUpdateScore}>
+          <Space direction="vertical">
+            <Radio value={0}>Điểm trưng bày giám sát chấm được cập nhập dựa theo AI chấm</Radio>
+            <Radio value={1}>Điểm trưng bày giám sát chấm được cập nhập theo giá trị được chọn</Radio>
+          </Space>
+        </Radio.Group>
+        {
+          typeUpdateScore === 1 && (
+            <Select
+              defaultValue={valScore}
+              style={{ width: 540, marginTop: 10, marginBottom: 10 }}
+              onChange={handleChangeScore}
+              options={[
+                { value: 0, label: 'Không đạt' },
+                { value: 1, label: 'Đạt' }
+              ]}
+            />
+          )
+        }
+      </Modal>
     </>
   );
 }
