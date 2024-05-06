@@ -1354,7 +1354,7 @@ export default function Product_SKU() {
   };
   const initDataProductFromERP = async () => {
     //Goi dich vu lay danh sach san pham tu erp
-    let url = "/api/method/mbw_dms.api.selling.product.list_product";
+    let url = "/api/method/mbw_dms.api.selling.product.list_product_campaign";
     // if (searchProductFromERP != null && searchProductFromERP != "")
     //url = `${url}?item_name=${searchProductFromERP.trim()}`;
     let res = await AxiosService.get(url);
