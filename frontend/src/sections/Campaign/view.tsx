@@ -7,16 +7,18 @@ import {
   SearchOutlined,
   PlusOutlined
 } from "@ant-design/icons";
-import { Input, Space, Table, TableColumnsType, Tag, Modal, message, Button, UploadProps } from "antd";
+import { Input, Space, TableColumnsType, Tag, Modal, message, Button, UploadProps } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AxiosService } from "../../services/server";
 import moment from 'moment';
 import "./campaign.css";
 import paths from "../AppConst/path.js";
 import * as XLSX from "xlsx";
 import { UploadFile } from "antd/lib";
+import * as ExcelJS from "exceljs";
+import * as FileSaver from "file-saver";
 
 interface TypeCampaign {
   key: React.Key;
@@ -127,23 +129,34 @@ export default function Campaign() {
                               if (!data[i][0]) {
                                 continue; // Bỏ qua dòng không có giá trị cho campaign_name và chuyển sang dòng tiếp theo
                               }
+                              let objDataImport = {
+                                'campaign_name': data[i][0],
+                                'campaign_description': data[i][1] ? data[i][1] : "",
+                                'campaign_status': data[i][4] !== "" ? (data[i][4].toLowerCase() === "close" ? "Close" : "Open") : "Open",
+                                'campaign_categories': data[i][5] ? (data[i][5].replace('“', '"').replace('”', '"')) : "",
+                                'campaign_employees': data[i][6] ? (data[i][6].replace('“', '"').replace('”', '"')) : "",
+                                'campaign_customers': data[i][7] ? (data[i][7].replace('“', '"').replace('”', '"')) : ""
+                              }
+                              if(typeof(data[i][2]) == "string"){
+                                let dateParts = data[i][2].split("-");
+                                let dateStart = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                                objDataImport["campaign_start"] = (dateStart.getTime() / 1000).toString();
+                              }else{
                                 const EXCEL_EPOCH = new Date(1899, 11, 31);
                                 const date_startMilliseconds = (data[i][2] - 1) * 24 * 60 * 60 * 1000;
                                 let startDate = new Date(EXCEL_EPOCH.getTime() + date_startMilliseconds);
-        
+                                objDataImport["campaign_start"] = (startDate.getTime() / 1000).toString();
+                              }
+                              if(typeof(data[i][3]) == "string"){
+                                let dateParts = data[i][3].split("-");
+                                let dateEnd = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                                objDataImport["campaign_end"] = (dateEnd.getTime() / 1000).toString();
+                              }else{
+                                const EXCEL_EPOCH = new Date(1899, 11, 31);
                                 const date_endMilliseconds = (data[i][3] - 1) * 24 * 60 * 60 * 1000;
                                 let endDate = new Date(EXCEL_EPOCH.getTime() + date_endMilliseconds);
-        
-                                let objDataImport = {
-                                    'campaign_name': data[i][0],
-                                    'campaign_description': data[i][1] ? data[i][1] : "",
-                                    'campaign_start': (startDate.getTime() / 1000).toString(),
-                                    'campaign_end': (endDate.getTime() / 1000).toString(),
-                                    'campaign_status': data[i][4] !== "" ? (data[i][4].toLowerCase() === "close" ? "Close" : "Open") : "Open",
-                                    'campaign_categories': data[i][5] ? (data[i][5].replace('“', '"').replace('”', '"')) : "",
-                                    'campaign_employees': data[i][6] ? (data[i][6].replace('“', '"').replace('”', '"')) : "",
-                                    'campaign_customers': data[i][7] ? (data[i][7].replace('“', '"').replace('”', '"')) : ""
-                                }
+                                objDataImport["campaign_end"] = (endDate.getTime() / 1000).toString();
+                              }
                                 if (
                                   campaigns.some(
                                     (campaign) =>
@@ -318,14 +331,67 @@ export default function Campaign() {
     }else{
       message.error("Thêm chiến dịch thất bại");
     }
-    
-   
   }
 
   const handleCancelImportExcel = () => {
     setIsModalOpenImportFileExcel(false);
     setFileListImport([])
   }
+
+  const handleDownloadSampleCampaign = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Sheet1");
+    sheet.properties.defaultColWidth = 30;
+    let arrHeader = [
+      {'label': "Campaign Name", 'cell': "A1", 'column': "A"},
+      {'label': "Campaign Description", 'cell': "B1", 'column': "B"},
+      {'label': "Start Date", 'cell': "C1", 'column': "C"},
+      {'label': "End Date", 'cell': "D1", 'column': "D"},
+      {'label': "Status", 'cell': "E1", 'column': "E"},
+      {'label': "Categories", 'cell': "F1", 'column': "F"},
+      {'label': "Employees", 'cell': "G1", 'column': "G"},
+      {'label': "Customers", 'cell': "H1", 'column': "H"}
+    ]
+    for(let i = 0; i < arrHeader.length; i++){
+      sheet.getCell(arrHeader[i].cell).value = arrHeader[i].label;
+      sheet.getCell(arrHeader[i].cell).style = {
+        font: { bold: true, name: "Times New Roman", size: 13 },
+      };
+    }
+    let arrContent = [
+      {'label': "Tên chiến dịch. VD: Chiến dịch 1", 'cell': "A2"},
+      {'label': "Mô tả chiến dịch", 'cell': "B2"},
+      {'label': "Ngày chiến dịch bắt đầu. VD: 27-02-2024", 'cell': "C2"},
+      {'label': "Ngày chiến dịch kết thúc. VD 29-02-2024", 'cell': "D2"},
+      {'label': "Trạng thái của chiến dịch bao gồm: Close, Open. VD: Close", 'cell': "E2"},
+      {'label': `Danh sách danh mục sản phẩm. VD ["Danh mục 1"]`, 'cell': "F2"},
+      {'label': `Danh sách mã nhân viên. VD ["HR-EMP-00014"]`, 'cell': "G2"},
+      {'label': `Danh sách mã khách hàng. VD: ["CH-00001"]`, 'cell': "H2"}
+    ]
+    for(let i = 0; i < arrContent.length; i++){
+      sheet.getCell(arrContent[i].cell).value = arrContent[i].label;
+      sheet.getCell(arrContent[i].cell).style = {
+        font: { bold: false, name: "Times New Roman", size: 13 },
+      };
+    }
+    // Lưu file Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "sample_campaign", false);
+  }
+  const saveAsExcelFile = (buffer: any, fileName: string, convertName = true) => {
+    let EXCEL_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    let EXCEL_EXTENSION = ".xlsx";
+    const data: Blob = new Blob([buffer], {
+      type: EXCEL_TYPE,
+    });
+    let fileNameExport = fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION;
+    if(!convertName) fileNameExport = fileName + EXCEL_EXTENSION;
+    FileSaver.saveAs(
+      data,
+      fileNameExport
+    );
+  };
 
 
   return (
@@ -416,7 +482,7 @@ export default function Campaign() {
         ]}
       >
         <p className="text-[#637381] font-normal text-sm">
-          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" href="/public/data_sample/Mẫu_Nhập_Chiến_Dịch.xlsx">tại đây</a>
+          Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ liệu mẫu <a target="_blank" onClick={handleDownloadSampleCampaign}>tại đây</a>
         </p>
         <Dragger {...propUploadImportFileExcel}  fileList={fileListImport}>
           <p className="ant-upload-drag-icon">

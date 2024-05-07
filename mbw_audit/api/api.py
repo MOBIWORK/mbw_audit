@@ -31,7 +31,6 @@ def test_queue(*args,**kwargs):
 def process_queue(par):
     res = 1+1
 
-
 @frappe.whitelist(methods=["POST"])
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs):
@@ -974,7 +973,7 @@ def import_campaign(*args, **kwargs):
             new_campaign.end_date = end_date
 
             categories = json.loads(data.get('campaign_categories'))
-            min_products = {}
+            config_score_audit = {"min_product": {}}
             category_names = []
 
             for category in categories:
@@ -982,7 +981,8 @@ def import_campaign(*args, **kwargs):
                 if category_name:
                     category_names.append(category_name)
                     products = frappe.get_all("VGM_Product", filters={"category": category_name}, fields=["name"])
-                    min_products.update({product.name: {"min_product": 1} for product in products})
+                    for product in products:
+                        config_score_audit["min_product"][product["name"]] = 1
 
             employees = json.loads(data.get('campaign_employees'))
             retails = json.loads(data.get('campaign_customers'))
@@ -993,7 +993,7 @@ def import_campaign(*args, **kwargs):
             new_campaign.retails = json.dumps(retails)
             
             # Gán min_products vào trường setting_score_audit        
-            new_campaign.setting_score_audit = json.dumps(min_products)
+            new_campaign.setting_score_audit = json.dumps(config_score_audit)
 
             new_campaign.insert()
 

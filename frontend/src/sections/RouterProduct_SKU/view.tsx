@@ -2,10 +2,10 @@ import { LuUploadCloud, LuImport } from "react-icons/lu";
 import { v4 as uuidv4 } from "uuid";
 import { VscAdd } from "react-icons/vsc";
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
-import ObjectDetectionResult from "./ObjectDetectionResult";
 import * as ExcelJS from "exceljs";
-import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+
 import {
   DeleteOutlined,
   EditOutlined,
@@ -24,7 +24,6 @@ import {
   List,
   Modal,
   Row,
-  Space,
   Table,
   TableColumnsType,
   Typography,
@@ -215,7 +214,7 @@ export default function Product_SKU() {
 
                 let objDataImport = {
                   product_code: data[i][0] ? data[i][0] : "",
-                  barcode: data[i][1] ? data[i][1] : "",
+                  barcode: data[i][1] ? data[i][1] : data[i][0],
                   product_name: data[i][2],
                   product_description: data[i][3],
                   url_images: data[i][4]
@@ -1518,16 +1517,18 @@ export default function Product_SKU() {
     const buffer = await workbook.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "report_check_image");
   };
-  const saveAsExcelFile = (buffer: any, fileName: string) => {
+  const saveAsExcelFile = (buffer: any, fileName: string, convertName = true) => {
     let EXCEL_TYPE =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     let EXCEL_EXTENSION = ".xlsx";
     const data: Blob = new Blob([buffer], {
       type: EXCEL_TYPE,
     });
+    let fileNameExport = fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION;
+    if(!convertName) fileNameExport = fileName + EXCEL_EXTENSION;
     FileSaver.saveAs(
       data,
-      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+      fileNameExport
     );
   };
   const [mainImageIndex, setMainImageIndex] = useState<number>(0);
@@ -1561,6 +1562,41 @@ export default function Product_SKU() {
       setMainImageIndexAI(mainImageIndexAI + 1);
     }
   };
+  const handleDownloadSampleProduct = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Sheet1");
+    sheet.properties.defaultColWidth = 30;
+    let arrHeader = [
+      {'label': "Product Code", 'cell': "A1", 'column': "A"},
+      {'label': "BarCode", 'cell': "B1", 'column': "B"},
+      {'label': "Product Name", 'cell': "C1", 'column': "C"},
+      {'label': "Product Description", 'cell': "D1", 'column': "D", 'width': 50},
+      {'label': "Url Image", 'cell': "E1", 'column': "E", 'width': 70},
+    ]
+    for(let i = 0; i < arrHeader.length; i++){
+      if(arrHeader[i].width != null) sheet.getColumn(arrHeader[i].column).width = arrHeader[i].width;
+      sheet.getCell(arrHeader[i].cell).value = arrHeader[i].label;
+      sheet.getCell(arrHeader[i].cell).style = {
+        font: { bold: true, name: "Times New Roman", size: 13 },
+      };
+    }
+    let arrContent = [
+      {'label': "Mã sản phẩm(bắt buộc)", 'cell': "A2"},
+      {'label': "Mã sản phẩm dùng làm barcode", 'cell': "B2"},
+      {'label': "Tên sản phẩm(bắt buộc)", 'cell': "C2"},
+      {'label': "Mô tả cho sản phẩm", 'cell': "D2"},
+      {'label': `Danh sách link ảnh sản phẩm. Ví dụ ["http://hr.mbwcloud.com:8007/files/PhomaiGa1.png"]`, 'cell': "E2"}
+    ]
+    for(let i = 0; i < arrContent.length; i++){
+      sheet.getCell(arrContent[i].cell).value = arrContent[i].label;
+      sheet.getCell(arrContent[i].cell).style = {
+        font: { bold: false, name: "Times New Roman", size: 13 },
+      };
+    }
+    // Lưu file Excel
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAsExcelFile(buffer, "sample_product", false);
+  }
   return (
     <>
       <HeaderPage
@@ -2439,7 +2475,7 @@ export default function Product_SKU() {
         <p className="text-[#637381] font-normal text-sm">
           Chọn file excel có định dạng .xlsx để thực hiện nhập dữ liệu. Tải dữ
           liệu mẫu{" "}
-          <a target="_blank" href="/public/data_sample/Mẫu_Nhập_Sản_Phẩm.xlsx">
+          <a target="_blank" onClick={handleDownloadSampleProduct}>
             tại đây
           </a>
         </p>
