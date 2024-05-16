@@ -82,7 +82,7 @@ import {
     }, [searchEmployee]);
   
     const initDataEmployee = async () => {
-      setSelectedRowKeys(employeeEdit);
+      //setSelectedRowKeys(employeeEdit);
       let urlEmployee = "/api/method/mbw_audit.api.api.get_list_employees";
       let res = await AxiosService.get(urlEmployee);
       let arrEmployeeSource = [];
@@ -129,14 +129,18 @@ import {
     }
   
     const handleAddEmployee = () => {
-      let employeeSelecteds: TypeEmployee[] = [];
-      for(let i = 0; i < selectedRowKeys.length; i++ ){
-        let employeeFilter = employees.filter(x => x.name == selectedRowKeys[i]);
-        if(employeeFilter != null && employeeFilter.length > 0) employeeSelecteds.push(employeeFilter[0]);
+      const arrEmployee = [...employeeSelected]; // create a new array reference
+      for (let i = 0; i < selectedRowKeys.length; i++) {
+        const existEmployee = arrEmployee.filter(x => x.name === selectedRowKeys[i]);
+        if (existEmployee.length === 0) {
+          const employeeFilter = employees.filter(x => x.name === selectedRowKeys[i]);
+          if (employeeFilter != null && employeeFilter.length > 0) arrEmployee.push(employeeFilter[0]);
+        }
       }
-      setEmployeeSelected(employeeSelecteds);
-      onChangeEmployees(employeeSelecteds);
+      setEmployeeSelected(arrEmployee); // set state with a new array reference
+      onChangeEmployees(arrEmployee);
       handleCancelAddEmployee();
+      setSelectedRowKeys([]);
     }
   
     const handleDeleteEmployeeSelected = (item) => {

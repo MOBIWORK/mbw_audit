@@ -71,9 +71,9 @@ import paths from "../AppConst/path.js";
     }, [searchCustomer]);
   
     const initDataCustomer = async () => {
-      setSelectedRowKeys(customerEdit);
+      console.log(customerEdit);
+      //setSelectedRowKeys(customerEdit);
       let urlCustomer = apiUrl + ".api.get_list_customers";
-      console.log(urlCustomer);
       let res = await AxiosService.get(urlCustomer);
       let arrCustomerSource = [];
       if(res != null && res.message == "ok"){
@@ -90,7 +90,6 @@ import paths from "../AppConst/path.js";
       for(let i = 0; i < customerEdit.length; i++){
         let dataCustomerFilter = arrCustomerSource.filter(x => x.name==customerEdit[i]);
         if(dataCustomerFilter != null && dataCustomerFilter.length > 0){
-            //selectedRowKeys.push(customerEdit[i]);
             customersInitSelected.push(dataCustomerFilter[0]);
         } 
       }
@@ -118,14 +117,18 @@ import paths from "../AppConst/path.js";
     };
   
     const handleAddCustomer = () => {
-      let customerSelecteds: TypeCustomer[] = [];
-      for(let i = 0; i < selectedRowKeys.length; i++ ){
-        let customerFilter = customers.filter(x => x.name == selectedRowKeys[i]);
-        if(customerFilter != null && customerFilter.length > 0) customerSelecteds.push(customerFilter[0]);
+      const arrCustomer = [...customersSelected]; // create a new array reference
+      for (let i = 0; i < selectedRowKeys.length; i++) {
+        const existCustomer = arrCustomer.filter(x => x.name === selectedRowKeys[i]);
+        if (existCustomer.length === 0) {
+          const customerFilter = customers.filter(x => x.name === selectedRowKeys[i]);
+          if (customerFilter != null && customerFilter.length > 0) arrCustomer.push(customerFilter[0]);
+        }
       }
-      setCustomersSelected(customerSelecteds);
-      onChangeCustomer(customerSelecteds);
+      setCustomersSelected(arrCustomer); // set state with a new array reference
+      onChangeCustomer(arrCustomer);
       handleCancel();
+      setSelectedRowKeys([]);
     }
   
     const handleDeleteCustomer = (item) => {

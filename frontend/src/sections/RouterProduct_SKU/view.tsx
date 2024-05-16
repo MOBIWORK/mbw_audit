@@ -268,6 +268,7 @@ export default function Product_SKU() {
       }
     },
     beforeUpload: async (file) => {
+      console.log(file);
       const fileName = file.name.toLowerCase();
       if (
         fileName.endsWith(".jpeg") ||
@@ -298,7 +299,6 @@ export default function Product_SKU() {
           "/api/method/mbw_audit.api.api.upload_file_for_product",
           formData
         );
-
         if (response.message === "ok") {
           setFileUploadAddProduct((prevFileUpload) => [
             ...prevFileUpload,
@@ -2170,6 +2170,7 @@ export default function Product_SKU() {
                 action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
                 listType="picture-card"
                 accept="image/png, image/jpeg"
+                multiple={true}
                 fileList={fileList}
                 onChange={onChangeImageFormAddProduct}
                 onPreview={onPreviewAdd}

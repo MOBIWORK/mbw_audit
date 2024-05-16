@@ -108,14 +108,18 @@ export default function Customer({onChangeCustomer}) {
   };
 
   const handleAddCustomer = () => {
-    let customerSelecteds: TypeCustomer[] = [];
-    for(let i = 0; i < selectedRowKeys.length; i++ ){
-      let customerFilter = customers.filter(x => x.name == selectedRowKeys[i]);
-      if(customerFilter != null && customerFilter.length > 0) customerSelecteds.push(customerFilter[0]);
+    const arrCustomer = [...customersSelected]; // create a new array reference
+    for (let i = 0; i < selectedRowKeys.length; i++) {
+      const existCustomer = arrCustomer.filter(x => x.name === selectedRowKeys[i]);
+      if (existCustomer.length === 0) {
+        const customerFilter = customers.filter(x => x.name === selectedRowKeys[i]);
+        if (customerFilter != null && customerFilter.length > 0) arrCustomer.push(customerFilter[0]);
+      }
     }
-    setCustomersSelected(customerSelecteds);
-    onChangeCustomer(customerSelecteds);
+    setCustomersSelected(arrCustomer);
+    onChangeCustomer(arrCustomer);
     handleCancel();
+    setSelectedRowKeys([])
   }
 
   const handleDeleteCustomer = (item) => {
