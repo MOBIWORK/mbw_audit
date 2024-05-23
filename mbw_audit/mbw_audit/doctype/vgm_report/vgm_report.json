@@ -21,7 +21,8 @@
   "images_time",
   "scoring_machine",
   "image_ai",
-  "scoring_human"
+  "scoring_human",
+  "log_ai"
  ],
  "fields": [
   {
@@ -111,11 +112,16 @@
    "fieldname": "scoring_human",
    "fieldtype": "Int",
    "label": "Scoring By Human"
+  },
+  {
+   "fieldname": "log_ai",
+   "fieldtype": "JSON",
+   "label": "Log AI"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-11 10:47:35.947491",
+ "modified": "2024-05-22 09:13:37.445090",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Report",

@@ -297,8 +297,11 @@ def process_report_sku(input_sku): #name, report_images, category, setting_score
                 if resultExistProduct.get("status") == "completed":
                     image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps(image_ais))
+                    for item in resultExistProduct.get("process_results").get('verbose'):
+                        del item["base64_image"]
                 else:
                     frappe.db.set_value('VGM_Report', name, 'image_ai', json.dumps([]))
+                frappe.db.set_value('VGM_Report', name, 'log_ai', json.dumps(resultExistProduct))
             if setting_score_audit is not None:
                 doc_report = frappe.get_doc("VGM_Report", name)
                 doc_report.scoring_machine = 0 if 0 in score_by_products else 1 if 1 in score_by_products else 0
@@ -470,6 +473,7 @@ def render_check_image_ai(verbose):
 
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
     vectordb_dir = frappe.get_site_path()
+    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     deep_vision: DeepVision = DeepVision(vectordb_dir)
     on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
@@ -477,6 +481,7 @@ def shelf_availability_by_category(category_name, image_paths, lst_product_check
 
 def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
     vectordb_dir = frappe.get_site_path()
+    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     deep_vision: DeepVision = DeepVision(vectordb_dir)
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)

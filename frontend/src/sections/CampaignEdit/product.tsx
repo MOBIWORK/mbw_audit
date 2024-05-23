@@ -285,6 +285,10 @@ export default function ProductCampaignEdit({
   };
 
   const handleSelectCategory = () => {
+    if(selectedRowKeys.length > 1){
+      message.error("Số lượng danh mục không được vượt quá 1 danh mục");
+      return;
+    }
     let arrCategorySelect: TypeCategory[] = [];
     let allProducts = [];
     for (let i = 0; i < selectedRowKeys.length; i++) {
