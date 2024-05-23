@@ -35,7 +35,10 @@ def process_queue(par):
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir)
+    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+    if nguong_nhan_dien_sp == 0:
+        nguong_nhan_dien_sp = 0.6
+    deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     try:
@@ -62,17 +65,21 @@ def deleteListByDoctype(*args,**kwargs):
 def checkImageProductExist(*args, **kwargs):
     try:
         vectordb_dir = frappe.get_site_path()
-        deep_vision: DeepVision = DeepVision(vectordb_dir)
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0:
+            nguong_nhan_dien_sp = 0.6
+        deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
         base_url = frappe.utils.get_request_site_address()
         collection_name = kwargs.get('collection_name')
         link_image = json.loads(kwargs.get('linkimages'))
-
+        print("Dòng 78 ", link_image)
         # url_images = post_images_check(image_base64)
         image_path = link_image
         # product_id = self.product
         # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
         response = recognition.count(collection_name, image_path)
+        print("Dòng 84 ", response)
         
         if response.get('status') == 'completed':
             # Tính tổng của các danh sách sản phẩm từ mảng
@@ -126,7 +133,10 @@ def delete_check_image_ai(*args, **kwargs):
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
-    deep_vision: DeepVision = DeepVision(vectordb_dir)
+    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+    if nguong_nhan_dien_sp == 0:
+        nguong_nhan_dien_sp = 0.6
+    deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
     collection_name = kwargs.get('collection_name')
@@ -474,7 +484,9 @@ def render_check_image_ai(verbose):
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
     vectordb_dir = frappe.get_site_path()
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    deep_vision: DeepVision = DeepVision(vectordb_dir)
+    if nguong_nhan_dien_sp == 0:
+        nguong_nhan_dien_sp = 0.6
+    deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
     return result
@@ -482,7 +494,9 @@ def shelf_availability_by_category(category_name, image_paths, lst_product_check
 def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
     vectordb_dir = frappe.get_site_path()
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    deep_vision: DeepVision = DeepVision(vectordb_dir)
+    if nguong_nhan_dien_sp == 0:
+        nguong_nhan_dien_sp = 0.6
+    deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
     return result
