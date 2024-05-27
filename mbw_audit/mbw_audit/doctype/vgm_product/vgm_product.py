@@ -32,7 +32,7 @@ class VGM_Product(Document):
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
-        deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
+        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
         print(self)
@@ -67,7 +67,7 @@ class VGM_Product(Document):
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
-        deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
+        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         product_name = self.product_name
         json_string = self.images
