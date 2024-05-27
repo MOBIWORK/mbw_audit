@@ -66,9 +66,9 @@ def checkImageProductExist(*args, **kwargs):
     try:
         vectordb_dir = frappe.get_site_path()
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0:
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
-        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=0.6)
+        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
         base_url = frappe.utils.get_request_site_address()
         collection_name = kwargs.get('collection_name')
