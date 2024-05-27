@@ -30,7 +30,7 @@ class VGM_Product(Document):
     def update_product(self):
         vectordb_dir = frappe.get_site_path()
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0:
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
         deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
@@ -65,7 +65,7 @@ class VGM_Product(Document):
         # Sử dụng self để truy cập trường product_name
         vectordb_dir = frappe.get_site_path()
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0:
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
         deep_vision: DeepVision = DeepVision(vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
