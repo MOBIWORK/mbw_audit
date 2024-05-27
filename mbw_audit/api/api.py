@@ -73,19 +73,16 @@ def checkImageProductExist(*args, **kwargs):
         base_url = frappe.utils.get_request_site_address()
         collection_name = kwargs.get('collection_name')
         link_image = json.loads(kwargs.get('linkimages'))
-        print("Dòng 78 ", link_image)
         # url_images = post_images_check(image_base64)
         image_path = link_image
         # product_id = self.product
         # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
         response = recognition.count(collection_name, image_path)
-        print("Dòng 84 ", response)
-        
+        print("Dòng 81 ", response)
         if response.get('status') == 'completed':
             # Tính tổng của các danh sách sản phẩm từ mảng
             count_result = {}
             verbose_result = []
-
             for result in response.get("results", []):
                 count = result.get("results", {}).get("count", {})
                 verbose = result.get("results", {}).get("verbose", {})
@@ -93,10 +90,21 @@ def checkImageProductExist(*args, **kwargs):
                     count_result[key] = count_result.get(key, 0) + value
                 verbose_ais = render_check_image_ai([verbose])  # Xử lý qua hàm render_check_image_ai
                 verbose_result.extend(verbose_ais)
-
+                del verbose["base64_image"]
+            doc_checking_product = frappe.new_doc('VGM_Checking_Count_Product')
+            doc_checking_product.collection_id = collection_name
+            doc_checking_product.url_image = json.dumps(link_image)
+            doc_checking_product.url_image_ai = json.dumps(verbose_result)
+            doc_checking_product.response_ai = json.dumps(response)
+            doc_checking_product.insert()
             # Trả về kết quả dưới dạng `{count: {...}, verbose: [...]}`
             return {"status": "completed", "results": {"count": count_result, "verbose": verbose_result}}
         else:
+            doc_checking_product = frappe.new_doc('VGM_Checking_Count_Product')
+            doc_checking_product.collection_id = collection_name
+            doc_checking_product.url_image = json.dumps(link_image)
+            doc_checking_product.response_ai = json.dumps(response)
+            doc_checking_product.insert()
             return {"status": "error", 'message': response}
 
     except Exception as e:
@@ -218,8 +226,8 @@ def record_report_data(*args, **kwargs):
         doc.scoring_human = 0
         doc.insert()
         input_report_sku = {"name_doc": doc.name, "report_images": images, "category": category, "setting_score_audit": setting_score_audit}
-        #process_report_sku(input_report_sku)
-        frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
+        process_report_sku(input_report_sku)
+        #frappe.enqueue("mbw_audit.api.api.process_report_sku", input_sku = input_report_sku)
         return gen_response(200, "ok", {"data" : doc.name})
     except Exception as e:
         return gen_response(500, "error", {"data" : _("Failed to add VGM Report: {0}").format(str(e))})
