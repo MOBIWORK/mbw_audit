@@ -1028,3 +1028,27 @@ def import_campaign(*args, **kwargs):
     except Exception as e:
         return {'status': 'failed', 'message': str(e)}
 
+
+@frappe.whitelist(methods="POST")
+def get_bbox_by_image(*args, **kwargs):
+    try:
+        arrImage = kwargs.get('lst_image')
+        vectordb_dir = frappe.get_site_path()
+        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, options={})
+        detection: ProductDetectionService = deep_vision.init_product_detection_service(appconst.KEY_API_AI)
+        arrBbox = []
+        for image in arrImage:
+            bbox = detection.detect(image)
+            arrBbox.append(bbox)
+        return gen_response(200, 'ok', arrBbox)
+    except Exception as e:
+        return gen_response(500, 'error', [])
+
+@frappe.whitelist(methods="GET")
+def get_products_by_category(category):
+    try:
+        products = frappe.db.get_list('VGM_Product', filters = {'category': category}, fields=['name', 'product_name'])
+        return gen_response(200, 'ok', products)
+    except Exception as e:
+        return gen_response(500, 'error', [])
+
