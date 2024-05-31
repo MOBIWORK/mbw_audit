@@ -15,6 +15,7 @@ import {
   VerticalAlignBottomOutlined,
   LeftOutlined,
   RightOutlined,
+  FormOutlined
 } from "@ant-design/icons";
 import {
   Button,
@@ -166,6 +167,8 @@ export default function Product_SKU() {
 
   const [lstProductImport, setLstProductImport] = useState([]);
   const [fileListImport, setFileListImport] = useState<UploadFile[]>([]);
+  const [showAssignLabelForProduct, setShowAssignLabelForProduct] = useState(false);
+  const [lstImageBoothForLabel, setLstImageBoothForLabel] = useState([]);
 
   const propUploadImportFileExcel: UploadProps = {
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
@@ -319,7 +322,7 @@ export default function Product_SKU() {
       return false;
     },
   };
-
+  
   const propUploadEditProducts: UploadProps = {
     onRemove: (file) => {
       // Lấy tên tệp tin từ thuộc tính name của file
@@ -1597,146 +1600,199 @@ export default function Product_SKU() {
     const buffer = await workbook.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "sample_product", false);
   }
+
+  const onAssignLabelForProduct = () => {
+    document.getElementById('fileInput').click();
+    //setShowAssignLabelForProduct(true);
+  }
+  const handleFileChange = async (event) => {
+    const formData = new FormData();
+    let files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+      formData.append('file', files[i]);
+    }
+    const response = await AxiosService.post(
+      "/api/method/mbw_audit.api.api.upload_multi_file_for_checking",
+      formData
+    );
+    if(response.message == "ok"){
+      let urlImages = response.result.file_urls;
+      setLstImageBoothForLabel(urlImages);
+      setShowAssignLabelForProduct(true);
+    }else{
+      message.error("Lỗi chọn ảnh trưng bày gian hàng");
+    }
+  }
+
   return (
     <>
-      <HeaderPage
-        title="Sản phẩm"
-        buttons={[
-          showDeleteList && {
-            label: "Xóa",
-            type: "primary",
-            icon: <DeleteOutlined />,
-            size: "20px",
-            className: "flex items-center mr-2",
-            danger: true,
-            action: handleDeleteByList,
-          },
-          {
-            label: "Nhập file",
-            icon: <LuUploadCloud className="text-xl" />,
-            size: "20px",
-            className:
-              "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
-            action: handleImportFileProduct,
-          },
-          {
-            label: "Thêm sản phẩm từ ERP",
-            icon: <VscAdd className="text-xl" />,
-            size: "20px",
-            className:
-              "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
-            action: handleAddProductFromERP,
-          },
-          {
-            label: "Kiểm tra sản phẩm",
-            type: "primary",
-            icon: <FileProtectOutlined className="text-xl" />,
-            size: "20px",
-            className: "flex items-center mr-2",
-            action: showModalCheckProduct,
-          },
-          {
-            label: "Thêm mới",
-            type: "primary",
-            icon: <VscAdd className="text-xl" />,
-            size: "20px",
-            className: "flex items-center",
-            action: showModalAddProduct,
-          },
-        ]}
-      />
-      <Row gutter={16}>
-        <Col span={18} push={6}>
-          <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
-            <FormItemCustom className="w-[320px] border-none p-4">
-              <Input
-                value={searchProduct}
-                onChange={onChangeFilterProduct}
-                placeholder="Tìm kiếm tên sản phẩm"
-                prefix={<SearchOutlined />}
-              />
-            </FormItemCustom>
-            <div className="pt-3">
-              <TableCustom
-                rowSelection={{
-                  type: selectionType,
-                  ...rowSelectionProduct,
-                }}
-                columns={columnProducts}
-                dataSource={filteredProducts}
-              />
-            </div>
-          </div>
-        </Col>
-
-        <Col span={6} pull={18}>
-          <div className="bg-white rounded-xl p-4 border-[#DFE3E8] border-[0.2px] border-solid">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-base leading-5 font-medium text-[#212B36]">
-                  Danh mục
-                </p>
-              </div>
-              <div className="cursor-pointer" onClick={showModalCategory}>
-                <PlusOutlined />
-              </div>
-            </div>
-            <div className="py-3">
-              <FormItemCustom
-                className="w-full border-none"
-                name="filter_category"
-              >
-                <Input
-                  onChange={onChangeFilterCategory}
-                  value={searchCategory}
-                  placeholder="Tìm kiếm danh mục"
-                  prefix={<SearchOutlined />}
-                />
-              </FormItemCustom>
-            </div>
-            <List
-              style={{
-                maxHeight: "calc(100vh - 500px)",
-                overflow: "auto",
-                paddingRight: "10px",
-              }}
-              header={false}
-              footer={false}
-              bordered={false}
-              dataSource={categories}
-              renderItem={(item: any) => (
-                <List.Item
-                  onMouseEnter={(event) =>
-                    handleMouseEnterCategory(event, item)
-                  }
-                  onMouseLeave={(event) =>
-                    handleMouseLeaveCategory(event, item)
-                  }
-                  onClick={() => handleSelectedCategory(item)}
-                >
-                  <div className={"item_category"}>
-                    <span className={`${item.selected ? "selected" : ""}`}>
-                      <Typography.Text></Typography.Text> {item.category_name}
-                    </span>
-                    <span style={{ display: item.hidden ? "none" : "block" }}>
-                      <span style={{ marginRight: "10px" }}>
-                        <EditOutlined
-                          key="edit"
-                          onClick={() => handleEditCategoryClick(item)}
-                        />
-                      </span>
-
-                      <span onClick={() => handleDeleteCategoryClick(item)}>
-                        <DeleteOutlined key="delete" />
-                      </span>
-                    </span>
-                  </div>
-                </List.Item>
-              )}
+      <input
+        id="fileInput"
+        type="file"
+        multiple
+        onChange={handleFileChange}
+        style={{ display: 'none' }}/>
+      {
+        showAssignLabelForProduct==false && (
+          <>
+            <HeaderPage
+              title="Sản phẩm"
+              buttons={[
+                showDeleteList && {
+                  label: "Xóa",
+                  type: "primary",
+                  icon: <DeleteOutlined />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  danger: true,
+                  action: handleDeleteByList,
+                },
+                {
+                  label: "Nhập file",
+                  icon: <LuUploadCloud className="text-xl" />,
+                  size: "20px",
+                  className:
+                    "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+                  action: handleImportFileProduct,
+                },
+                {
+                  label: "Thêm sản phẩm từ ERP",
+                  icon: <VscAdd className="text-xl" />,
+                  size: "20px",
+                  className:
+                    "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+                  action: handleAddProductFromERP,
+                },
+                {
+                  label: "Kiểm tra sản phẩm",
+                  type: "primary",
+                  icon: <FileProtectOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: showModalCheckProduct,
+                },
+                {
+                  label: "Gán nhãn từ ảnh trưng bày",
+                  type: "primary",
+                  icon: <FormOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct,
+                },
+                {
+                  label: "Thêm mới",
+                  type: "primary",
+                  icon: <VscAdd className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center",
+                  action: showModalAddProduct,
+                },
+              ]}
             />
-          </div>
-        </Col>
-      </Row>
+            <Row gutter={16}>
+              <Col span={18} push={6}>
+                <div className="bg-white rounded-xl border-[#DFE3E8] border-[0.2px] border-solid">
+                  <FormItemCustom className="w-[320px] border-none p-4">
+                    <Input
+                      value={searchProduct}
+                      onChange={onChangeFilterProduct}
+                      placeholder="Tìm kiếm tên sản phẩm"
+                      prefix={<SearchOutlined />}
+                    />
+                  </FormItemCustom>
+                  <div className="pt-3">
+                    <TableCustom
+                      rowSelection={{
+                        type: selectionType,
+                        ...rowSelectionProduct,
+                      }}
+                      columns={columnProducts}
+                      dataSource={filteredProducts}
+                    />
+                  </div>
+                </div>
+              </Col>
+
+              <Col span={6} pull={18}>
+                <div className="bg-white rounded-xl p-4 border-[#DFE3E8] border-[0.2px] border-solid">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-base leading-5 font-medium text-[#212B36]">
+                        Danh mục
+                      </p>
+                    </div>
+                    <div className="cursor-pointer" onClick={showModalCategory}>
+                      <PlusOutlined />
+                    </div>
+                  </div>
+                  <div className="py-3">
+                    <FormItemCustom
+                      className="w-full border-none"
+                      name="filter_category"
+                    >
+                      <Input
+                        onChange={onChangeFilterCategory}
+                        value={searchCategory}
+                        placeholder="Tìm kiếm danh mục"
+                        prefix={<SearchOutlined />}
+                      />
+                    </FormItemCustom>
+                  </div>
+                  <List
+                    style={{
+                      maxHeight: "calc(100vh - 500px)",
+                      overflow: "auto",
+                      paddingRight: "10px",
+                    }}
+                    header={false}
+                    footer={false}
+                    bordered={false}
+                    dataSource={categories}
+                    renderItem={(item: any) => (
+                      <List.Item
+                        onMouseEnter={(event) =>
+                          handleMouseEnterCategory(event, item)
+                        }
+                        onMouseLeave={(event) =>
+                          handleMouseLeaveCategory(event, item)
+                        }
+                        onClick={() => handleSelectedCategory(item)}
+                      >
+                        <div className={"item_category"}>
+                          <span className={`${item.selected ? "selected" : ""}`}>
+                            <Typography.Text></Typography.Text> {item.category_name}
+                          </span>
+                          <span style={{ display: item.hidden ? "none" : "block" }}>
+                            <span style={{ marginRight: "10px" }}>
+                              <EditOutlined
+                                key="edit"
+                                onClick={() => handleEditCategoryClick(item)}
+                              />
+                            </span>
+
+                            <span onClick={() => handleDeleteCategoryClick(item)}>
+                              <DeleteOutlined key="delete" />
+                            </span>
+                          </span>
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              </Col>
+            </Row>
+          </>
+        )
+      }
+      {
+        showAssignLabelForProduct==true && (
+          <>
+            <div>Gán nhãn cho sản phẩm</div>
+          </>
+        )
+      }
+      
+      
 
       <Modal
         title="Kiểm tra ảnh sản phẩm"

@@ -21,6 +21,7 @@ from mbw_audit.utils import appconst
 from mbw_sfc_integrations.sfc_integrations.utils import create_sfc_log
 from frappe import _, msgprint
 from io import BytesIO
+import uuid
 
 @frappe.whitelist(methods=["POST"])
 def test_queue(*args,**kwargs):
@@ -1052,3 +1053,106 @@ def get_products_by_category(category):
     except Exception as e:
         return gen_response(500, 'error', [])
 
+@frappe.whitelist(methods="POST")
+def render_image_by_base64(*args, **kwargs):
+    try:
+        id_product = kwargs.get('name_product')
+        arr_base64 = kwargs.get('lst_base64')
+        id_category = kwargs.get('name_category')
+        arr_url_image = [];
+        for base64_str in arr_base64:
+            binary_data = base64.b64decode(base64_str)
+            stream = BytesIO(binary_data)
+            timestamp = datetime.timestamp(datetime.now())
+            filename = f'product_{int(timestamp)}.png'
+            filedata = stream.read()
+            path_folder = create_folder(id_category, f"product_trainning/{frappe.session.user}")
+            # Lưu file tạm vào hệ thống Frappe và nhận lại đường dẫn file đã lưu
+            fileInfo = save_file(filename, filedata, "File", f"{frappe.session.user}", path_folder)
+            arr_url_image.append(frappe.utils.get_request_site_address() + fileInfo.file_url)
+        return gen_response(200, 'ok', arr_url_image)
+    except Exception as e:
+        return gen_response(500, 'error', [])
+
+@frappe.whitelist(methods="POST")
+def assign_image_to_product(*args, **kwargs):
+    try:
+        id_product = kwargs.get('name_product')
+        lst_image = kwargs.get('lst_image')
+        id_category = kwargs.get('name_category')
+        doc_product = frappe.get_doc('VGM_Product', id_product)
+        vectordb_dir = frappe.get_site_path()
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+            nguong_nhan_dien_sp = 0.6
+        deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
+        product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
+        custom_field = doc_product.custom_field
+        arr_image_new = []
+        if doc_product.images is not None:
+            arr_image_new = json.loads(doc_product.images)
+            arr_image_new.extend(lst_image)
+        else:
+            arr_image_new = lst_image
+        obj_custom_field = {}
+        if custom_field is not None and json.loads(custom_field).get('product_id') is not None:
+            obj_custom_field = json.loads(custom_field)
+            products: Products = product_recognition.get_products()
+            image_ids = []
+            for image_new in arr_image_new:
+                image_id = str(uuid.uuid4())
+                image_ids.append(image_id)
+            response = products.add(id_category, obj_custom_field.get('product_id'), doc_product.product_name, image_ids, arr_image_new)
+            if response.get('status') == 'completed':
+                pass
+            else:
+                raise Exception("")
+        else:
+            product_id = str(uuid.uuid4())
+            image_ids = []
+            for value in arr_image_new:
+                image_id = str(uuid.uuid4())
+                image_ids.append(image_id)
+            products: Products = product_recognition.get_products()
+            response = products.add(id_category, product_id, doc_product.product_name, image_ids, arr_image_new)
+            if response.get('status') == 'completed':
+                product_AI = response.get('result', {}).get('product_id')
+                doc_product.custom_field = json.dumps({"product_id": product_AI})
+            else:
+                raise Exception("")
+        doc_product.images = json.dumps(arr_image_new)
+        doc_product.save()
+        return gen_response(200, 'ok', "Thành công")
+    except Exception as e:
+        return gen_response(500, "error", str(e))
+
+@frappe.whitelist(methods="POST")
+def upload_multi_file_for_checking():
+    try:
+        # Check if multiple files are uploaded
+        if "file" not in frappe.request.files:
+            raise ValueError("No file found in form data")
+
+        # Get all uploaded files
+        files = frappe.request.files.getlist("file")
+
+        # Initialize an empty list to store file URLs
+        file_urls = []
+
+        # Iterate over each uploaded file
+        for file_info in files:
+            # Check if file_info is a valid file object
+            filename = file_info.filename
+            filedata = file_info.stream.read()
+            path_folder = create_folder("product_checking")
+
+            # Save each file and get the file information
+            file_info = save_file(filename, filedata, "File", "product_checking", path_folder)
+
+            # Add file information to a list
+            file_urls.append(frappe.utils.get_request_site_address() + file_info.file_url)
+
+        # Return response with a list of file URLs and timestamp
+        return gen_response(200, "ok", {"file_urls": file_urls, "date_time": str(datetime.now().timestamp())})
+    except Exception as e:
+        return gen_response(500, "error", {"file_url": _("Failed to upload file: {0}").format(str(e))})

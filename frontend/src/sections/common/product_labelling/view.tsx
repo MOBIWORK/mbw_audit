@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./style.css";
 import { AxiosService } from "../../../services/server";
-import {Row, Col, Image, Spin, Button, Select} from 'antd';
+import {Row, Col, Image, Spin, Button, Select, message} from 'antd';
 import {LeftOutlined, RightOutlined, LoadingOutlined, CloseOutlined} from "@ant-design/icons";
 import CanvasImage from "../canvas_image/view";
 import { FormItemCustom } from "../../../components";
@@ -15,6 +15,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
     const [lstImageBboxProduct, setLstImageBboxProduct] = useState([]);
     const [optionsProduct, setOptionsProduct] = useState([]);
     const [labelProductSelect, setLabelProductSelect] = useState("");
+    const [loadingAssignLabel, setLoadingAssignLabel] = useState(false);
 
     useEffect(() => {
         renderImageWithBBox();
@@ -65,8 +66,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
     }
 
     const handleBackPage = function (){
-        console.log("Back page");
-        backPageEmit();
+        backPageEmit(arrImage);
     }
     const handlePrevImage = () => {
         if (mainImageIndex > 0) {
@@ -94,14 +94,58 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
         setLabelProductSelect(val);
     }
 
-    const handleSaveLabelForImage = () =>{
-        console.log(labelProductSelect);
-        console.log(lstImageBboxProduct);
-
-        //Clear dữ liệu
-        setLabelProductSelect("");
-        setLstImageBboxProduct([]);
-        setStateInsertImageContent(1);
+    const handleSaveLabelForImage = async () =>{
+        if(labelProductSelect == null || labelProductSelect == ""){
+            message.warning("Vui lòng chọn tên sản phẩm để thực hiện gán nhãn");
+            return;
+        }
+        if(lstImageBboxProduct.length == 0){
+            message.warning("Vui lòng chọn ảnh sản phẩm trong ảnh trưng bày để thực hiện gán nhãn");
+            return;
+        }
+        setLoadingAssignLabel(true);
+        let arrUrlImage = [];
+        let objRenderImage = {
+            'name_product': labelProductSelect,
+            'name_category': category,
+            'lst_base64': []
+        }
+        for(let i = 0; i < lstImageBboxProduct.length; i++){
+            let base64 = lstImageBboxProduct[i].split(',')[1];
+            objRenderImage.lst_base64.push(base64);
+            if((i > 0 && i % 5 == 0) || (i == lstImageBboxProduct.length-1)){
+                let urlRenderImage = "api/method/mbw_audit.api.api.render_image_by_base64";
+                let res = await AxiosService.post(urlRenderImage, objRenderImage);
+                if(res.message == "ok"){
+                    for(let j = 0; j < res.result.length; j++){
+                        arrUrlImage.push(res.result[j]);
+                    }
+                    objRenderImage.lst_base64 = [];
+                }else{
+                    message.error("Tạo ảnh cho sản phẩm lỗi. Vui lòng liên hệ quản trị hệ thống để tiếp tục");
+                    setLoadingAssignLabel(false);
+                    return;
+                }
+            }
+        }
+        let objAssignImage = {
+            'name_product': labelProductSelect,
+            'name_category': category,
+            'lst_image': arrUrlImage
+        }
+        let urlAssignImage = "/api/method/mbw_audit.api.api.assign_image_to_product";
+        let resAssign = await AxiosService.post(urlAssignImage, objAssignImage);
+        if(resAssign.message == "ok"){
+            //Clear dữ liệu
+            setLoadingAssignLabel(false);
+            setLabelProductSelect("");
+            setLstImageBboxProduct([]);
+            setStateInsertImageContent(1);
+        }else{
+            message.error("Gán nhãn cho sản phẩm lỗi. Vui lòng liên hệ quản trị hệ thống để tiếp tục");
+            setLoadingAssignLabel(false);
+            return;
+        }
     }
 
     const handleAddAnotherProduct = () => {
@@ -109,7 +153,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
     }
 
     const handleCompleteProductLabelling = () => {
-        completeProductLabelling();
+        completeProductLabelling(arrImage);
     }
 
     return (
@@ -238,7 +282,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                         <div style={{fontWeight:600,fontSize: '18px',lineHeight: '36px'}}>Thêm hình ảnh vào sản phẩm</div>
                         {stateInsertImageContent==0&&(
                             <>
-                                <div style={{ display: 'flex', flexWrap: 'wrap' }} className="py-3">
+                                <div style={{ display: 'flex', flexWrap: 'wrap', maxHeight: '490px', overflowY: 'auto' }} className="py-3">
                                     {lstImageBboxProduct.map((image, index) => (
                                     <div key={index} style={{ marginRight: '15px',marginBottom: '15px', position: 'relative' }}>
                                         <Image
@@ -269,7 +313,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                                     </Select>
                                 </FormItemCustom>
                                 <div className="py-5">
-                                    <Button type="primary" ghost onClick={handleSaveLabelForImage}>Lưu hình ảnh</Button>
+                                    <Button type="primary" ghost loading={loadingAssignLabel} onClick={handleSaveLabelForImage}>Lưu hình ảnh</Button>
                                 </div>
                                 
                             </>
