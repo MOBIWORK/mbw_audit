@@ -261,14 +261,6 @@ export default function ReportView() {
               }
               buttons={[
                 {
-                  label: "Gán nhãn từ ảnh trưng bày",
-                  type: "primary",
-                  icon: <FormOutlined className="text-xl" />,
-                  size: "20px",
-                  className: "flex items-center mr-2",
-                  action: onAssignLabelForProduct,
-                },
-                {
                   label: "trước",
                   type: "default",
                   size: "20px",
@@ -286,6 +278,14 @@ export default function ReportView() {
                   action: handleSaveReport,
                   disabled: lastRecord
                 },
+                {
+                  label: "Gán nhãn từ ảnh trưng bày",
+                  type: "primary",
+                  icon: <FormOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct,
+                }
               ]}
             />
           )}
@@ -301,14 +301,6 @@ export default function ReportView() {
                 </p>
               }
               buttons={[
-                {
-                  label: "Gán nhãn từ ảnh trưng bày",
-                  type: "primary",
-                  icon: <FormOutlined className="text-xl" />,
-                  size: "20px",
-                  className: "flex items-center mr-2",
-                  action: onAssignLabelForProduct,
-                },
                 {
                   label: "trước",
                   type: "default",
@@ -326,6 +318,14 @@ export default function ReportView() {
                   loading: loadingUpdate,
                   action: handleSaveReportWithOutNext
                 },
+                {
+                  label: "Gán nhãn từ ảnh trưng bày",
+                  type: "primary",
+                  icon: <FormOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct,
+                }
               ]}
             />
           )}
