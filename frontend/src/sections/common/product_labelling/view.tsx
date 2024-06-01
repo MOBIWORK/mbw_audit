@@ -114,7 +114,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
             let base64 = lstImageBboxProduct[i].split(',')[1];
             objRenderImage.lst_base64.push(base64);
             if((i > 0 && i % 5 == 0) || (i == lstImageBboxProduct.length-1)){
-                let urlRenderImage = "api/method/mbw_audit.api.api.render_image_by_base64";
+                let urlRenderImage = "/api/method/mbw_audit.api.api.render_image_by_base64";
                 let res = await AxiosService.post(urlRenderImage, objRenderImage);
                 if(res.message == "ok"){
                     for(let j = 0; j < res.result.length; j++){
