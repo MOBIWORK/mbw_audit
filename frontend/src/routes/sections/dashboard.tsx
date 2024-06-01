@@ -12,7 +12,6 @@ const RouterProduct_SKU= lazy(()=> import('@/pages/RouterProduct_SKU'))
 const Campaign = lazy(()=> import('@/pages/Campaign'))
 const CampaignCreate = lazy(()=> import('@/pages/CampaignCreate'))
 const ReportView = lazy(()=> import('@/pages/RouteReportView'))
-const DemoImage = lazy(() => import('@/pages/DemoImage'))
 // Định nghĩa các route của dashboard
 export const dashboardRoutes = [
     {
@@ -45,8 +44,6 @@ export const dashboardRoutes = [
             },
             {
                 path: 'report-view', element: <ReportView />
-            },{
-                path: 'demo_image', element: <DemoImage />
             }
         ]
     },

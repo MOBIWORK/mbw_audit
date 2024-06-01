@@ -5,6 +5,7 @@ import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import * as ExcelJS from "exceljs";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import ProductLabelling from "../common/product_labelling/view"
 
 import {
   DeleteOutlined,
@@ -271,7 +272,6 @@ export default function Product_SKU() {
       }
     },
     beforeUpload: async (file) => {
-      console.log(file);
       const fileName = file.name.toLowerCase();
       if (
         fileName.endsWith(".jpeg") ||
@@ -941,7 +941,7 @@ export default function Product_SKU() {
       return;
     }
     // Kiểm tra xem người dùng đã nhập đủ thông tin hay chưa
-    if (!objProduct.product_name || arrImages.length === 0) {
+    if (!objProduct.product_name) {
       // Hiển thị thông báo lỗi
       message.error(
         "Vui lòng nhập tên sản phẩm và tải lên ít nhất một hình ảnh"
@@ -1618,10 +1618,27 @@ export default function Product_SKU() {
     if(response.message == "ok"){
       let urlImages = response.result.file_urls;
       setLstImageBoothForLabel(urlImages);
+      //setLstImageBoothForLabel(["http://localhost:8001/public/gian.png"]);
       setShowAssignLabelForProduct(true);
+      let arrNode = document.getElementsByClassName("ant-layout-content");
+      arrNode[0].style.padding = "0px";
     }else{
       message.error("Lỗi chọn ảnh trưng bày gian hàng");
     }
+  }
+  const onBackPage = (event) => {
+    setShowAssignLabelForProduct(false);
+    let arrNode = document.getElementsByClassName("ant-layout-content");
+    arrNode[0].style.padding = "0px 24px 20px";
+    document.getElementById("fileInput").value = '';
+    initDataProductByCategory();
+  }
+  const onCompleteProductLabelling = (event) => {
+    setShowAssignLabelForProduct(false);
+    let arrNode = document.getElementsByClassName("ant-layout-content");
+    arrNode[0].style.padding = "0px 24px 20px";
+    document.getElementById("fileInput").value = '';
+    initDataProductByCategory();
   }
 
   return (
@@ -1787,7 +1804,8 @@ export default function Product_SKU() {
       {
         showAssignLabelForProduct==true && (
           <>
-            <div>Gán nhãn cho sản phẩm</div>
+            <ProductLabelling category={categorySelected.name} arrImage={lstImageBoothForLabel}
+                backPageEmit={onBackPage} completeProductLabelling={onCompleteProductLabelling}></ProductLabelling>
           </>
         )
       }

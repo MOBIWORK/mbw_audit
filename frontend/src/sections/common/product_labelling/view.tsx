@@ -162,7 +162,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
             <div style={{
             position: 'fixed',
             width: '100%',
-            height: '85%',
+            height: '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             zIndex: 9999,
             display: 'flex',

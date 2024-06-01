@@ -26,9 +26,9 @@ export default function DashboardLayout({ children }: Props) {
           </SiderCustome>
           <Content
               className="round"
-              style={{ padding: "0px 24px 20px", maxHeight: "85vh", overflow: "auto" ,background:"#F4F6F8" }}
+              style={{ padding: "0px 24px 20px", overflow: "auto" ,background:"#F4F6F8" }}
             >
-              <div>{children}</div>
+              <div style={{height:'100%', width: '100%'}}>{children}</div>
             </Content>
     </Layout>
   );

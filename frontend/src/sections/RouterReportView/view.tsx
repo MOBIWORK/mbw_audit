@@ -1,21 +1,27 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { HeaderPage } from "../../components";
-import { DoubleLeftOutlined, DoubleRightOutlined, LeftOutlined } from "@ant-design/icons";
+import { DoubleLeftOutlined, LeftOutlined, FormOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Form ,Collapse, message  } from "antd";
+import { Form, Collapse, message } from "antd";
 import type { CollapseProps } from 'antd';
 import GeneralInformation from "./general-information";
 import Product from "./product";
-import './view.css'; 
+import './view.css';
 import { AxiosService } from "../../services/server";
-export default function  ReportView() {
+import ProductLabelling from "../common/product_labelling/view"
+
+export default function ReportView() {
   const [recordData, setRecordData] = useState(null);
   const [scoringHuman, setScoringHuman] = useState(0);
   const [reportSKUs, setReportSKUs] = useState<any[]>([]);
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false);
   const [updateStorage, setUpdateStorage] = useState<boolean>(false);
-  const [firstRecord, setFirstRecord] = useState<boolean>(false); 
+  const [firstRecord, setFirstRecord] = useState<boolean>(false);
   const [lastRecord, setLastRecord] = useState<boolean>(false);
+  const [showAssignLabelForProduct, setShowAssignLabelForProduct] = useState(false);
+  const [category, setCategory] = useState<String>("");
+  const [lstImageBoothForLabelling, setLstImageBoothForLabelling] = useState<String[]>([]);
+
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
   };
@@ -33,17 +39,17 @@ export default function  ReportView() {
     {
       key: '1',
       label: <span style={{ fontWeight: 700 }}>Thông tin chung</span>,
-      children: <GeneralInformation form={form} recordData={recordData} onChangeScoringHuman={handleChangeScoringHuman}/>,
+      children: <GeneralInformation form={form} recordData={recordData} onChangeScoringHuman={handleChangeScoringHuman} />,
     },
     {
       key: '2',
       label: <span style={{ fontWeight: 700 }}>Sản phẩm</span>,
       children: <Product recordData={recordData} onChangeValReportSKU={handleChangeValReportSKU}
-    />,
+      />,
     },
-    
+
   ];
-  
+
   useEffect(() => {
     // Lấy record từ local storage khi component được mount
     let storedRecordData = localStorage.getItem('recordData');
@@ -52,7 +58,7 @@ export default function  ReportView() {
       setRecordData(objRecord);
       setScoringHuman(objRecord.scoring_human);
       let arrReportSKU = [];
-      for(let i = 0; i < objRecord.detail_skus.length; i++){
+      for (let i = 0; i < objRecord.detail_skus.length; i++) {
         let reportSKU = {
           'report_sku_id': objRecord.detail_skus[i].name,
           'sum_product_human': objRecord.detail_skus[i].sum_product_human,
@@ -64,7 +70,7 @@ export default function  ReportView() {
     }
 
     // Xóa record khỏi local storage sau khi đã sử dụng
-   // localStorage.removeItem('recordData');
+    // localStorage.removeItem('recordData');
   }, [updateStorage]);
 
   useEffect(() => {
@@ -82,7 +88,7 @@ export default function  ReportView() {
       }
     }
   }, [recordData]);
-  
+
   const handleSaveReport = async () => {
     setLoadingUpdate(true);
     let objReportSKU = {
@@ -92,38 +98,38 @@ export default function  ReportView() {
     }
     let urlReportUpdate = "/api/method/mbw_audit.api.api.update_report";
     const res = await AxiosService.post(urlReportUpdate, objReportSKU);
-    if(res != null && res.message == "ok" && res.result != null && res.result.data == "success"){
+    if (res != null && res.message == "ok" && res.result != null && res.result.data == "success") {
       message.success("Cập nhật thành công");
       setLoadingUpdate(false);
-      let dataReports  = JSON.parse(localStorage.getItem('dataReports'));
+      let dataReports = JSON.parse(localStorage.getItem('dataReports'));
       let record = JSON.parse(localStorage.getItem('recordData'));
-      for (let i = 0; i< record.detail_skus.length;i++){
-        for(let j = 0; j < reportSKUs.length;j++){
-          if(record.detail_skus[i].name == reportSKUs[j].report_sku_id){
+      for (let i = 0; i < record.detail_skus.length; i++) {
+        for (let j = 0; j < reportSKUs.length; j++) {
+          if (record.detail_skus[i].name == reportSKUs[j].report_sku_id) {
             record.detail_skus[i].sum_product_human = reportSKUs[j].sum_product_human
             record.detail_skus[i].scoring_human = reportSKUs[j].scoring_human
           }
         }
-        
+
       }
       record.scoring_human = scoringHuman
       const currentIndex = dataReports.findIndex((item) => item.name === record.name);
 
-    // Kiểm tra nếu không phải là record cuối cùng trong danh sách
-    if (currentIndex !== null && currentIndex < dataReports.length - 1) {
-      const nextRecord = dataReports[currentIndex + 1];
-      localStorage.setItem('recordData', JSON.stringify(nextRecord));
-      setUpdateStorage(prevState => !prevState);
-    }else{
-    //localStorage.removeItem('recordData');
-    return
-    }
+      // Kiểm tra nếu không phải là record cuối cùng trong danh sách
+      if (currentIndex !== null && currentIndex < dataReports.length - 1) {
+        const nextRecord = dataReports[currentIndex + 1];
+        localStorage.setItem('recordData', JSON.stringify(nextRecord));
+        setUpdateStorage(prevState => !prevState);
+      } else {
+        //localStorage.removeItem('recordData');
+        return
+      }
       // Cập nhật lại record mới vào dataReports
-  dataReports[currentIndex] = record;
+      dataReports[currentIndex] = record;
 
-  // Cập nhật lại dataReports trong local storage
-  localStorage.setItem('dataReports', JSON.stringify(dataReports));
-    }else{
+      // Cập nhật lại dataReports trong local storage
+      localStorage.setItem('dataReports', JSON.stringify(dataReports));
+    } else {
       message.error("Cập nhật thất bại");
       setLoadingUpdate(false);
     }
@@ -148,50 +154,115 @@ export default function  ReportView() {
     return 'Tiêu đề';
   };
   // Hàm xử lý khi click và điều hướng
-const handleNavigateToReports = () => {
-  navigate("/reports");
-  localStorage.removeItem('recordData');
-  localStorage.removeItem('dataReports');
-};
+  const handleNavigateToReports = () => {
+    navigate("/reports");
+    localStorage.removeItem('recordData');
+    localStorage.removeItem('dataReports');
+  };
+
+  const onAssignLabelForProduct = () => {
+    console.log(recordData);
+    if(recordData.images != null && recordData.images != ""){
+      let arrImage = JSON.parse(recordData.images);
+      if(arrImage.length > 0){
+        setLstImageBoothForLabelling(arrImage);
+        //setLstImageBoothForLabelling(["http://localhost:8001/public/gian.png"]);
+      }else{
+        message.warning("Bạn không có ảnh gian hàng sản phẩm để thực hiện gán nhãn");
+        return;
+      }
+    }else{
+      message.warning("Bạn không có ảnh gian hàng sản phẩm để thực hiện gán nhãn");
+      return;
+    }
+    if(recordData.categories != null && recordData.categories != ""){
+      let categories = JSON.parse(recordData.categories);
+      if(categories.length > 0){
+        setCategory(categories[0]);
+      }else{
+        message.warning("Bạn không có danh mục sản phẩm khi tạo chiến dịch");
+        return;
+      }
+    }else{
+      message.warning("Bạn không có danh mục sản phẩm khi tạo chiến dịch");
+      return;
+    }
+    setShowAssignLabelForProduct(true);
+    let arrNode = document.getElementsByClassName("ant-layout-content");
+    arrNode[0].style.padding = "0px";
+  }
+
+  const onBackPage = (event) => {
+    setLstImageBoothForLabelling([]);
+    setCategory("");
+    setShowAssignLabelForProduct(false);
+    let arrNode = document.getElementsByClassName("ant-layout-content");
+    arrNode[0].style.padding = "0px 24px 20px";
+  }
+
+  const onCompleteProductLabelling = (event) => {
+    setLstImageBoothForLabelling([]);
+    setCategory("");
+    setShowAssignLabelForProduct(false);
+    let arrNode = document.getElementsByClassName("ant-layout-content");
+    arrNode[0].style.padding = "0px 24px 20px";
+  }
+
   return (
     <>
-      <HeaderPage
-        title={renderTitle()}
-        icon={
-          <p
-            onClick={ () => handleNavigateToReports()}
-            className="mr-2 cursor-pointer"
-          >
-            <LeftOutlined />
-          </p>
-        }
-        buttons={[
-          {
-            label: "trước",
-            type: "default",
-            size: "20px",
-            className: "flex items-center mr-2",
-            icon: <DoubleLeftOutlined />,
-            action: handleNavigateToPrevious,
-            disabled: firstRecord 
-          },
-          {
-            label: "Lưu lại và Tiếp",
-            type: "primary",
-            size: "20px",
-            className: "flex items-center",
-            loading: loadingUpdate,
-            action: handleSaveReport,
-            disabled: lastRecord 
-          },
-        ]}
-      />
-      <div className="bg-white  rounded-xl">
-        <Form layout="vertical" form={form}>
-        <Collapse items={items} defaultActiveKey={['1','2']} onChange={onChange} className="custom-collapse"/>
-          {}
-        </Form>
-      </div>
+      {showAssignLabelForProduct == false && (
+        <>
+          <HeaderPage
+            title={renderTitle()}
+            icon={
+              <p
+                onClick={() => handleNavigateToReports()}
+                className="mr-2 cursor-pointer"
+              >
+                <LeftOutlined />
+              </p>
+            }
+            buttons={[
+              {
+                label: "Gán nhãn từ ảnh trưng bày",
+                type: "primary",
+                icon: <FormOutlined className="text-xl" />,
+                size: "20px",
+                className: "flex items-center mr-2",
+                action: onAssignLabelForProduct,
+              },
+              {
+                label: "trước",
+                type: "default",
+                size: "20px",
+                className: "flex items-center mr-2",
+                icon: <DoubleLeftOutlined />,
+                action: handleNavigateToPrevious,
+                disabled: firstRecord
+              },
+              {
+                label: "Lưu lại và Tiếp",
+                type: "primary",
+                size: "20px",
+                className: "flex items-center",
+                loading: loadingUpdate,
+                action: handleSaveReport,
+                disabled: lastRecord
+              },
+            ]}
+          />
+          <div className="bg-white  rounded-xl">
+            <Form layout="vertical" form={form}>
+              <Collapse items={items} defaultActiveKey={['1', '2']} onChange={onChange} className="custom-collapse" />
+              { }
+            </Form>
+          </div>
+        </>
+      )}
+      {showAssignLabelForProduct == true && (
+        <ProductLabelling category={category} arrImage={lstImageBoothForLabelling}
+          backPageEmit={onBackPage} completeProductLabelling={onCompleteProductLabelling}></ProductLabelling>
+      )}
     </>
   );
 }
