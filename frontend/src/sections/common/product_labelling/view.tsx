@@ -50,7 +50,7 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
     }
 
     const renderLabelProduct = async () => {
-        let urlProduct = `api/method/mbw_audit.api.api.get_products_by_category?category=${category}`;
+        let urlProduct = `/api/method/mbw_audit.api.api.get_products_by_category?category=${category}`;
         let res = await AxiosService.get(urlProduct);
         if(res.message == "ok"){
             let arrProduct = [];

@@ -135,6 +135,43 @@ export default function ReportView() {
     }
   }
 
+  const handleSaveReportWithOutNext = async() => {
+    setLoadingUpdate(true);
+    let objReportSKU = {
+      'name': recordData.name,
+      'scoring': scoringHuman,
+      'arr_product': reportSKUs
+    }
+    let urlReportUpdate = "/api/method/mbw_audit.api.api.update_report";
+    const res = await AxiosService.post(urlReportUpdate, objReportSKU);
+    if (res != null && res.message == "ok" && res.result != null && res.result.data == "success") {
+      message.success("Cập nhật thành công");
+      setLoadingUpdate(false);
+      let dataReports = JSON.parse(localStorage.getItem('dataReports'));
+      let record = JSON.parse(localStorage.getItem('recordData'));
+      for (let i = 0; i < record.detail_skus.length; i++) {
+        for (let j = 0; j < reportSKUs.length; j++) {
+          if (record.detail_skus[i].name == reportSKUs[j].report_sku_id) {
+            record.detail_skus[i].sum_product_human = reportSKUs[j].sum_product_human
+            record.detail_skus[i].scoring_human = reportSKUs[j].scoring_human
+          }
+        }
+
+      }
+      record.scoring_human = scoringHuman
+      const currentIndex = dataReports.findIndex((item) => item.name === record.name);
+
+      // Cập nhật lại record mới vào dataReports
+      dataReports[currentIndex] = record;
+
+      // Cập nhật lại dataReports trong local storage
+      localStorage.setItem('dataReports', JSON.stringify(dataReports));
+    } else {
+      message.error("Cập nhật thất bại");
+      setLoadingUpdate(false);
+    }
+  }
+
   const handleNavigateToPrevious = () => {
     let dataReports = JSON.parse(localStorage.getItem('dataReports'));
     const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
@@ -161,7 +198,6 @@ export default function ReportView() {
   };
 
   const onAssignLabelForProduct = () => {
-    console.log(recordData);
     if(recordData.images != null && recordData.images != ""){
       let arrImage = JSON.parse(recordData.images);
       if(arrImage.length > 0){
@@ -212,45 +248,88 @@ export default function ReportView() {
     <>
       {showAssignLabelForProduct == false && (
         <>
-          <HeaderPage
-            title={renderTitle()}
-            icon={
-              <p
-                onClick={() => handleNavigateToReports()}
-                className="mr-2 cursor-pointer"
-              >
-                <LeftOutlined />
-              </p>
-            }
-            buttons={[
-              {
-                label: "Gán nhãn từ ảnh trưng bày",
-                type: "primary",
-                icon: <FormOutlined className="text-xl" />,
-                size: "20px",
-                className: "flex items-center mr-2",
-                action: onAssignLabelForProduct,
-              },
-              {
-                label: "trước",
-                type: "default",
-                size: "20px",
-                className: "flex items-center mr-2",
-                icon: <DoubleLeftOutlined />,
-                action: handleNavigateToPrevious,
-                disabled: firstRecord
-              },
-              {
-                label: "Lưu lại và Tiếp",
-                type: "primary",
-                size: "20px",
-                className: "flex items-center",
-                loading: loadingUpdate,
-                action: handleSaveReport,
-                disabled: lastRecord
-              },
-            ]}
-          />
+          {lastRecord == false && (
+            <HeaderPage
+              title={renderTitle()}
+              icon={
+                <p
+                  onClick={() => handleNavigateToReports()}
+                  className="mr-2 cursor-pointer"
+                >
+                  <LeftOutlined />
+                </p>
+              }
+              buttons={[
+                {
+                  label: "Gán nhãn từ ảnh trưng bày",
+                  type: "primary",
+                  icon: <FormOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct,
+                },
+                {
+                  label: "trước",
+                  type: "default",
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  icon: <DoubleLeftOutlined />,
+                  action: handleNavigateToPrevious,
+                  disabled: firstRecord
+                },
+                {
+                  label: "Lưu lại và Tiếp",
+                  type: "primary",
+                  size: "20px",
+                  className: "flex items-center",
+                  loading: loadingUpdate,
+                  action: handleSaveReport,
+                  disabled: lastRecord
+                },
+              ]}
+            />
+          )}
+          {lastRecord == true && (
+            <HeaderPage
+              title={renderTitle()}
+              icon={
+                <p
+                  onClick={() => handleNavigateToReports()}
+                  className="mr-2 cursor-pointer"
+                >
+                  <LeftOutlined />
+                </p>
+              }
+              buttons={[
+                {
+                  label: "Gán nhãn từ ảnh trưng bày",
+                  type: "primary",
+                  icon: <FormOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct,
+                },
+                {
+                  label: "trước",
+                  type: "default",
+                  size: "20px",
+                  className: "flex items-center mr-2",
+                  icon: <DoubleLeftOutlined />,
+                  action: handleNavigateToPrevious,
+                  disabled: firstRecord
+                },
+                {
+                  label: "Lưu lại",
+                  type: "primary",
+                  size: "20px",
+                  className: "flex items-center",
+                  loading: loadingUpdate,
+                  action: handleSaveReportWithOutNext
+                },
+              ]}
+            />
+          )}
+          
           <div className="bg-white  rounded-xl">
             <Form layout="vertical" form={form}>
               <Collapse items={items} defaultActiveKey={['1', '2']} onChange={onChange} className="custom-collapse" />

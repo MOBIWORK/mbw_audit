@@ -5,7 +5,7 @@ import {} from "frappe-react-sdk";
 import { useFrappeAuth } from "frappe-react-sdk";
 
 import { Link } from "react-router-dom";
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/react.svg";
 import { AxiosService } from "../../services/server";
 import { rsData } from "../../types/response";
 
@@ -16,9 +16,8 @@ export default function Header() {
   useEffect(() => {
     (async () => {
       const rsEmployee: rsData<employeeType> = await AxiosService.get(
-        "api/method/mbw_service_v2.api.user.get_employee_info"
+        "api/method/mbw_service_v2.api.user.get_user_info"
       );
-      console.log("employee", rsEmployee);
       setEmpDetail(rsEmployee.result);
     })();
   }, []);
@@ -43,9 +42,10 @@ export default function Header() {
       key: "3",
     },
   ];
+  
   return (
-    <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4 " style={{ height: '56px' }}>
-      <Row className="justify-end max-w-full " style={{ alignItems:'center',height:'100%'}}>
+    <div className="w-full !border-[red] border bg-white py-[7px] !border-b-4">
+      <Row className="justify-end max-w-full pr-8">
         <Dropdown
             menu={{ items }}
             trigger={["click"]}
@@ -57,11 +57,11 @@ export default function Header() {
             )}
           >
             <Avatar
-              style={{ backgroundColor: "#f56a00", marginRight:'10px',cursor:'pointer' }}
+              style={{ backgroundColor: "#f56a00" }}
               size={32}
-              {...(empDetail?.image ? { src: empDetail?.image } : {})}
+              {...(empDetail?.user_image ? { src: empDetail?.user_image } : {})}
             >
-              {!empDetail?.image && empDetail?.employee_name[0]}
+              {!empDetail?.user_image && empDetail?.full_name.split(" ").reduce((prev,now) => `${prev[0] || ""}${now[0]}`,"")}
             </Avatar>
           </Dropdown>
       </Row>
