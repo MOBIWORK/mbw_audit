@@ -21,6 +21,7 @@ from datetime import datetime
 class VGM_Product(Document):
     def before_save(self):
         # Check exist Product
+        print("Dòng 24 vào đây")
         product_exists = frappe.get_list("VGM_Product", filters={"name": self.name}, limit=1)
         if product_exists:
             self.update_product()
@@ -35,7 +36,6 @@ class VGM_Product(Document):
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
-        print(self)
         custom_field_check = self.get('custom_field')
         if custom_field_check is None:
             self.check_and_add_product()
@@ -76,7 +76,6 @@ class VGM_Product(Document):
         if images_dict:
             base_url = frappe.utils.get_request_site_address()
             image_paths = [base_url + value if 'http' not in value else value for value in images_dict]
-            print(image_paths)
             collection_name = self.category
             product_id = str(uuid.uuid4())
             # Khởi tạo danh sách để chứa các image_ids

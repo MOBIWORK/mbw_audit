@@ -79,7 +79,6 @@ def checkImageProductExist(*args, **kwargs):
         # product_id = self.product
         # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
         response = recognition.count(collection_name, image_path)
-        print("Dòng 81 ", response)
         if response.get('status') == 'completed':
             # Tính tổng của các danh sách sản phẩm từ mảng
             count_result = {}
@@ -1121,7 +1120,10 @@ def assign_image_to_product(*args, **kwargs):
             else:
                 raise Exception("")
         doc_product.images = json.dumps(arr_image_new)
-        doc_product.save()
+        frappe.db.set_value('VGM_Product', id_product, {
+            'images': doc_product.images,
+            'custom_field': doc_product.custom_field
+        })
         return gen_response(200, 'ok', "Thành công")
     except Exception as e:
         return gen_response(500, "error", str(e))

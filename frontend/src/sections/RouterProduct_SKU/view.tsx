@@ -1618,7 +1618,7 @@ export default function Product_SKU() {
     if(response.message == "ok"){
       let urlImages = response.result.file_urls;
       setLstImageBoothForLabel(urlImages);
-      //setLstImageBoothForLabel(["http://localhost:8001/public/gian.png"]);
+      //setLstImageBoothForLabel(["http://localhost:8001/public/gian.jpg"]);
       setShowAssignLabelForProduct(true);
       let arrNode = document.getElementsByClassName("ant-layout-content");
       arrNode[0].style.padding = "0px";
