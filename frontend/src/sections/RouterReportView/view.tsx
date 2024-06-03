@@ -273,7 +273,7 @@ export default function ReportView() {
                   label: "Lưu lại và Tiếp",
                   type: "primary",
                   size: "20px",
-                  className: "flex items-center",
+                  className: "flex items-center mr-2",
                   loading: loadingUpdate,
                   action: handleSaveReport,
                   disabled: lastRecord
@@ -283,7 +283,7 @@ export default function ReportView() {
                   type: "primary",
                   icon: <FormOutlined className="text-xl" />,
                   size: "20px",
-                  className: "flex items-center mr-2",
+                  className: "flex items-center",
                   action: onAssignLabelForProduct,
                 }
               ]}
@@ -314,7 +314,7 @@ export default function ReportView() {
                   label: "Lưu lại",
                   type: "primary",
                   size: "20px",
-                  className: "flex items-center",
+                  className: "flex items-center mr-2",
                   loading: loadingUpdate,
                   action: handleSaveReportWithOutNext
                 },
@@ -323,7 +323,7 @@ export default function ReportView() {
                   type: "primary",
                   icon: <FormOutlined className="text-xl" />,
                   size: "20px",
-                  className: "flex items-center mr-2",
+                  className: "flex items-center",
                   action: onAssignLabelForProduct,
                 }
               ]}

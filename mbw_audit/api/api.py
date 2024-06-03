@@ -79,6 +79,7 @@ def checkImageProductExist(*args, **kwargs):
         # product_id = self.product
         # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
         response = recognition.count(collection_name, image_path)
+
         if response.get('status') == 'completed':
             # Tính tổng của các danh sách sản phẩm từ mảng
             count_result = {}
@@ -522,7 +523,7 @@ def get_reports_by_filter():
         if campaign_code is not None:
             filters.append(['campaign_code', '=', campaign_code])
         if start_date is not None and end_date is not None:
-            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            date_format_with_time = '%Y/%m/%d'
             start_date_in = int(start_date)
             end_date_in = int(end_date)
             start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
