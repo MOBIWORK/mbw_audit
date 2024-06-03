@@ -15,7 +15,7 @@ export default function MenuLeft({
   collapsed: boolean;
 }) {
   const [current, setCurrent] = useState(
-     "1"
+    localStorage.getItem("selectedKey") || "1"
   );
 
   const onClick: MenuProps["onClick"] = (e) => {

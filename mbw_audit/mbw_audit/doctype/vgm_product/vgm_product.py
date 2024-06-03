@@ -21,7 +21,6 @@ from datetime import datetime
 class VGM_Product(Document):
     def before_save(self):
         # Check exist Product
-        print("Dòng 24 vào đây")
         product_exists = frappe.get_list("VGM_Product", filters={"name": self.name}, limit=1)
         if product_exists:
             self.update_product()
@@ -86,7 +85,6 @@ class VGM_Product(Document):
                 image_ids.append(image_id)
             # Lấy danh sách sản phẩm
             products: Products = product_recognition.get_products()
-
             # Thực hiện thêm sản phẩm và xử lý kết quả
             response = products.add(collection_name, product_id, product_name, image_ids, image_paths)
             if response.get('status') == 'completed':

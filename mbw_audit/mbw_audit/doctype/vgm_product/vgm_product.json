@@ -12,6 +12,7 @@
   "product_description",
   "category",
   "images",
+  "id_images",
   "custom_field"
  ],
  "fields": [
@@ -53,11 +54,16 @@
    "fieldname": "custom_field",
    "fieldtype": "JSON",
    "label": "CustomField"
+  },
+  {
+   "fieldname": "id_images",
+   "fieldtype": "JSON",
+   "label": "Id Images"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-29 14:34:37.065813",
+ "modified": "2024-06-03 09:08:19.480091",
  "modified_by": "Administrator",
  "module": "mbw audit",
  "name": "VGM_Product",
