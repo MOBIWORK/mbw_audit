@@ -121,7 +121,7 @@ import {
     };
   
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(newSelectedRowKeys);
+      setSelectedRowKeys((prev) => [...prev, ...newSelectedRowKeys]);
     };
   
     const onChangeSearch = (event) => {
@@ -133,7 +133,7 @@ import {
       for (let i = 0; i < selectedRowKeys.length; i++) {
         const existEmployee = arrEmployee.filter(x => x.name === selectedRowKeys[i]);
         if (existEmployee.length === 0) {
-          const employeeFilter = employees.filter(x => x.name === selectedRowKeys[i]);
+          const employeeFilter = employeesTemp.filter(x => x.name === selectedRowKeys[i]);
           if (employeeFilter != null && employeeFilter.length > 0) arrEmployee.push(employeeFilter[0]);
         }
       }

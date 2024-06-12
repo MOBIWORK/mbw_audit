@@ -1,21 +1,14 @@
 import { FormItemCustom, HeaderPage, TableCustom } from "../../components";
 import { AxiosService } from "../../services/server";
-import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs"; // Giả sử exceljs hỗ trợ cú pháp mô-đun ES6
 import {
   DownOutlined,
-  EllipsisOutlined,
   VerticalAlignBottomOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from "@ant-design/icons";
 import * as FileSaver from "file-saver";
 import {
-  SearchOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
-import {
-  Input,
-  Tooltip,
   Button,
   TableColumnsType,
   DatePicker,
@@ -28,10 +21,8 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import paths from "../AppConst/path.js";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import type { RadioChangeEvent } from 'antd';
-import type { MenuProps } from "antd";
 
 declare var require: any;
 
@@ -56,17 +47,7 @@ interface DataTypeReport {
 }
 
 const { RangePicker } = DatePicker;
-// rowSelection object indicates the need for row selection
-const rowSelection = {
-  onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
-  },
-};
-const apiUrl = paths.apiUrl;
+
 export default function ReportDetail() {
   const [searchCampaign, setSearchCampaign] = useState("all");
   const [searchTime, setSearchTime] = useState([]); // Sử dụng state để lưu giá trị thời gian thực hiện
@@ -74,8 +55,6 @@ export default function ReportDetail() {
   const [searchAIEvalue, setSearchAIEvalue] = useState("all");
   const [searchHumanEvalue, setSearchHumanEvalue] = useState("all");
   const [hoveredSelect, setHoveredSelect] = useState(null);
-
-  const [imageButtonClick, setImageButtonClick] = useState(false);
 
   const [arrSourceEvalue, setArrSourceEvalue] = useState<any[]>([
     { label: "Đạt", value: 1 },
@@ -127,7 +106,6 @@ export default function ReportDetail() {
           try {
             imageArray = JSON.parse(item);
           } catch (error) {
-            console.error("Error parsing item:", error);
           }
         }
         return (
@@ -157,7 +135,6 @@ export default function ReportDetail() {
           try {
             imageArray = JSON.parse(item);
           } catch (error) {
-            console.error("Error parsing item:", error);
           }
         }
         return (
@@ -250,7 +227,7 @@ export default function ReportDetail() {
         >
           <Select
             value={scoring_human}
-            onChange={() => handleChange(item, index)}
+            onChange={() => handleChange(item, index, true)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -293,11 +270,6 @@ export default function ReportDetail() {
   const [dataReportsByCampaign, setDataReportsByCampaign] = useState([]);
 
   const { search } = useLocation();
-  const params = new URLSearchParams(search);
-  const campaign = params.get("campaign");
-  // if(campaign != null && campaign != "" && campaign != "all"){
-  //   setSearchCampaign(campaign);
-  // }
   const navigate = useNavigate();
   const [dataReports, setDataReports] = useState<any[]>([]);
   const [dataEmployee, setDataEmployee] = useState<any[]>([]);
@@ -468,7 +440,6 @@ export default function ReportDetail() {
           try {
             imageArray = JSON.parse(item);
           } catch (error) {
-            console.error("Error parsing item:", error);
           }
         }
         return (
@@ -497,7 +468,6 @@ export default function ReportDetail() {
           try {
             imageArray = JSON.parse(item);
           } catch (error) {
-            console.error("Error parsing item:", error);
           }
         }
         return (
@@ -587,7 +557,7 @@ export default function ReportDetail() {
         >
           <Select
             value={scoring_human}
-            onChange={() => handleChange(item, index)}
+            onChange={() => handleChange(item, index, false)}
             bordered={hoveredSelect === index}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
@@ -706,7 +676,6 @@ export default function ReportDetail() {
       if (urlReports.includes("?"))
         urlReports = `${urlReports}&status_scoring_ai=${searchAIEvalue}`;
       else urlReports = `${urlReports}?status_scoring_ai=${searchAIEvalue}`;
-      console.log(urlReports);
     }
     if (searchHumanEvalue != null && searchHumanEvalue != "all") {
       if (urlReports.includes("?"))
@@ -741,20 +710,17 @@ export default function ReportDetail() {
         let isRenderHeader = false;
         let arrChildColsProductAI = [];
         let arrChildColsProductHuman = [];
-        console.log(dataSources);
-        let maxProductsCount = 0;
-        let dataSourceWithMaxProducts = null;
         let allProductNames = new Set();
+        let productInfoOfAllReport = [];
         
         // Tìm dataSource có số lượng sản phẩm nhiều nhất và thu thập tất cả tên sản phẩm
         for (let j = 0; j < dataSources.length; j++) {
           const dataSource = dataSources[j];
           const infoProductsAI = dataSource.info_products_ai;
-          const numProducts = infoProductsAI.length;
-        
-          if (numProducts > maxProductsCount) {
-            maxProductsCount = numProducts;
-            dataSourceWithMaxProducts = dataSource;
+
+          for(let i  = 0; i < infoProductsAI.length; i++){
+            let filterProduct = productInfoOfAllReport.filter(x => x.product_name == infoProductsAI[i].product_name);
+            if(filterProduct.length == 0) productInfoOfAllReport.push(infoProductsAI[i]);
           }
         
           // Thu thập tất cả tên sản phẩm từ tất cả các dataSource
@@ -762,13 +728,10 @@ export default function ReportDetail() {
             allProductNames.add(product.product_name);
           });
         }
-        
-        if (dataSourceWithMaxProducts) {
-          const infoProductsAI = dataSourceWithMaxProducts.info_products_ai;
-        
-          for (let i = 0; i < infoProductsAI.length; i++) {
-            const productName = infoProductsAI[i].product_name;
-        
+
+        if (productInfoOfAllReport) {
+          for(let i = 0; i < productInfoOfAllReport.length; i++){
+            const productName = productInfoOfAllReport[i].product_name;
             const objColProductAI = {
               title: productName,
               dataIndex: `${productName}_ai`,
@@ -843,7 +806,7 @@ export default function ReportDetail() {
   const handleMouseLeave = () => {
     setHoveredSelect(false);
   };
-  const handleChange = async (value: any, index: any) => {
+  const handleChange = async (value: any, index: any, groupCampaign = false) => {
     const newScoringHuman = value.scoring_human === 1 ? 0 : 1;
 
     let objReportSKU = {
@@ -861,20 +824,15 @@ export default function ReportDetail() {
     ) {
       message.success("Cập nhật thành công");
       //fetchDataReport();
-      console.log(dataReportsByCampaign);
-      console.log(dataReports);
-      console.log(isGroupByCampaign);
-      if (!isGroupByCampaign) {
-        console.log('123');
+      if (!groupCampaign) {
         setDataReports((prevDataReports) => {
-          const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
+          let newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
           newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
           return newDataReports; // Trả về mảng mới đã được thay đổi
         });
       }else{
-        console.log('13');
         setDataReportsByCampaign((prevDataReports) => {
-          const newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
+          let newDataReports = [...prevDataReports]; // Tạo bản sao của mảng hiện tại
           newDataReports[index].scoring_human = newScoringHuman; // Cập nhật phần tử của mảng tại chỉ mục index
           return newDataReports; // Trả về mảng mới đã được thay đổi
         });
@@ -895,7 +853,6 @@ export default function ReportDetail() {
         setDataEmployee(res.result.data);
       }
     } catch (error) {
-      console.error("Error fetching employee data:", error);
     }
   };
 
@@ -929,120 +886,66 @@ export default function ReportDetail() {
       : onExportDataToExcel(dataReports, "Báo cáo chấm điểm trưng bày");
   };
 
-  const applyCommonCellStyle = (cell, isHeader = false) => {
-    const style = {
-      font: {
-        bold: true,
-        name: "Times New Roman",
-        size: 12,
-      },
-      alignment: {
-        vertical: "middle",
-        horizontal: "center",
-      },
-    };
-
-    if (isHeader) {
-      style.border = {
-        top: { style: "medium" },
-        left: { style: "medium" },
-        bottom: { style: "medium" },
-        right: { style: "medium" },
-      };
-    }
-
-    cell.style = style;
-  };
-
   const onExportDataToExcelByCampaign = async (table, columns, title) => {
-    console.log(table);
-    console.log(columns);
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Sheet1");
-
-    let currentColumnIndex = 1; // Chỉ số cột hiện tại
-    columns.forEach((column, index) => {
-      const startColumnIndex = currentColumnIndex; // Chỉ số cột bắt đầu
-
-      // Đặt tiêu đề và chiều rộng cho cột
-      if (currentColumnIndex === 1) {
-        // Cố định chiều rộng cột đầu tiên
-        sheet.getColumn(currentColumnIndex).width = 10;
-      } else {
-        // Đặt chiều rộng theo giá trị mặc định hoặc được chỉ định
-        sheet.getColumn(currentColumnIndex).width = 20; // Set default width if not provided
+    let isMergeRow = false;
+    for(let i = 0; i < columns.length; i++){
+      if(columns[i].children != null && columns[i].children.length > 0){
+        isMergeRow = true;
+        break;
       }
-
-      const cell = sheet.getCell(1, currentColumnIndex);
-      cell.value = column.title;
-      applyCommonCellStyle(cell, true); // Áp dụng viền đậm cho ô tiêu đề cột
-
-      // Kiểm tra nếu cột có children
-      if (column.children && column.children.length > 0) {
-        // Tính tổng số cột con
-        const totalChildColumns = column.children.length;
-
-        // Gộp các ô cho cột cha nếu chưa được gộp
-        const isMerged = cell.isMerged;
-        if (!isMerged) {
-          sheet.mergeCells(
-            1,
-            currentColumnIndex,
-            1,
-            currentColumnIndex + totalChildColumns - 1
-          );
+    }
+    let startIndexHead = 1;
+    for(let i = 0; i < columns.length; i++){
+      let rowHead = sheet.getRow(1);
+      if(columns[i].children != null && columns[i].children.length > 0){
+        let startIndexGroupHead = startIndexHead;
+        rowHead.getCell(startIndexHead).style = {font: {bold: true, name: "Times New Roman", size: 12}};
+        rowHead.getCell(startIndexHead).value = columns[i].title;
+        for(let j = 0; j < columns[i].children.length; j++){
+          let rowHeadNext = sheet.getRow(2);
+          rowHeadNext.getCell(startIndexHead).style = {font: {bold: true, name: "Times New Roman", size: 12}};
+          sheet.getColumn(startIndexHead).width = columns[i].children[j].width/5;
+          rowHeadNext.getCell(startIndexHead).value = columns[i].children[j].title;
+          startIndexHead +=1;
         }
-
-        // Thêm tiêu đề cho các cột con
-        column.children.forEach((child, childIndex) => {
-          const childColumnIndex = startColumnIndex + childIndex;
-          const childCell = sheet.getCell(2, childColumnIndex);
-          childCell.value = child.title;
-          applyCommonCellStyle(childCell);
-        });
-
-        // Cập nhật chỉ số cột hiện tại cho vòng lặp tiếp theo
-        currentColumnIndex += totalChildColumns;
-      } else {
-        // Nếu cột không có children, di chuyển đến cột tiếp theo
-        currentColumnIndex++;
+        if(columns[i].children.length >= 2) sheet.mergeCells(`${rowHead.getCell(startIndexGroupHead)["_address"]}:${rowHead.getCell(startIndexHead-1)["_address"]}`);
+      }else{
+        sheet.getColumn(startIndexHead).width = columns[i].width/5;
+        if(isMergeRow){
+          let rowHeadNext = sheet.getRow(2);
+          sheet.mergeCells(`${rowHead.getCell(startIndexHead)["_address"]}:${rowHeadNext.getCell(startIndexHead)["_address"]}`);
+        }
+        rowHead.getCell(startIndexHead).style = {font: {bold: true, name: "Times New Roman", size: 12}};
+        rowHead.getCell(startIndexHead).value = columns[i].title;
+        startIndexHead += 1;
       }
-    });
-    let newColume = extractChildColumns(columns);
-    const dataRowIndex = 3; // Chỉ số hàng bắt đầu cho dữ liệu
-
-    table.forEach((row, rowIndex) => {
-      currentColumnIndex = 1; // Đặt lại chỉ số cột cho mỗi hàng
-
-      newColume.forEach((column, columnIndex) => {
-        const { dataIndex } = column;
-        let dataValue = null;
-
-        // Kiểm tra xem dataIndex có tồn tại trong dòng dữ liệu hiện tại không
-        if (row.hasOwnProperty(dataIndex)) {
-          if (
-            dataIndex === "scoring_machine" ||
-            dataIndex === "scoring_human"
-          ) {
-            // Xử lý scoring_machine và scoring_human thành chuỗi "Đạt" hoặc "Không đạt"
-            dataValue = getScoringLabel(row[dataIndex]);
-          } else {
-            // Giữ nguyên giá trị cho các dataIndex khác
-            dataValue = row[dataIndex];
+    }
+    let startRowValue = 2;
+    if(isMergeRow) startRowValue = 3;
+    for(let i = 0; i < table.length; i++){
+      let startIndexVal = 1;
+      let rowValue = sheet.getRow(startRowValue);
+      for(let j = 0; j < columns.length; j++){
+        if(columns[j].children != null && columns[j].children.length > 0){
+          for(let t = 0; t < columns[j].children.length; t++){
+            rowValue.getCell(startIndexVal).value = table[i][columns[j].children[t].dataIndex];
+            rowValue.getCell(startIndexVal).style = {font: {bold: false, name: "Times New Roman", size: 12}};
+            startIndexVal +=1;
           }
+        }else{
+          if(columns[j].dataIndex == "scoring_human" || columns[j].dataIndex == "scoring_machine"){
+            rowValue.getCell(startIndexVal).value = getScoringLabel(table[i][columns[j].dataIndex]);
+          }else{
+            rowValue.getCell(startIndexVal).value = table[i][columns[j].dataIndex];
+          }
+          rowValue.getCell(startIndexVal).style = {font: {bold: false, name: "Times New Roman", size: 12}};
+          startIndexVal += 1;
         }
-
-        // Điền dữ liệu vào ô tương ứng trong bảng Excel
-        const cell = sheet.getCell(
-          dataRowIndex + rowIndex,
-          currentColumnIndex + columnIndex
-        );
-        cell.value = dataValue;
-
-        // Áp dụng kiểu dáng cho ô
-        applyCommonCellStyle(cell);
-      });
-    });
+      }
+      startRowValue += 1;
+    }
     // Lưu file Excel
     const buffer = await workbook.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "report");
@@ -1056,121 +959,53 @@ export default function ReportDetail() {
       return ""; // Xử lý các giá trị khác (nếu cần)
     }
   };
-  function extractChildColumns(columns) {
-    const extractedColumns = [];
-
-    function extract(column) {
-      if (column.children && column.children.length > 0) {
-        // Nếu có children, đệ quy gọi hàm extract với từng child
-        column.children.forEach((child) => extract(child));
-      } else {
-        // Nếu không có children, thêm column vào mảng extractedColumns
-        extractedColumns.push(column);
-      }
-    }
-
-    // Duyệt qua từng column trong mảng columns ban đầu và gọi hàm extract
-    columns.forEach((column) => extract(column));
-
-    return extractedColumns;
-  }
   const onExportDataToExcel = async (tableinput, title) => {
-    //const ExcelJS = require('exceljs');
-    let table = tableinput.map((item) => {
-      // Chuyển đổi chuỗi thời gian thành đối tượng Date (giả sử thuộc tính thời gian của item là 'time')
-      const dateObj = new Date(item.images_time); // Sử dụng item.time để lấy thời gian từ từng item trong mảng
-
-      // Lấy ngày, tháng và năm từ đối tượng Date
-      const day = dateObj.getDate();
-      const month = dateObj.getMonth() + 1; // Tháng bắt đầu từ 0 nên cộng thêm 1
-      const year = dateObj.getFullYear();
-
-      // Lấy giờ và phút từ đối tượng Date
-      const hours = dateObj.getHours();
-      const minutes = dateObj.getMinutes();
-
-      // Biến đổi thành chuỗi thời gian theo định dạng "dd/MM/yyyy hh:mm"
-      const formattedTime = `${day.toString().padStart(2, "0")}/${month
-        .toString()
-        .padStart(2, "0")}/${year} ${hours
-        .toString()
-        .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-      // Gán giá trị formattedTime vào thuộc tính images_time của item
-      item.images_time = formattedTime;
-
-      // Trả về item đã được thêm thuộc tính images_time
-      return item;
-    });
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Sheet1");
-    sheet.properties.defaultColWidth = 20;
-    sheet.getColumn("A").width = 30;
-    sheet.mergeCells("A2:J2");
-    sheet.getCell("A2").value = title;
-    sheet.getCell("A2").style = {
-      font: { bold: true, name: "Times New Roman", size: 12 },
-    };
-    sheet.getCell("A2").alignment = {
-      vertical: "middle",
-      horizontal: "center",
-    };
-    let rowHeader = sheet.getRow(4);
-    let rowHeader_Next = sheet.getRow(5);
-    let fieldsMerge = [
-      { title: "Khách hàng", field: "customer_name" },
-      { title: "Tên chiến dịch", field: "campaign_name" },
-      { title: "Nhân viên thực hiện", field: "employee_name" },
-      { title: "Số lượng danh mục", field: "categories" },
-      { title: "Ảnh gian hàng", field: "images" },
-      { title: "Ảnh gian hàng AI", field: "images_ai" },
-      { title: "Thời gian thực hiện", field: "images_time" },
-      { title: "Điểm trưng bày AI chấm", field: "scoring_machine" },
-      { title: "Điểm trưng bày giám sát chấm", field: "scoring_human" },
+    const workbookx = new ExcelJS.Workbook();
+    const sheetx = workbookx.addWorksheet("Sheet1");
+    let fieldHeader = [
+      {'title': "STT", 'width': 10, 'key': "stt"},
+      {'title': "Khách hàng", 'width': 20, 'key': "customer_name"},
+      {'title': "Tên chiến dịch", 'width': 30, 'key': "campaign_name"},
+      {'title': "Nhân viên thực hiện", 'width': 20, 'key': "employee_name"},
+      {'title': "Số lượng danh mục", 'width': 20, 'key': "categories"},
+      {'title': "Ảnh gian hàng", 'width': 30, 'key': "images"},
+      {'title': "Ảnh gian hàng AI", 'width': 30, 'key': "images_ai"},
+      {'title': "Thời gian thực hiện", 'width': 30, 'key': "images_time"},
+      {'title': "Điểm trưng bày AI chấm", 'width': 20, 'key': "scoring_machine"},
+      {'title': "Điểm trưng bày giám sát chấm", 'width': 20, 'key': "scoring_human"}
     ];
-    for (let i = 0; i < fieldsMerge.length; i++) {
-      let cellStart = rowHeader.getCell(i + 1);
-      let cellEnd = rowHeader_Next.getCell(i + 1);
-      sheet.mergeCells(`${cellStart._address}:${cellEnd._address}`);
-      rowHeader.getCell(i + 1).style = {
-        font: { bold: true, name: "Times New Roman", size: 12, italic: true },
-      };
-      rowHeader.getCell(i + 1).alignment = {
-        vertical: "middle",
-        horizontal: "center",
-      };
-      rowHeader.getCell(i + 1).value = fieldsMerge[i].title;
+    let startIndexHead = 1;
+    for(let i = 0; i < fieldHeader.length; i++){
+      let rowHead = sheetx.getRow(1);
+      sheetx.getColumn(startIndexHead).width = fieldHeader[i].width;
+      rowHead.getCell(startIndexHead).style = {font: {bold: true, name: "Times New Roman", size: 12}};
+      rowHead.getCell(startIndexHead).value = fieldHeader[i].title;
+      startIndexHead += 1;
     }
-    for (let i = 0; i < table.length; i++) {
-      let rowStart = 6;
-      let row = sheet.getRow(i + rowStart);
-      let cellStart = 1;
-      for (let j = 0; j < fieldsMerge.length; j++) {
-        row.getCell(cellStart).style = {
-          font: { name: "Times New Roman", size: 12, italic: true },
-        };
-        let valCell = "";
-        if (fieldsMerge[j].field == "categories") {
-          if (
-            table[i][fieldsMerge[j].field] != null &&
-            table[i][fieldsMerge[j].field] != ""
-          ) {
-            let categories = JSON.parse(table[i][fieldsMerge[j].field]);
-            valCell = categories.length;
+    let startRowValue = 2;
+    for(let i = 0; i < tableinput.length; i++){
+      let startIndexVal = 1;
+      let rowValue = sheetx.getRow(startRowValue);
+      for(let j = 0; j < fieldHeader.length; j++){
+        if(fieldHeader[j].key == "scoring_human" || fieldHeader[j].key == "scoring_machine"){
+          rowValue.getCell(startIndexVal).value = getScoringLabel(tableinput[i][fieldHeader[j].key]);
+        }else if(fieldHeader[j].key == "categories"){
+          let catergoriesStr = tableinput[i][fieldHeader[j].key];
+          let countCategories = 0;
+          if(catergoriesStr != null && catergoriesStr != ""){
+            let catergories = JSON.parse(catergoriesStr);
+            if(catergories != null) countCategories = catergories.length;
           }
-        } else if (
-          fieldsMerge[j].field == "scoring_machine" ||
-          fieldsMerge[j].field == "scoring_human"
-        ) {
-          if (table[i][fieldsMerge[j].field] == 0) valCell = "Không đạt";
-          else valCell = "Đạt";
-        } else {
-          valCell = table[i][fieldsMerge[j].field];
+          rowValue.getCell(startIndexVal).value = countCategories;
+        }else{
+          rowValue.getCell(startIndexVal).value = tableinput[i][fieldHeader[j].key];
         }
-        row.getCell(cellStart).value = valCell;
-        cellStart += 1;
+        rowValue.getCell(startIndexVal).style = {font: {bold: false, name: "Times New Roman", size: 12}};
+        startIndexVal += 1;
       }
+      startRowValue += 1;
     }
-    const buffer = await workbook.xlsx.writeBuffer();
+    const buffer = await workbookx.xlsx.writeBuffer();
     saveAsExcelFile(buffer, "report");
   };
 
@@ -1189,11 +1024,9 @@ export default function ReportDetail() {
 
   const onChangeCampaign = (val) => {
     setSearchCampaign(val);
-    console.log(val);
     if (val == "all") {
       setIsGroupByCampaign(false);
     } else {
-      console.log("true");
       setIsGroupByCampaign(true);
     }
   };
@@ -1261,8 +1094,9 @@ export default function ReportDetail() {
               width: "100%",
             }}
           >
-            <div style={{ display: "flex", alignItems: "flex-end" }}>
+            <div style={{ display: "flex", alignItems: "flex-end", flexWrap: "wrap" }}>
               <div
+                className="mt-2"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -1288,7 +1122,7 @@ export default function ReportDetail() {
                 </Select>
               </div>
               <FormItemCustom
-                className="w-[250px] border-none mr-4"
+                className="w-[250px] border-none mr-4 mt-2"
                 label="Thời gian thực hiện"
               >
                 <RangePicker
@@ -1298,7 +1132,7 @@ export default function ReportDetail() {
               </FormItemCustom>
               <div
                 style={{ display: "flex", flexDirection: "column" }}
-                className="mr-4"
+                className="mr-4 mt-2"
               >
                 <label style={{ paddingBottom: "5px" }}>Nhân viên:</label>
                 <Select
@@ -1320,7 +1154,7 @@ export default function ReportDetail() {
               </div>
               <div
                 style={{ display: "flex", flexDirection: "column" }}
-                className="mr-4"
+                className="mr-4 mt-2"
               >
                 <label style={{ paddingBottom: "5px" }}>Điểm AI chấm:</label>
                 <Select
@@ -1342,7 +1176,7 @@ export default function ReportDetail() {
               </div>
               <div
                 style={{ display: "flex", flexDirection: "column" }}
-                className="mr-4"
+                className="mr-4 mt-2"
               >
                 <label style={{ paddingBottom: "5px" }}>
                   Điểm giám sát chấm:
@@ -1384,7 +1218,8 @@ export default function ReportDetail() {
                   onClick: () => handleRowClick(record, rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
-              rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
+              //rowHoverBg="red" // Màu nền mong muốn khi hover
+              //rowHoverable={true}
             />
           ) : (
             <TableCustom
@@ -1398,7 +1233,8 @@ export default function ReportDetail() {
                   onClick: () => handleRowClick(record, rowIndex), // Gọi hàm xử lý khi click vào dòng
                 };
               }}
-              rowHoverBg="#f0f0f0" // Màu nền mong muốn khi hover
+              //rowHoverBg="red " // Màu nền mong muốn khi hover
+              //rowHoverable={true}
               expandable={{
                 expandedRowRender: (record, index) => (
                   <div style={{ margin: 5 }}>

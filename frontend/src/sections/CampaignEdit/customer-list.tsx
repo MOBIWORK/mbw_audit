@@ -113,7 +113,7 @@ import paths from "../AppConst/path.js";
     }
   
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(newSelectedRowKeys);
+      setSelectedRowKeys((prev) => [...prev, ...newSelectedRowKeys]);
     };
   
     const handleAddCustomer = () => {
@@ -121,7 +121,7 @@ import paths from "../AppConst/path.js";
       for (let i = 0; i < selectedRowKeys.length; i++) {
         const existCustomer = arrCustomer.filter(x => x.name === selectedRowKeys[i]);
         if (existCustomer.length === 0) {
-          const customerFilter = customers.filter(x => x.name === selectedRowKeys[i]);
+          const customerFilter = customersTemp.filter(x => x.name === selectedRowKeys[i]);
           if (customerFilter != null && customerFilter.length > 0) arrCustomer.push(customerFilter[0]);
         }
       }

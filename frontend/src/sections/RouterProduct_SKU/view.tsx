@@ -883,11 +883,17 @@ export default function Product_SKU() {
     let arrImage = JSON.parse(item.images);
     let arrImageEdit = [];
     for (let i = 0; i < arrImage.length; i++) {
-      let objImage = {
-        uid: i,
-        url: arrImage[i], //import.meta.env.VITE_BASE_URL
-        url_base: arrImage[i],
-      };
+      let objImage = {};
+      if(typeof(arrImage[i]) == "string"){
+        objImage["uid"] = i;
+        objImage["url"] = arrImage[i];
+        objImage["url_base"] = arrImage[i];
+      }else{
+        objImage["uid"] = i;
+        objImage["id_image"] = arrImage[i].image_id;
+        objImage["url"] = arrImage[i].url_image;
+        objImage["url_base"] = arrImage[i].url_image;
+      }
       arrImageEdit.push(objImage);
     }
     setFileListEdit(arrImageEdit);
@@ -928,7 +934,10 @@ export default function Product_SKU() {
 
     let arrImages = [];
     for (let i = 0; i < fileUploadAddProduct.length; i++) {
-      arrImages.push(fileUploadAddProduct[i]);
+      let objImage = {
+        'url_image': fileUploadAddProduct[i]
+      }
+      arrImages.push(objImage);
     }
     // Kiểm tra và gán giá trị cho barcode
     if (!objProduct.barcode_product || objProduct.barcode_product === "") {
@@ -1010,6 +1019,7 @@ export default function Product_SKU() {
       return;
     }
     // Lặp qua mảng fileListEdit và thêm các URL hình ảnh vào arrImage
+    
     for (let i = 0; i < fileListEdit.length; i++) {
       // Kiểm tra nếu có URL và không phải là null hoặc rỗng
       if (
@@ -1017,13 +1027,18 @@ export default function Product_SKU() {
         fileListEdit[i].url_base !== null &&
         fileListEdit[i].url_base !== ""
       ) {
-        arrImage.push(fileListEdit[i].url_base);
+        arrImage.push({
+          'url_image': fileListEdit[i].url_base,
+          'image_id': fileListEdit[i].image_id
+        });
       }
     }
     // Kiểm tra và thêm các URL hình ảnh từ fileUploadEditProduct vào arrImage
     if (fileUploadEditProduct !== null) {
       for (let i = 0; i < fileUploadEditProduct.length; i++) {
-        arrImage.push(fileUploadEditProduct[i]);
+        arrImage.push({
+          'url_image': fileUploadEditProduct[i]
+        });
       }
     }
     let urlEditProduct = `/api/resource/VGM_Product/${editItemProduct.name}`;
@@ -1327,6 +1342,8 @@ export default function Product_SKU() {
 
   const handleCancelAddProductFromERP = () => {
     setIsModalAddProductFromERP(false);
+    setSearchProductFromERP("");
+    setProductFromERPSelected([]);
   };
 
   const handleSearchProductFromERP = (event) => {
@@ -1347,6 +1364,7 @@ export default function Product_SKU() {
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeProductFromERP[]
   ) => {
+    console.log(newSelectedRowKeys);
     setProductFromERPSelected(selectedRow);
   };
 
@@ -1383,6 +1401,7 @@ export default function Product_SKU() {
     //Goi dich vu luu san pham tu erp
     setLoadingAddListProduct(true);
     let arrProductPost = [];
+    let isExistProduct = false;
     for (let i = 0; i < productFromERPSelected.length; i++) {
       let itemProduct = {
         product_code: productFromERPSelected[i].item_code,
@@ -1392,9 +1411,10 @@ export default function Product_SKU() {
         url_images:
           productFromERPSelected[i].image != null &&
           productFromERPSelected[i].image != ""
-            ? [productFromERPSelected[i].image]
+            ? [{"url_image": productFromERPSelected[i].image}]
             : [],
       };
+
       if (
         products.some(
           (product) =>
@@ -1402,14 +1422,19 @@ export default function Product_SKU() {
             product.product_name === itemProduct.product_name
         )
       ){
+        isExistProduct = true;
         continue; // Nếu đã tồn tại thì bỏ qua và chuyển sang dòng tiếp theo
       }
       arrProductPost.push(itemProduct);
     }
-    if(arrProductPost.length == 0){
-      message.error('Danh sách sản phẩm đã tồn tại')
+    if(arrProductPost.length == 0 && isExistProduct){
+      message.error('Sản phẩm bạn chọn để thêm vào đã có. Vui lòng chọn sản phẩm khác để thêm vào');
       setLoadingAddListProduct(false);
       return
+    }else if(arrProductPost.length == 0 && !isExistProduct){
+      message.error('Bạn chưa chọn sản phẩm. Vui lòng chọn sản phẩm để tiếp tục');
+      setLoadingAddListProduct(false);
+      return;
     }
     let dataPost = {
       listproduct: JSON.stringify(arrProductPost),
@@ -1420,7 +1445,6 @@ export default function Product_SKU() {
     if (res != null && res.message != null && res.message.status == "success") {
       message.success("Thêm mới thành công");
       setLoadingAddListProduct(false);
-      setProductFromERPSelected([]);
       initDataProductByCategory();
       handleCancelAddProductFromERP();
     } else {
@@ -1606,8 +1630,21 @@ export default function Product_SKU() {
     //setShowAssignLabelForProduct(true);
   }
   const handleFileChange = async (event) => {
+    const files = event.target.files;
+    const validExtensions = ['image/png', 'image/jpeg', 'image/jpg'];
+    let valid = true;
+    for (let i = 0; i < files.length; i++) {
+      if (!validExtensions.includes(files[i].type)) {
+          valid = false;
+          break;
+      }
+    }
+    if (!valid){
+      message.error("Chức năng gán nhãn chỉ chấp nhận tệp ảnh PNG và JPG");
+      document.getElementById("fileInput").value = '';
+      return;
+    }
     const formData = new FormData();
-    let files = event.target.files;
     for (let i = 0; i < files.length; i++) {
       formData.append('file', files[i]);
     }
@@ -1647,6 +1684,7 @@ export default function Product_SKU() {
         id="fileInput"
         type="file"
         multiple
+        accept=".png, .jpg, .jpeg"
         onChange={handleFileChange}
         style={{ display: 'none' }}/>
       {
@@ -1663,22 +1701,23 @@ export default function Product_SKU() {
                   className: "flex items-center mr-2",
                   danger: true,
                   action: handleDeleteByList,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
                 {
                   label: "Nhập file",
                   icon: <LuUploadCloud className="text-xl" />,
                   size: "20px",
-                  className:
-                    "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+                  className: "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
                   action: handleImportFileProduct,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
                 {
                   label: "Thêm sản phẩm từ ERP",
                   icon: <VscAdd className="text-xl" />,
                   size: "20px",
-                  className:
-                    "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
+                  className: "flex items-center mr-2 text-[#1877F2] border-solid border-[#1877F2]",
                   action: handleAddProductFromERP,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
                 {
                   label: "Kiểm tra sản phẩm",
@@ -1687,6 +1726,7 @@ export default function Product_SKU() {
                   size: "20px",
                   className: "flex items-center mr-2",
                   action: showModalCheckProduct,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
                 {
                   label: "Gán nhãn từ ảnh trưng bày",
@@ -1695,6 +1735,7 @@ export default function Product_SKU() {
                   size: "20px",
                   className: "flex items-center mr-2",
                   action: onAssignLabelForProduct,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
                 {
                   label: "Thêm mới",
@@ -1703,6 +1744,7 @@ export default function Product_SKU() {
                   size: "20px",
                   className: "flex items-center",
                   action: showModalAddProduct,
+                  disabled: categorySelected != null && categorySelected.name != null? false : true
                 },
               ]}
             />

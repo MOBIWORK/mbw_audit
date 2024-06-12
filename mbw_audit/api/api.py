@@ -39,6 +39,8 @@ def deleteListByDoctype(*args,**kwargs):
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
         nguong_nhan_dien_sp = 0.6
+    if isinstance(nguong_nhan_dien_sp, str):
+        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
@@ -69,6 +71,8 @@ def checkImageProductExist(*args, **kwargs):
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
         base_url = frappe.utils.get_request_site_address()
@@ -79,7 +83,6 @@ def checkImageProductExist(*args, **kwargs):
         # product_id = self.product
         # get_product_name =  frappe.get_value("Product", {"name": product_id}, "product_name")
         response = recognition.count(collection_name, image_path)
-
         if response.get('status') == 'completed':
             # Tính tổng của các danh sách sản phẩm từ mảng
             count_result = {}
@@ -104,7 +107,8 @@ def checkImageProductExist(*args, **kwargs):
             doc_checking_product = frappe.new_doc('VGM_Checking_Count_Product')
             doc_checking_product.collection_id = collection_name
             doc_checking_product.url_image = json.dumps(link_image)
-            doc_checking_product.response_ai = json.dumps(response)
+            res_count_ai = {"status": "failed","error": str(response.get('error'))}
+            doc_checking_product.response_ai = json.dumps(res_count_ai)
             doc_checking_product.insert()
             return {"status": "error", 'message': response}
 
@@ -145,6 +149,8 @@ def deleteCategory(*args,**kwargs):
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
         nguong_nhan_dien_sp = 0.6
+    if isinstance(nguong_nhan_dien_sp, str):
+        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
@@ -495,6 +501,8 @@ def shelf_availability_by_category(category_name, image_paths, lst_product_check
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
         nguong_nhan_dien_sp = 0.6
+    if isinstance(nguong_nhan_dien_sp, str):
+        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
@@ -505,6 +513,8 @@ def sequence_of_product_by_category(category_name, image_paths, lst_product_sequ
     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
         nguong_nhan_dien_sp = 0.6
+    if isinstance(nguong_nhan_dien_sp, str):
+        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
@@ -676,7 +686,7 @@ def summary_overview_dashboard():
     try:
         filters = []
         if start_date is not None and end_date is not None:
-            date_format_with_time = '%Y/%m/%d %H:%M:%S'
+            date_format_with_time = '%Y/%m/%d'
             start_date_in = int(start_date)
             end_date_in = int(end_date)
             start_date_in = datetime.fromtimestamp(start_date_in).strftime(date_format_with_time)
@@ -1085,23 +1095,38 @@ def assign_image_to_product(*args, **kwargs):
         nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
             nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         custom_field = doc_product.custom_field
         arr_image_new = []
+        arr_image_update = []
         if doc_product.images is not None:
-            arr_image_new = json.loads(doc_product.images)
-            arr_image_new.extend(lst_image)
+            arr_image_update = json.loads(doc_product.images)
+            for image in arr_image_update:
+                arr_image_new.append(image.get('url_image'))
+            for image in lst_image:
+                arr_image_new.append(image)
+                image_new = {'url_image': image}
+                arr_image_update.append(image_new)
         else:
             arr_image_new = lst_image
+            for image in lst_image:
+                image_new = {'url_image': image}
+                arr_image_update.append(image_new)
         obj_custom_field = {}
         if custom_field is not None and json.loads(custom_field).get('product_id') is not None:
             obj_custom_field = json.loads(custom_field)
             products: Products = product_recognition.get_products()
             image_ids = []
-            for image_new in arr_image_new:
-                image_id = str(uuid.uuid4())
-                image_ids.append(image_id)
+            for image_new in arr_image_update:
+                if image_new.get('image_id') is not None:
+                    image_ids.append(image_new.get('image_id'))
+                else:
+                    image_id = str(uuid.uuid4())
+                    image_new['image_id'] = image_id
+                    image_ids.append(image_id)
             response = products.add(id_category, obj_custom_field.get('product_id'), doc_product.product_name, image_ids, arr_image_new)
             if response.get('status') == 'completed':
                 pass
@@ -1110,8 +1135,9 @@ def assign_image_to_product(*args, **kwargs):
         else:
             product_id = str(uuid.uuid4())
             image_ids = []
-            for value in arr_image_new:
+            for value in arr_image_update:
                 image_id = str(uuid.uuid4())
+                value['image_id'] = image_id
                 image_ids.append(image_id)
             products: Products = product_recognition.get_products()
             response = products.add(id_category, product_id, doc_product.product_name, image_ids, arr_image_new)
@@ -1120,7 +1146,7 @@ def assign_image_to_product(*args, **kwargs):
                 doc_product.custom_field = json.dumps({"product_id": product_AI})
             else:
                 raise Exception("")
-        doc_product.images = json.dumps(arr_image_new)
+        doc_product.images = json.dumps(arr_image_update)
         frappe.db.set_value('VGM_Product', id_product, {
             'images': doc_product.images,
             'custom_field': doc_product.custom_field

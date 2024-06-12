@@ -77,7 +77,7 @@ export default function Product(props) {
           style={{ width: "120px" }}
           // value={editingIndex !== null ? undefined : item}
           defaultValue={item}
-          onChange={(e) => {
+          onBlur={(e) => {
             const newValue = parseInt(e.target.value);
             if (!isNaN(newValue)) {
               handleChangeProductHuman(index, newValue, rowData)
@@ -127,6 +127,7 @@ useEffect(() => {
         index_category: index
       }));
     });
+    console.log(newData);
     setExpandedRowData(newData);
   }
 

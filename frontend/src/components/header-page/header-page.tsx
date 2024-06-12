@@ -8,6 +8,7 @@ type button = {
   action?: any;
   type?: string;
   className?: string;
+  disabled: boolean;
   [key:string]: any;
 };
 
@@ -28,7 +29,7 @@ export function HeaderPage({ title, buttons, icon }: Props) {
         <div className="flex mb-2">
         
           {buttons &&
-            buttons.filter(button => button).map(({className,size,icon,action,type,label,...rest}:button) => {
+            buttons.filter(button => button).map(({className,size,icon,action,type,label,disabled,...rest}:button) => {
               
               return (
                 <Button
@@ -37,6 +38,7 @@ export function HeaderPage({ title, buttons, icon }: Props) {
                   icon={icon}
                   onClick={action}
                   type={type}
+                  disabled={disabled || false}
                    {...rest}
                 >
                   {label}
