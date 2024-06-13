@@ -4,6 +4,7 @@ import { AxiosService } from "../../../services/server";
 import {Row, Col, Image, Spin, Button, Select, message} from 'antd';
 import {LeftOutlined, RightOutlined, LoadingOutlined, CloseOutlined} from "@ant-design/icons";
 import CanvasImage from "../canvas_image/view";
+import BoundingBoxProduct from "../bounding_box/view";
 import { FormItemCustom } from "../../../components";
 
 export default function ProductLabelling({category, arrImage, backPageEmit, completeProductLabelling}){
@@ -181,7 +182,8 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                         </div>
                         <div className="font-semibold leading-[21px]" style={{fontSize: '1.4rem'}}>Nhận diện sản phẩm</div>
                     </div>
-                    <div className="py-2">
+                    <div>
+                        <div className="py-2">Bạn có thể di chuyển, phóng to, thu nhỏ ảnh để chọn các ảnh sản phẩm cần gán nhãn</div>
                         <div
                             style={{
                             position: "relative",
@@ -195,10 +197,16 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                         >
                         {
                             lstImage.length > 0 &&(
-                                <CanvasImage
+                                // <CanvasImage
+                                //     key={mainImageIndex}
+                                //     src={lstImage[mainImageIndex].url}
+                                //     bboxes={lstImage[mainImageIndex].bboxes}
+                                //     clickBboxProductEmit={handleClickBboxProduct}
+                                // />
+                                <BoundingBoxProduct
                                     key={mainImageIndex}
-                                    src={lstImage[mainImageIndex].url}
-                                    bboxes={lstImage[mainImageIndex].bboxes}
+                                    imageSrc ={lstImage[mainImageIndex].url}
+                                    objectBoxes={lstImage[mainImageIndex].bboxes}
                                     clickBboxProductEmit={handleClickBboxProduct}
                                 />
                             )
@@ -287,11 +295,11 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                                     <div key={index} style={{ marginRight: '15px',marginBottom: '15px', position: 'relative' }}>
                                         <Image
                                             width={80}
-                                            height={80}
+                                            height={100}
                                             src={image}
                                             style={{
                                                 width: "80px",
-                                                height: "80px",
+                                                height: "100px",
                                                 objectFit: "cover",
                                                 borderRadius: "10px"
                                             }}

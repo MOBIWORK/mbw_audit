@@ -179,6 +179,7 @@ export default function Product({
   //     setSelectedRowKeys(keys);
   // };
   const rowSelectionCategory = {
+    type: "radio",
     selectedRowKeys,
     //  onSelectAll: onSelectAllCategory,
     onChange: onSelectChangeCategory,

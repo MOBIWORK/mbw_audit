@@ -44,7 +44,7 @@ export default function ReportView() {
     {
       key: '2',
       label: <span style={{ fontWeight: 700 }}>Sản phẩm</span>,
-      children: <Product recordData={recordData} onChangeValReportSKU={handleChangeValReportSKU}
+      children: <Product recordData={recordData} inputValue={recordData}  onChangeValReportSKU={handleChangeValReportSKU}
       />,
     },
 

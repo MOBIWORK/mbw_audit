@@ -397,7 +397,11 @@ export default function ReportDetail() {
   const handleRowClick = (record, index) => {
     // Lưu record vào local storage
     localStorage.setItem("recordData", JSON.stringify(record));
-    localStorage.setItem("dataReports", JSON.stringify(dataReports));
+    if(!isGroupByCampaign){
+      localStorage.setItem("dataReports", JSON.stringify(dataReports));
+    }else{
+      localStorage.setItem("dataReports", JSON.stringify(dataReportsByCampaign));
+    }
     navigate(`/report-view`);
   };
   useEffect(() => {

@@ -280,6 +280,7 @@ export default function ProductCampaignEdit({
   };
 
   const rowSelectionCategory = {
+    type: "radio",
     selectedRowKeys,
     onChange: onSelectChangeCategory,
   };
