@@ -197,18 +197,18 @@ export default function ProductLabelling({category, arrImage, backPageEmit, comp
                         >
                         {
                             lstImage.length > 0 &&(
-                                // <CanvasImage
-                                //     key={mainImageIndex}
-                                //     src={lstImage[mainImageIndex].url}
-                                //     bboxes={lstImage[mainImageIndex].bboxes}
-                                //     clickBboxProductEmit={handleClickBboxProduct}
-                                // />
-                                <BoundingBoxProduct
+                                <CanvasImage
                                     key={mainImageIndex}
-                                    imageSrc ={lstImage[mainImageIndex].url}
-                                    objectBoxes={lstImage[mainImageIndex].bboxes}
+                                    src={lstImage[mainImageIndex].url}
+                                    bboxes={lstImage[mainImageIndex].bboxes}
                                     clickBboxProductEmit={handleClickBboxProduct}
                                 />
+                                // <BoundingBoxProduct
+                                //     key={mainImageIndex}
+                                //     imageSrc ={lstImage[mainImageIndex].url}
+                                //     objectBoxes={lstImage[mainImageIndex].bboxes}
+                                //     clickBboxProductEmit={handleClickBboxProduct}
+                                // />
                             )
                         }
                 
