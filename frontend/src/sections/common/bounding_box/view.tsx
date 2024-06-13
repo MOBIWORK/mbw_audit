@@ -56,7 +56,6 @@ const BoundingBoxProduct = ({ imageSrc, objectBoxes, clickBboxProductEmit }) => 
 
     // Chuyển đổi canvas thành dataURL
     const dataURL = canvas.toDataURL();
-    console.log(dataURL);
     clickBboxProductEmit(dataURL);
   };
 

@@ -1105,7 +1105,10 @@ def assign_image_to_product(*args, **kwargs):
         if doc_product.images is not None:
             arr_image_update = json.loads(doc_product.images)
             for image in arr_image_update:
-                arr_image_new.append(image.get('url_image'))
+                if isinstance(image, str):
+                    arr_image_new.append(image)
+                else:
+                    arr_image_new.append(image.get('url_image'))
             for image in lst_image:
                 arr_image_new.append(image)
                 image_new = {'url_image': image}
@@ -1121,12 +1124,13 @@ def assign_image_to_product(*args, **kwargs):
             products: Products = product_recognition.get_products()
             image_ids = []
             for image_new in arr_image_update:
-                if image_new.get('image_id') is not None:
-                    image_ids.append(image_new.get('image_id'))
-                else:
-                    image_id = str(uuid.uuid4())
-                    image_new['image_id'] = image_id
-                    image_ids.append(image_id)
+                if isinstance(image_new, str) == False:
+                    if image_new.get('image_id') is not None:
+                        image_ids.append(image_new.get('image_id'))
+                    else:
+                        image_id = str(uuid.uuid4())
+                        image_new['image_id'] = image_id
+                        image_ids.append(image_id)
             response = products.add(id_category, obj_custom_field.get('product_id'), doc_product.product_name, image_ids, arr_image_new)
             if response.get('status') == 'completed':
                 pass
@@ -1219,9 +1223,42 @@ def update_images_for_report():
                 setting_score_audit = json.loads(setting_score_audit)
             else:
                 setting_score_audit = {}
+            score_by_products = []
             for category in categories:
-                pass
-            print("Dòng 1205 ", report)
+                arr_product = []
+                for report_sku in report.report_sku:
+                    if report_sku.category == category:
+                        arr_product.append(report_sku.product)
+                lst_product_check = {}
+                lst_product_sequence = []
+                resultExistProduct = {}
+                resultSequenceProduct = {}
+                    #Sinh điều kiện sản phẩm tồn tại trong AI, nếu không có cấu hình thì mặc định là 0 để thực hiện lấy số lượng
+                if setting_score_audit.get("min_product") is not None:
+                    for product_id in arr_product:
+                        objMinProduct = setting_score_audit.get("min_product", {})
+                        if objMinProduct is not None:
+                            doc_product = frappe.get_doc('VGM_Product', product_id)
+                            lst_product_check[doc_product.product_name] = objMinProduct.get(product_id)
+                    resultExistProduct = shelf_availability_by_category(category, file_urls, lst_product_check)
+                else:
+                    for product_id in arr_product:
+                        doc_product = frappe.get_doc('VGM_Product', product_id)
+                        lst_product_check[doc_product.product_name] = 0
+                    resultExistProduct = shelf_availability_by_category(category, file_urls, lst_product_check)
+                #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
+                if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
+                    obj_setting_sequences = setting_score_audit.get("sequence_product", [])
+                    arr_product_sequences = []
+                    for product_id in arr_product:
+                        doc_product = frappe.get_doc('VGM_Product', product_id)
+                        arr_product_sequences.append(doc_product.product_name)
+                    resultSequenceProduct = sequence_of_product_by_category(category, file_urls, arr_product_sequences)
+                    if resultSequenceProduct.get("status") == "completed":
+                        process_result_sequence = resultSequenceProduct.get("process_results", {})
+                        sequence_of_product = process_result_sequence.get("sequence_of_product")
+                        score_by_products.append(1 if sequence_of_product == 1 else 0)
+            print("Dòng 1205 ", report.report_sku)
         return gen_response(200, "ok", {'file_urls': file_urls, 'report_id': report_id})
     except Exception as e:
         return gen_response(500, "error", str(e))
