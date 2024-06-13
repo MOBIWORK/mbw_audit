@@ -250,6 +250,8 @@ export default function ReportView() {
 
   const handleFileChange = (event) => {
     console.log(event);
+    let files = event.target.files;
+    
   }
 
   return (
