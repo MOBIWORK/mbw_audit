@@ -36,11 +36,14 @@ def process_queue(par):
 # param {items: arr,doctype: ''}
 def deleteListByDoctype(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
-    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        nguong_nhan_dien_sp = 0.6
-    if isinstance(nguong_nhan_dien_sp, str):
-        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+    dms_settings = frappe.get_doc('DMS Settings')
+    nguong_nhan_dien_sp = 0.6
+    if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+            nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
@@ -68,11 +71,14 @@ def deleteListByDoctype(*args,**kwargs):
 def checkImageProductExist(*args, **kwargs):
     try:
         vectordb_dir = frappe.get_site_path()
-        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-            nguong_nhan_dien_sp = 0.6
-        if isinstance(nguong_nhan_dien_sp, str):
-            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        dms_settings = frappe.get_doc('DMS Settings')
+        nguong_nhan_dien_sp = 0.6
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+            nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+            if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+                nguong_nhan_dien_sp = 0.6
+            if isinstance(nguong_nhan_dien_sp, str):
+                nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         recognition: ProductCountService = deep_vision.init_product_count_service(appconst.KEY_API_AI)
         base_url = frappe.utils.get_request_site_address()
@@ -146,11 +152,14 @@ def delete_check_image_ai(*args, **kwargs):
 # param {collection_name: ''}
 def deleteCategory(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
-    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        nguong_nhan_dien_sp = 0.6
-    if isinstance(nguong_nhan_dien_sp, str):
-        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+    dms_settings = frappe.get_doc('DMS Settings')
+    nguong_nhan_dien_sp = 0.6
+    if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+            nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
     products: Products = product_recognition.get_products()
@@ -498,11 +507,14 @@ def render_check_image_ai(verbose):
 
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
     vectordb_dir = frappe.get_site_path()
-    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        nguong_nhan_dien_sp = 0.6
-    if isinstance(nguong_nhan_dien_sp, str):
-        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+    dms_settings = frappe.get_doc('DMS Settings')
+    nguong_nhan_dien_sp = 0.6
+    if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+            nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     on_shelf_availibility: OnShelfAvailabilityService = deep_vision.init_on_shelf_availability_service(appconst.KEY_API_AI)
     result = on_shelf_availibility.run(category_name, image_paths, lst_product_check)
@@ -510,11 +522,14 @@ def shelf_availability_by_category(category_name, image_paths, lst_product_check
 
 def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
     vectordb_dir = frappe.get_site_path()
-    nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-    if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        nguong_nhan_dien_sp = 0.6
-    if isinstance(nguong_nhan_dien_sp, str):
-        nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+    dms_settings = frappe.get_doc('DMS Settings')
+    nguong_nhan_dien_sp = 0.6
+    if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+            nguong_nhan_dien_sp = 0.6
+        if isinstance(nguong_nhan_dien_sp, str):
+            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
     deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
     sequence_of_product: SequenceOfProductService = deep_vision.init_audit_sequence_of_product_service(appconst.KEY_API_AI)
     result = sequence_of_product.run(category_name, image_paths, lst_product_sequence)
@@ -1092,11 +1107,14 @@ def assign_image_to_product(*args, **kwargs):
         id_category = kwargs.get('name_category')
         doc_product = frappe.get_doc('VGM_Product', id_product)
         vectordb_dir = frappe.get_site_path()
-        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-            nguong_nhan_dien_sp = 0.6
-        if isinstance(nguong_nhan_dien_sp, str):
-            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        dms_settings = frappe.get_doc('DMS Settings')
+        nguong_nhan_dien_sp = 0.6
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+            nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+            if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+                nguong_nhan_dien_sp = 0.6
+            if isinstance(nguong_nhan_dien_sp, str):
+                nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         custom_field = doc_product.custom_field
@@ -1204,6 +1222,7 @@ def update_images_for_report():
             path_folder = create_folder("booth_product")
             file_info = save_file(filename, filedata, "File", "booth_product", path_folder)
             file_urls.append(frappe.utils.get_request_site_address() + file_info.file_url)
+        print("Dong 1225 ", file_urls)
         if len(file_urls) > 0:
             report = frappe.get_doc('VGM_Report', report_id)
             url_image_old = report.images
@@ -1211,7 +1230,7 @@ def update_images_for_report():
                 url_image_old = json.loads(url_image_old)
             else:
                 url_image_old = []
-            file_urls = file_urls.extend(url_image_old)
+            file_urls.extend(url_image_old)
             categories = report.categories
             if categories is not None and categories != "":
                 categories = json.loads(categories)
@@ -1240,6 +1259,7 @@ def update_images_for_report():
                         if objMinProduct is not None:
                             doc_product = frappe.get_doc('VGM_Product', product_id)
                             lst_product_check[doc_product.product_name] = objMinProduct.get(product_id)
+                    print("Dong 1262 ", category, file_urls, lst_product_check)
                     resultExistProduct = shelf_availability_by_category(category, file_urls, lst_product_check)
                 else:
                     for product_id in arr_product:
@@ -1258,7 +1278,45 @@ def update_images_for_report():
                         process_result_sequence = resultSequenceProduct.get("process_results", {})
                         sequence_of_product = process_result_sequence.get("sequence_of_product")
                         score_by_products.append(1 if sequence_of_product == 1 else 0)
-            print("Dòng 1205 ", report.report_sku)
-        return gen_response(200, "ok", {'file_urls': file_urls, 'report_id': report_id})
+                if resultExistProduct.get('status') == "completed":
+                    product_availability = []
+                    count_product = {}
+                    if resultExistProduct.get('process_results') is not None:
+                        on_shelf_availability = resultExistProduct.get('process_results').get('on_shelf_availability')
+                        if on_shelf_availability is not None:
+                            availability_result = on_shelf_availability.get('availability_result')
+                            if availability_result.get('product_availability') is not None:
+                                product_availability = availability_result.get('product_availability')
+                        if resultExistProduct.get('process_results').get('count') is not None:
+                            count_product = resultExistProduct.get('process_results').get('count')
+                    for product_id in arr_product:
+                        filter_sku = [product_sku for product_sku in report.report_sku if product_sku.get('product') == product_id]
+                        if len(filter_sku) > 0:
+                            doc_product = frappe.get_doc('VGM_Product', product_id)
+                            doc_children = frappe.get_doc('VGM_ReportDetailSKU', filter_sku[0].get('name'))
+                            if count_product.get(doc_product.get('product_name')) is not None:
+                                doc_children.sum_product = count_product.get(doc_product.get('product_name'))
+                                doc_children.sum_product_human = count_product.get(doc_product.get('product_name'))
+                                if doc_product.get('product_name') in product_availability:
+                                    doc_children.scoring_machine = 1
+                                    doc_children.scoring_human = 1
+                                    score_by_products.append(1)
+                                else:
+                                    doc_children.scoring_machine = 0
+                                    doc_children.scoring_human = 0
+                                    score_by_products.append(0)
+                                doc_children.save()
+                    image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
+                    report.images = json.dumps(file_urls)
+                    report.image_ai = json.dumps(image_ais)
+                    if 0 in score_by_products:
+                        report.scoring_machine = 0
+                        report.scoring_human = 0
+                    else:
+                        report.scoring_machine = 1
+                        report.scoring_human = 1
+                    report.log_ai = json.dumps(resultExistProduct)
+                    report.save()
+        return gen_response(200, "ok", "Thành công")
     except Exception as e:
         return gen_response(500, "error", str(e))

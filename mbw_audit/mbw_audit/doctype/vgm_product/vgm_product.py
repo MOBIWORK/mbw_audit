@@ -29,11 +29,14 @@ class VGM_Product(Document):
             self.check_and_add_product()
     def update_product(self):
         vectordb_dir = frappe.get_site_path()
-        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-            nguong_nhan_dien_sp = 0.6
-        if isinstance(nguong_nhan_dien_sp, str):
-            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        dms_settings = frappe.get_doc('DMS Settings')
+        nguong_nhan_dien_sp = 0.6
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+            nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+            if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+                nguong_nhan_dien_sp = 0.6
+            if isinstance(nguong_nhan_dien_sp, str):
+                nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
@@ -70,11 +73,14 @@ class VGM_Product(Document):
     def check_and_add_product(self):
         # Sử dụng self để truy cập trường product_name
         vectordb_dir = frappe.get_site_path()
-        nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-            nguong_nhan_dien_sp = 0.6
-        if isinstance(nguong_nhan_dien_sp, str):
-            nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        dms_settings = frappe.get_doc('DMS Settings')
+        nguong_nhan_dien_sp = 0.6
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
+            nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
+            if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
+                nguong_nhan_dien_sp = 0.6
+            if isinstance(nguong_nhan_dien_sp, str):
+                nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         product_name = self.product_name
@@ -97,8 +103,6 @@ class VGM_Product(Document):
             products: Products = product_recognition.get_products()
             # Thực hiện thêm sản phẩm và xử lý kết quả
             response = products.add(collection_name, product_id, product_name, image_ids, image_paths)
-            print("Dòng 100 ", collection_name, product_id, product_name, image_ids, image_paths)
-            print("Dòng 101 ", response)
             if response.get('status') == 'completed':
                 product_AI = response.get('result', {}).get('product_id')
                 custom_field_value = json.dumps({"product_id": product_AI})
