@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { HeaderPage } from "../../components";
-import { DoubleLeftOutlined, LeftOutlined, FormOutlined } from "@ant-design/icons";
+import { DoubleLeftOutlined, LeftOutlined, FormOutlined, FileAddOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Form, Collapse, message } from "antd";
 import type { CollapseProps } from 'antd';
@@ -244,8 +244,23 @@ export default function ReportView() {
     arrNode[0].style.padding = "0px 24px 20px";
   }
 
+  const onAddImageToReport = () => {
+    document.getElementById('fileInput').click();
+  }
+
+  const handleFileChange = (event) => {
+    console.log(event);
+  }
+
   return (
     <>
+      <input
+        id="fileInput"
+        type="file"
+        multiple
+        accept=".png, .jpg, .jpeg"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}/>
       {showAssignLabelForProduct == false && (
         <>
           {lastRecord == false && (
@@ -283,8 +298,15 @@ export default function ReportView() {
                   type: "primary",
                   icon: <FormOutlined className="text-xl" />,
                   size: "20px",
+                  className: "flex items-center mr-2",
+                  action: onAssignLabelForProduct
+                },{
+                  label: "Thêm ảnh trưng bày",
+                  type: "primary",
+                  icon: <FileAddOutlined className="text-xl" />,
+                  size: "20px",
                   className: "flex items-center",
-                  action: onAssignLabelForProduct,
+                  action: onAddImageToReport
                 }
               ]}
             />
@@ -323,8 +345,16 @@ export default function ReportView() {
                   type: "primary",
                   icon: <FormOutlined className="text-xl" />,
                   size: "20px",
-                  className: "flex items-center",
+                  className: "flex items-center mr-2",
                   action: onAssignLabelForProduct,
+                },
+                {
+                  label: "Thêm ảnh trưng bày",
+                  type: "primary",
+                  icon: <FileAddOutlined className="text-xl" />,
+                  size: "20px",
+                  className: "flex items-center",
+                  action: onAddImageToReport
                 }
               ]}
             />

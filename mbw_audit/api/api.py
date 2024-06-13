@@ -1185,3 +1185,43 @@ def upload_multi_file_for_checking():
         return gen_response(200, "ok", {"file_urls": file_urls, "date_time": str(datetime.now().timestamp())})
     except Exception as e:
         return gen_response(500, "error", {"file_url": _("Failed to upload file: {0}").format(str(e))})
+
+@frappe.whitelist(methods="POST")
+def update_images_for_report():
+    try:
+        if "file" not in frappe.request.files:
+            raise ValueError("No file found in form data")
+        files = frappe.request.files.getlist("file")
+        report_id = frappe.request.form.get("report_id")
+        file_urls = []
+        for file_info in files:
+            filename = file_info.filename
+            filedata = file_info.stream.read()
+            path_folder = create_folder("booth_product")
+            file_info = save_file(filename, filedata, "File", "booth_product", path_folder)
+            file_urls.append(frappe.utils.get_request_site_address() + file_info.file_url)
+        if len(file_urls) > 0:
+            report = frappe.get_doc('VGM_Report', report_id)
+            url_image_old = report.images
+            if url_image_old is not None and url_image_old != "":
+                url_image_old = json.loads(url_image_old)
+            else:
+                url_image_old = []
+            file_urls = file_urls.extend(url_image_old)
+            categories = report.categories
+            if categories is not None and categories != "":
+                categories = json.loads(categories)
+            else:
+                categories = []
+            campaign_doc = frappe.get_doc('VGM_Campaign', report.campaign_code)
+            setting_score_audit = campaign_doc.setting_score_audit
+            if setting_score_audit is not None and setting_score_audit != "":
+                setting_score_audit = json.loads(setting_score_audit)
+            else:
+                setting_score_audit = {}
+            for category in categories:
+                pass
+            print("Dòng 1205 ", report)
+        return gen_response(200, "ok", {'file_urls': file_urls, 'report_id': report_id})
+    except Exception as e:
+        return gen_response(500, "error", str(e))
