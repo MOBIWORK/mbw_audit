@@ -1255,7 +1255,8 @@ def update_images_for_report():
                 lst_product_sequence = []
                 resultExistProduct = {}
                 resultSequenceProduct = {}
-                    #Sinh điều kiện sản phẩm tồn tại trong AI, nếu không có cấu hình thì mặc định là 0 để thực hiện lấy số lượng
+                arr_product_audit = []
+                #Sinh điều kiện sản phẩm tồn tại trong AI, nếu không có cấu hình thì mặc định là 0 để thực hiện lấy số lượng
                 if setting_score_audit.get("min_product") is not None:
                     # for product_id in arr_product:
                     #     objMinProduct = setting_score_audit.get("min_product", {})
@@ -1266,6 +1267,10 @@ def update_images_for_report():
                         objMinProduct = setting_score_audit.get("min_product", {})
                         if objMinProduct is not None:
                             lst_product_check[product_item.get('product_name')] = objMinProduct.get(product_item.get('name'))
+                            arr_product_audit.append(product_item)
+                        else:
+                            lst_product_check[product_item.get('product_name')] = 0
+                            arr_product_audit.append(product_item)
                     resultExistProduct = shelf_availability_by_category(category, file_urls, lst_product_check)
                 else:
                     # for product_id in arr_product:
@@ -1273,6 +1278,7 @@ def update_images_for_report():
                     #     lst_product_check[doc_product.product_name] = 0
                     for product_item in products:
                         lst_product_check[product_item.get('product_name')] = 0
+                        arr_product_audit.append(product_item)
                     resultExistProduct = shelf_availability_by_category(category, file_urls, lst_product_check)
                 #Sinh điều kiện sắp xếp sản phẩm và gọi sang AI để kiểm tra vị trí sắp xếp
                 if setting_score_audit.get("sequence_product") is not None and len(setting_score_audit.get("sequence_product", [])) > 1:
@@ -1299,7 +1305,7 @@ def update_images_for_report():
                                 product_availability = availability_result.get('product_availability')
                         if resultExistProduct.get('process_results').get('count') is not None:
                             count_product = resultExistProduct.get('process_results').get('count')
-                    for product_item in products:
+                    for product_item in arr_product_audit:
                         filter_sku = [product_sku for product_sku in report.report_sku if product_sku.get('product') == product_item.get('name')]
                         if len(filter_sku) > 0:
                             doc_children = frappe.get_doc('VGM_ReportDetailSKU', filter_sku[0].get('name'))
@@ -1316,7 +1322,6 @@ def update_images_for_report():
                                     score_by_products.append(0)
                                 doc_children.save()
                         else:
-                            doc_sku = frappe.new_doc('VGM_ReportDetailSKU')
                             scoring_machine = 0
                             scoring_human = 0
                             if product_item.get('product_name') in product_availability:
@@ -1325,8 +1330,9 @@ def update_images_for_report():
                                 score_by_products.append(1)
                             else:
                                 score_by_products.append(0)
-                            doc_sku.update({
-                                'parent': report_id, 
+                            doc_report_detail_sku = frappe.get_doc({
+                                'doctype': 'VGM_ReportDetailSKU',
+                                'parent': report_id,
                                 'parentfield': 'report_sku',
                                 'parenttype': 'VGM_Report',
                                 'category': category,
@@ -1336,7 +1342,7 @@ def update_images_for_report():
                                 'sum_product_human': count_product.get(product_item.get('product_name')),
                                 'scoring_human': scoring_human
                             })
-                            doc_sku.insert()
+                            doc_report_detail_sku.insert()
                     image_ais = render_image_ai(resultExistProduct.get("process_results",{}).get("verbose", []))
                     report.images = json.dumps(file_urls)
                     report.image_ai = json.dumps(image_ais)
@@ -1347,7 +1353,13 @@ def update_images_for_report():
                         report.scoring_machine = 1
                         report.scoring_human = 1
                     report.log_ai = json.dumps(resultExistProduct)
-                    report.save()
+                    frappe.db.set_value('VGM_Report', report_id, {
+                        'images': json.dumps(file_urls),
+                        'image_ai': json.dumps(image_ais),
+                        'scoring_machine': report.scoring_machine,
+                        'scoring_human': report.scoring_human,
+                        'log_ai': report.log_ai
+                    })
         else:
             raise Exception("Đường dẫn ảnh không có")
         if len(file_urls) == 0:
@@ -1390,3 +1402,4 @@ def update_images_for_report():
         return gen_response(200, "ok", report_response)
     except Exception as e:
         return gen_response(500, "error", str(e))
+
