@@ -1153,7 +1153,7 @@ def assign_image_to_product(*args, **kwargs):
             if response.get('status') == 'completed':
                 pass
             else:
-                raise Exception("")
+                raise Exception(str(response))
         else:
             product_id = str(uuid.uuid4())
             image_ids = []
@@ -1167,7 +1167,7 @@ def assign_image_to_product(*args, **kwargs):
                 product_AI = response.get('result', {}).get('product_id')
                 doc_product.custom_field = json.dumps({"product_id": product_AI})
             else:
-                raise Exception("")
+                raise Exception(str(response))
         doc_product.images = json.dumps(arr_image_update)
         frappe.db.set_value('VGM_Product', id_product, {
             'images': doc_product.images,
