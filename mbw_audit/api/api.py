@@ -1121,12 +1121,14 @@ def assign_image_to_product(*args, **kwargs):
         arr_image_new = []
         arr_image_update = []
         if doc_product.images is not None:
-            arr_image_update = json.loads(doc_product.images)
-            for image in arr_image_update:
+            arr_image_old = json.loads(doc_product.images)
+            for image in arr_image_old:
                 if isinstance(image, str):
                     arr_image_new.append(image)
+                    arr_image_update.append({'url_image': image})
                 else:
                     arr_image_new.append(image.get('url_image'))
+                    arr_image_update.append(image)
             for image in lst_image:
                 arr_image_new.append(image)
                 image_new = {'url_image': image}
@@ -1142,13 +1144,12 @@ def assign_image_to_product(*args, **kwargs):
             products: Products = product_recognition.get_products()
             image_ids = []
             for image_new in arr_image_update:
-                if isinstance(image_new, str) == False:
-                    if image_new.get('image_id') is not None:
-                        image_ids.append(image_new.get('image_id'))
-                    else:
-                        image_id = str(uuid.uuid4())
-                        image_new['image_id'] = image_id
-                        image_ids.append(image_id)
+                if image_new.get('image_id') is not None:
+                    image_ids.append(image_new.get('image_id'))
+                else:
+                    image_id = str(uuid.uuid4())
+                    image_new['image_id'] = image_id
+                    image_ids.append(image_id)
             response = products.add(id_category, obj_custom_field.get('product_id'), doc_product.product_name, image_ids, arr_image_new)
             if response.get('status') == 'completed':
                 pass
