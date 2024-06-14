@@ -1360,6 +1360,17 @@ def update_images_for_report():
                         'scoring_human': report.scoring_human,
                         'log_ai': report.log_ai
                     })
+                else:
+                    report.scoring_machine = 0
+                    report.scoring_human = 0
+                    report.log_ai = json.dumps(resultExistProduct)
+                    frappe.db.set_value('VGM_Report', report_id, {
+                        'images': json.dumps(file_urls),
+                        'image_ai': json.dumps([]),
+                        'scoring_machine': 0,
+                        'scoring_human': 1,
+                        'log_ai': report.log_ai
+                    })
         else:
             raise Exception("Đường dẫn ảnh không có")
         if len(file_urls) == 0:
