@@ -54,6 +54,7 @@ export default function ReportView() {
   useEffect(() => {
     // Lấy record từ local storage khi component được mount
     let storedRecordData = localStorage.getItem('recordData');
+    console.log(storedRecordData)
     if (storedRecordData) {
       let objRecord = JSON.parse(storedRecordData);
       setRecordData(objRecord);
@@ -264,17 +265,19 @@ export default function ReportView() {
     );
     console.log(response);
     if(response.message == "ok"){
-      setLoadingAddImageToReport(false);
-      message.success("Thành công");
       if(response.result.name != null){
         let dataReports = JSON.parse(localStorage.getItem('dataReports'));
         const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
+        console.log(currentIndex);
         if (currentIndex > 0) {
           const previousRecord = response.result;
+          console.log(previousRecord)
           localStorage.setItem('recordData', JSON.stringify(previousRecord));
           setUpdateStorage(prevState => !prevState);
         }
       }
+      setLoadingAddImageToReport(false);
+      message.success("Thành công");
       document.getElementById('fileInput').value = "";
     }else{
       setLoadingAddImageToReport(true);
