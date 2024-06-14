@@ -1223,8 +1223,8 @@ def update_images_for_report():
             file_info = save_file(filename, filedata, "File", "booth_product", path_folder)
             file_urls.append(frappe.utils.get_request_site_address() + file_info.file_url)
         print("Dong 1225 ", file_urls)
+        report = frappe.get_doc('VGM_Report', report_id)
         if len(file_urls) > 0:
-            report = frappe.get_doc('VGM_Report', report_id)
             url_image_old = report.images
             if url_image_old is not None and url_image_old != "":
                 url_image_old = json.loads(url_image_old)
@@ -1243,8 +1243,11 @@ def update_images_for_report():
             else:
                 setting_score_audit = {}
             score_by_products = []
+            category_names = []
             for category in categories:
                 arr_product = []
+                doc_category = frappe.get_doc('VGM_Category', category)
+                category_names.append({category: doc_category.get('category_name')})
                 for report_sku in report.report_sku:
                     if report_sku.category == category:
                         arr_product.append(report_sku.product)
@@ -1317,6 +1320,43 @@ def update_images_for_report():
                         report.scoring_human = 1
                     report.log_ai = json.dumps(resultExistProduct)
                     report.save()
-        return gen_response(200, "ok", "Thành công")
+        if len(file_urls) == 0:
+            return gen_response(200, "ok", {})
+        report_skus = frappe.get_all("VGM_ReportDetailSKU", filters={"parent": report.get("name")}, fields=["*"])
+        info_products_ai = []
+        info_products_human = []
+        detail_skus = []
+        customer_name = frappe.get_value("Customer", filters={"name": report.get("retail_code")}, fieldname="customer_name")
+        for report_sku in report_skus:
+            product_name = frappe.get_value("VGM_Product", {"name": report_sku.get("product")}, "product_name")
+            info_products_ai.append({"report_sku_id": report_sku.get("name"), "product_name": product_name, "sum": report_sku.get("sum_product")})
+            info_products_human.append({"report_sku_id": report_sku.get("name"), "product_name": product_name, "sum": report_sku.get("sum_product_human")})
+            detail_sku = {
+                "name": report_sku.get("name"),
+                "category": report_sku.get("category"),
+                "product": report_sku.get("product"),
+                "sum_product": report_sku.get("sum_product"),
+                "scoring_machine": report_sku.get("scoring_machine"),
+                "sum_product_human": report_sku.get("sum_product_human"),
+                "scoring_human": report_sku.get("scoring_human"),
+                "product_name": product_name
+            }
+            detail_skus.append(detail_sku);
+        report_response = {
+            "name": report.get("name"),
+            "customer_name": customer_name,
+            "campaign_name": report.get('campaign_code'),
+            "categories": report.get("categories"),
+            "info_products_ai": info_products_ai,
+            "info_products_human": info_products_human,
+            "images": report.get("images"),
+            "images_ai":  report.get("image_ai"),
+            "images_time": report.get("images_time"),
+            "scoring_machine": report.get("scoring_machine"),
+            "scoring_human": report.get("scoring_human"),
+            "detail_skus": detail_skus,
+            "category_names": category_names
+        }
+        return gen_response(200, "ok", report_response)
     except Exception as e:
         return gen_response(500, "error", str(e))

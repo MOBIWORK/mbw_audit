@@ -21,6 +21,7 @@ export default function ReportView() {
   const [showAssignLabelForProduct, setShowAssignLabelForProduct] = useState(false);
   const [category, setCategory] = useState<String>("");
   const [lstImageBoothForLabelling, setLstImageBoothForLabelling] = useState<String[]>([]);
+  const [loadingAddImageToReport, setLoadingAddImageToReport] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const onChange = (key: string | string[]) => {
@@ -248,10 +249,38 @@ export default function ReportView() {
     document.getElementById('fileInput').click();
   }
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     console.log(event);
+    setLoadingAddImageToReport(true);
     let files = event.target.files;
-    
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('file', files[i]);
+    }
+    formData.append('report_id', recordData.name);
+    const response = await AxiosService.post(
+      "/api/method/mbw_audit.api.api.update_images_for_report",
+      formData
+    );
+    console.log(response);
+    if(response.message == "ok"){
+      setLoadingAddImageToReport(false);
+      message.success("Thành công");
+      if(response.result.name != null){
+        let dataReports = JSON.parse(localStorage.getItem('dataReports'));
+        const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
+        if (currentIndex > 0) {
+          const previousRecord = response.result;
+          localStorage.setItem('recordData', JSON.stringify(previousRecord));
+          setUpdateStorage(prevState => !prevState);
+        }
+      }
+      document.getElementById('fileInput').value = "";
+    }else{
+      setLoadingAddImageToReport(true);
+      message.error("Lỗi trong quá trình cập nhật");
+      document.getElementById('fileInput').value = "";
+    }
   }
 
   return (
@@ -308,7 +337,8 @@ export default function ReportView() {
                   icon: <FileAddOutlined className="text-xl" />,
                   size: "20px",
                   className: "flex items-center",
-                  action: onAddImageToReport
+                  action: onAddImageToReport,
+                  loading: loadingAddImageToReport
                 }
               ]}
             />
