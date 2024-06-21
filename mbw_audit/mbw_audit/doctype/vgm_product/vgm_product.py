@@ -30,7 +30,7 @@ class VGM_Product(Document):
     def update_product(self):
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
-        nguong_nhan_dien_sp = 0.6
+        nguong_nhan_dien_sp = 0.7
         # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
         #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -74,7 +74,7 @@ class VGM_Product(Document):
         # Sử dụng self để truy cập trường product_name
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
-        nguong_nhan_dien_sp = 0.6
+        nguong_nhan_dien_sp = 0.7
         # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
         #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:

@@ -37,7 +37,7 @@ def process_queue(par):
 def deleteListByDoctype(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
     dms_settings = frappe.get_doc('DMS Settings')
-    nguong_nhan_dien_sp = 0.6
+    nguong_nhan_dien_sp = 0.7
     # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
     #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -72,7 +72,7 @@ def checkImageProductExist(*args, **kwargs):
     try:
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
-        nguong_nhan_dien_sp = 0.6
+        nguong_nhan_dien_sp = 0.7
         # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
         #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -153,7 +153,7 @@ def delete_check_image_ai(*args, **kwargs):
 def deleteCategory(*args,**kwargs):
     vectordb_dir = frappe.get_site_path()
     dms_settings = frappe.get_doc('DMS Settings')
-    nguong_nhan_dien_sp = 0.6
+    nguong_nhan_dien_sp = 0.7
     # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
     #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -508,7 +508,7 @@ def render_check_image_ai(verbose):
 def shelf_availability_by_category(category_name, image_paths, lst_product_check):
     vectordb_dir = frappe.get_site_path()
     dms_settings = frappe.get_doc('DMS Settings')
-    nguong_nhan_dien_sp = 0.6
+    nguong_nhan_dien_sp = 0.7
     # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
     #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -523,7 +523,7 @@ def shelf_availability_by_category(category_name, image_paths, lst_product_check
 def sequence_of_product_by_category(category_name, image_paths, lst_product_sequence):
     vectordb_dir = frappe.get_site_path()
     dms_settings = frappe.get_doc('DMS Settings')
-    nguong_nhan_dien_sp = 0.6
+    nguong_nhan_dien_sp = 0.7
     # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
     #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
     #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
@@ -1108,7 +1108,7 @@ def assign_image_to_product(*args, **kwargs):
         doc_product = frappe.get_doc('VGM_Product', id_product)
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
-        nguong_nhan_dien_sp = 0.6
+        nguong_nhan_dien_sp = 0.7
         # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
         #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
         #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
