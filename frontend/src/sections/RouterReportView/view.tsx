@@ -268,10 +268,8 @@ export default function ReportView() {
       if(response.result.name != null){
         let dataReports = JSON.parse(localStorage.getItem('dataReports'));
         const currentIndex = dataReports.findIndex((item) => item.name === recordData.name);
-        console.log(currentIndex);
-        if (currentIndex > 0) {
+        if (currentIndex >= 0) {
           const previousRecord = response.result;
-          console.log(previousRecord)
           localStorage.setItem('recordData', JSON.stringify(previousRecord));
           setUpdateStorage(prevState => !prevState);
         }

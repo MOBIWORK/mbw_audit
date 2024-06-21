@@ -31,12 +31,14 @@ class VGM_Product(Document):
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
         nguong_nhan_dien_sp = 0.7
-        # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
-        #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        #         nguong_nhan_dien_sp = 0.6
-        #     if isinstance(nguong_nhan_dien_sp, str):
-        #         nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp_ai'):
+            nguong_nhan_dien_sp_ai = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp_ai
+            if nguong_nhan_dien_sp_ai != None and nguong_nhan_dien_sp_ai != "":
+                nguong_nhan_dien_sp_ai = nguong_nhan_dien_sp_ai.replace(',', '.')
+                try:
+                    nguong_nhan_dien_sp = float(nguong_nhan_dien_sp_ai)
+                except ValueError:
+                    pass
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         collection_name = self.category
@@ -75,12 +77,14 @@ class VGM_Product(Document):
         vectordb_dir = frappe.get_site_path()
         dms_settings = frappe.get_doc('DMS Settings')
         nguong_nhan_dien_sp = 0.7
-        # if hasattr(dms_settings, 'nguong_nhan_dien_sp'):
-        #     nguong_nhan_dien_sp = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp
-        #     if nguong_nhan_dien_sp == 0 or nguong_nhan_dien_sp is None:
-        #         nguong_nhan_dien_sp = 0.6
-        #     if isinstance(nguong_nhan_dien_sp, str):
-        #         nguong_nhan_dien_sp = float(nguong_nhan_dien_sp)
+        if hasattr(dms_settings, 'nguong_nhan_dien_sp_ai'):
+            nguong_nhan_dien_sp_ai = frappe.get_doc('DMS Settings').nguong_nhan_dien_sp_ai
+            if nguong_nhan_dien_sp_ai != None and nguong_nhan_dien_sp_ai != "":
+                nguong_nhan_dien_sp_ai = nguong_nhan_dien_sp_ai.replace(',', '.')
+                try:
+                    nguong_nhan_dien_sp = float(nguong_nhan_dien_sp_ai)
+                except ValueError:
+                    pass
         deep_vision: DeepVision = DeepVision(vectordb_dir=vectordb_dir, sku_threshold=nguong_nhan_dien_sp)
         product_recognition: ProductRecognitionService = deep_vision.init_product_recognition_service(appconst.KEY_API_AI)
         product_name = self.product_name
