@@ -190,7 +190,10 @@ def get_campaign_info(*args,**kwargs):
     # Lấy thông tin chiến dịch dựa trên điều kiện
     campaign_records = frappe.get_all(
         "VGM_Campaign",
-        fields=["*"]  # Thay thế field1, field2 bằng các trường bạn muốn lấy
+        fields=["*"],
+        filters={
+            'campaign_status': "Open"
+        }
     )
     # Lặp qua các bản ghi chiến dịch để kiểm tra customer_code và e_name
     valid_campaigns = []
@@ -204,7 +207,13 @@ def get_campaign_info(*args,**kwargs):
         retails_list = json.loads(retails_json) if retails_json else []
         # Kiểm tra xem customer_code có trong danh sách nhân viên không
         # và e_name có trong danh sách retails không
-        if kwargs.get('customer_code') in retails_list and kwargs.get('e_name') in employees_list:
+        contain_date = True
+        if campaign_record.start_date is not None and campaign_record.end_date is not None:
+            if datetime.now() >= campaign_record.start_date and datetime.now() <= campaign_record.end_date:
+                contain_date = True
+            else:
+                contain_date = False
+        if kwargs.get('customer_code') in retails_list and kwargs.get('e_name') in employees_list and contain_date:
             valid_campaigns.append(campaign_record)
     return gen_response(200, "ok", {"data" : valid_campaigns})
 
