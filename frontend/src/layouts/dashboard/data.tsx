@@ -14,7 +14,7 @@ export const listMenu: MenuItem[] = [
   //dashboard
   {
     label: (
-      <Link className={""} to="/">
+      <Link className={""} to="/mbw_desk">
           Tổng quan
       </Link>
     ),
@@ -24,7 +24,7 @@ export const listMenu: MenuItem[] = [
   //customer map
   {
     label: (
-      <Link className={""} to="/customers-map">
+      <Link className={""} to="/mbw_desk/customers-map">
           Bản đồ khách hàng
       </Link>
     ),
@@ -43,7 +43,7 @@ export const listMenu: MenuItem[] = [
     children: [
       {
         label: (
-          <Link className={""} to="/monitor-album">
+          <Link className={""} to="/mbw_desk/monitor-album">
               Giám sát chụp ảnh khách hàng
           </Link>
         ),
@@ -51,7 +51,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={""} to="employee-monitor">
+          <Link className={""} to="/mbw_desk/employee-monitor">
               Giám sát viếng thăm khách hàng
           </Link>
         ),
@@ -70,7 +70,7 @@ export const listMenu: MenuItem[] = [
   //control router
   {
     label: (
-      <Link className={""} to="/router-control">
+      <Link className={""} to="/mbw_desk/router-control">
        Quản lý tuyến
       </Link>
     ),
@@ -134,7 +134,7 @@ export const listMenu: MenuItem[] = [
     children: [
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-customer">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-customer">
               Báo cáo tồn kho khách hàng
           </Link>
         ),
@@ -142,7 +142,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-kpi">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-kpi">
               Báo cáo KPI
           </Link>
         ),
@@ -150,7 +150,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-checkin">
               Báo cáo viếng thăm
           </Link>
         ),
@@ -158,7 +158,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-sales">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-sales">
               Báo cáo tổng hợp bán hàng
           </Link>
         ),
@@ -166,7 +166,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-saleorder">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-saleorder">
               Báo cáo tổng hợp đặt hàng
           </Link>
         ),
@@ -174,7 +174,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-custom-new">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-custom-new">
               Báo cáo khách hàng mới
           </Link>
         ),
@@ -182,7 +182,7 @@ export const listMenu: MenuItem[] = [
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/report-checkin-first">
+          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-checkin-first">
               Báo cáo thống kê khách hàng viếng thăm lần đầu
             
           </Link>
