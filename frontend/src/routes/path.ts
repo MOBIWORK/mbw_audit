@@ -7,7 +7,7 @@ export const ROOTS = {
     AUTH: `/#login`,
     DASHBOARD: `${BASE_URL}/`,
   };
-  
+  console.log(ROOTS.DASHBOARD)
   export const paths = {
     // AUTH
     auth: ROOTS.AUTH,
