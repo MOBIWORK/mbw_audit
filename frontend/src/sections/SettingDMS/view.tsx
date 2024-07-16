@@ -20,7 +20,6 @@ export default function SettingDMS() {
   };
 
   const onChange = (checked: boolean) => {
-    console.log(`switch to ${checked}`);
   };
   return (
     <>

@@ -65,7 +65,6 @@ export default function GeneralInformation() {
       })))
     })()
   },[keySearch])
-  console.log("listEmployees",listEmployees);
   
   const handleSearch = (newValue: string) => {
     fetch(newValue,setKeySearch)

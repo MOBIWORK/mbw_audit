@@ -54,7 +54,6 @@ export default function ReportView() {
   useEffect(() => {
     // Lấy record từ local storage khi component được mount
     let storedRecordData = localStorage.getItem('recordData');
-    console.log(storedRecordData)
     if (storedRecordData) {
       let objRecord = JSON.parse(storedRecordData);
       setRecordData(objRecord);
@@ -251,7 +250,6 @@ export default function ReportView() {
   }
 
   const handleFileChange = async (event) => {
-    console.log(event);
     setLoadingAddImageToReport(true);
     let files = event.target.files;
     const formData = new FormData();
@@ -263,7 +261,6 @@ export default function ReportView() {
       "/api/method/mbw_audit.api.api.update_images_for_report",
       formData
     );
-    console.log(response);
     if(response.message == "ok"){
       if(response.result.name != null){
         let dataReports = JSON.parse(localStorage.getItem('dataReports'));

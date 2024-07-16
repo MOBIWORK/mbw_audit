@@ -72,7 +72,6 @@ export default function Customer({onChangeCustomer}) {
 
   const initDataCustomer = async () => {
     let urlCustomer = apiUrl + ".api.get_list_customers";
-    console.log(urlCustomer);
     let res = await AxiosService.get(urlCustomer);
     let arrCustomerSource = [];
     if(res != null && res.message == "ok"){

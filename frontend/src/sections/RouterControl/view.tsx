@@ -1,8 +1,8 @@
-import React, { useState, useEffect,useRef } from 'react';
-import { Button, Table , Tooltip ,Input ,Space ,Modal} from 'antd';
-import { Avatar ,Tag} from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Table, Tooltip, Input, Space, Modal } from 'antd';
+import { Avatar, Tag } from 'antd';
 import type { GetRef, TableColumnsType, TableColumnType } from 'antd';
-import  {AxiosService} from '../../services/server';
+import { AxiosService } from '../../services/server';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 // import Highlighter from 'react-highlight-words';
 import {
@@ -136,12 +136,11 @@ export default function RouterControl() {
           setData(dataWithKey);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
   const deleteItem = () => {
@@ -154,7 +153,6 @@ export default function RouterControl() {
   };
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -168,15 +166,15 @@ export default function RouterControl() {
     {
       title: 'Tên tài khoản',
       dataIndex: 'name',
-      render: (name,record) => (
+      render: (name, record) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-        {record.user_image ? (
-          <Avatar style={{ marginRight: '8px' }} src={record.user_image} />
-        ) : (
-          <Avatar style={{ marginRight: '8px' }}>{name.charAt(0)}</Avatar>
-        )}
-        <span>{name}</span>
-      </div>
+          {record.user_image ? (
+            <Avatar style={{ marginRight: '8px' }} src={record.user_image} />
+          ) : (
+            <Avatar style={{ marginRight: '8px' }}>{name.charAt(0)}</Avatar>
+          )}
+          <span>{name}</span>
+        </div>
       ),
       // ...getColumnSearchProps('name'),
     },
@@ -215,7 +213,7 @@ export default function RouterControl() {
         </Button>
       ),
     },
-  
+
   ];
   const GenderTag: React.FC<{ gender: string }> = ({ gender }) => {
     const color = gender === 'Male' ? 'blue' : 'pink';
@@ -237,35 +235,35 @@ export default function RouterControl() {
   };
   return (
     <div>
-   <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <div>
-    {hasSelected && (
-      <Button type="primary" danger ghost onClick={deleteItem} loading={loading} icon={<DeleteOutlined />}>
-        Xóa
-      </Button>
-    )}
-    <span style={{ marginLeft: 8 }}>
-      {hasSelected ? `Đã chọn ${selectedRowKeys.length} báo cáo` : ''}
-    </span>
-  </div>
-  <div style={{ display: 'flex' }}>
-    <div style={{ paddingRight: '10px' }}>
-    <Button type="primary" icon={<FileExcelOutlined />}>
-      Tải xuống
-    </Button>
-    </div>
-    <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal(false)}>
-      Thêm mới
-    </Button>
-  </div>
-</div>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          {hasSelected && (
+            <Button type="primary" danger ghost onClick={deleteItem} loading={loading} icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
+          )}
+          <span style={{ marginLeft: 8 }}>
+            {hasSelected ? `Đã chọn ${selectedRowKeys.length} báo cáo` : ''}
+          </span>
+        </div>
+        <div style={{ display: 'flex' }}>
+          <div style={{ paddingRight: '10px' }}>
+            <Button type="primary" icon={<FileExcelOutlined />}>
+              Tải xuống
+            </Button>
+          </div>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal(false)}>
+            Thêm mới
+          </Button>
+        </div>
+      </div>
 
-    <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
-    <Modal title={isEditing ? "Sửa" : "Thêm mới"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-    <p>Some contents...</p>
-  <p>Some contents...</p>
-  <p>Some contents...</p>
+      <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+      <Modal title={isEditing ? "Sửa" : "Thêm mới"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
+        <p>Some contents...</p>
       </Modal>
-  </div>
+    </div>
   );
 }

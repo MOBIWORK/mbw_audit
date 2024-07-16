@@ -39,7 +39,6 @@ export default function RouterCreate() {
       navigate('/')
     } catch (error) {
       openNotification('topRight',"Failure!!!")
-      console.log("error create",error);
 
       
     }

@@ -98,7 +98,6 @@ export function ChooseCustomer({selected,handleAdd,closeModal}:Props) {
       })
       setCustomerList(rsCustomer?.result?.data)
       setTotalNumber(rsCustomer.result?.total)
-      console.log("rsCustomer",rsCustomer);
       
     })()
   },[filter,page_number])

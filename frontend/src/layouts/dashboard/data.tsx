@@ -14,9 +14,7 @@ export const listMenu: MenuItem[] = [
   //dashboard
   {
     label: (
-      <Link className={""} to="/mbw_desk">
-          Tổng quan
-      </Link>
+      <a href="/mbw_desk" style={{textDecoration: "unset"}}>Tổng quan</a>
     ),
     icon: <BarChartOutlined style={{ fontSize: "22px" }} />,
     key: "dashboard",
@@ -24,9 +22,7 @@ export const listMenu: MenuItem[] = [
   //customer map
   {
     label: (
-      <Link className={""} to="/mbw_desk/customers-map">
-          Bản đồ khách hàng
-      </Link>
+      <a href="/mbw_desk/customers-map" style={{textDecoration: "unset"}}>Bản đồ khách hàng</a>
     ),
     icon: <AliyunOutlined style={{ fontSize: "22px" }}  />,
     key: "csmap",
@@ -34,26 +30,20 @@ export const listMenu: MenuItem[] = [
   //giam sat
   {
     label: (
-      <Link className={"text-[#212B36] hover:text-[#212B36]"} to="#">
-          Giám sát
-      </Link>
+      <a href="#" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Giám sát</a>
     ),
     icon: <FileSearchOutlined style={{ fontSize: "22px" }} />,
     key: "giamsat",
     children: [
       {
         label: (
-          <Link className={""} to="/mbw_desk/monitor-album">
-              Giám sát chụp ảnh khách hàng
-          </Link>
+          <a href="/mbw_desk/monitor-album" style={{textDecoration: "unset"}}>Giám sát chụp ảnh khách hàng</a>
         ),
         key: "giamsat-image",
       },
       {
         label: (
-          <Link className={""} to="/mbw_desk/employee-monitor">
-              Giám sát viếng thăm khách hàng
-          </Link>
+          <a href="/mbw_desk/employee-monitor" style={{textDecoration: "unset"}}>Giám sát viếng thăm khách hàng</a>
         ),
         key: "employee-monitor",
       },
@@ -70,9 +60,7 @@ export const listMenu: MenuItem[] = [
   //control router
   {
     label: (
-      <Link className={""} to="/mbw_desk/router-control">
-       Quản lý tuyến
-      </Link>
+      <a href="/mbw_desk/router-control" style={{textDecoration: "unset"}}>Quản lý tuyến</a>
     ),
     icon: <FileDoneOutlined style={{ fontSize: "22px" }} />,
     key: "control",
@@ -81,9 +69,7 @@ export const listMenu: MenuItem[] = [
   //cham diem trung bay
   {
     label: (
-      <Link className={"text-[#212B36] hover:text-[#212B36]"} to={"#"}>
-          Chấm điểm trưng bày
-      </Link>
+      <a href="#" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Chấm điểm trưng bày</a>
     ),
     icon: <FileImageOutlined style={{ fontSize: "22px" }} />,
     key: "checkinimage",
@@ -125,67 +111,50 @@ export const listMenu: MenuItem[] = [
   //report
   {
     label: (
-      <Link to={"#"} className={"text-[#212B36] hover:text-[#212B36]"}>
-          Báo cáo
-      </Link>
+      <a href="#" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo</a>
     ),
     icon: <ReconciliationOutlined style={{ fontSize: "22px" }} />,
     key: "report",
     children: [
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-customer">
-              Báo cáo tồn kho khách hàng
-          </Link>
+          <a href="/mbw_desk/report-customer" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo tồn kho khách hàng</a>
         ),
         key: "report-customer",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-kpi">
-              Báo cáo KPI
-          </Link>
+          <a href="/mbw_desk/report-kpi" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo KPI</a>
         ),
         key: "report_kpi",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-checkin">
-              Báo cáo viếng thăm
-          </Link>
+          <a href="/mbw_desk/report-checkin" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo viếng thăm</a>
         ),
         key: "report-checkin",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-sales">
-              Báo cáo tổng hợp bán hàng
-          </Link>
+          <a href="/mbw_desk/report-sales" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo tổng hợp bán hàng</a>
         ),
         key: "report-sales",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-saleorder">
-              Báo cáo tổng hợp đặt hàng
-          </Link>
+          <a href="/mbw_desk/report-saleorder" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo tổng hợp đặt hàng</a>
         ),
         key: "report-saleorder",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-custom-new">
-              Báo cáo khách hàng mới
-          </Link>
+          <a href="/mbw_desk/report-custom-new" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo khách hàng mới</a>
         ),
         key: "report-custom-new",
       },
       {
         label: (
-          <Link className={"text-[#212B36] hover:text-[#212B36]"} to="/mbw_desk/report-checkin-first">
-              Báo cáo thống kê khách hàng viếng thăm lần đầu
-            
-          </Link>
+          <a href="/mbw_desk/report-checkin-first" className={"text-[#212B36] hover:text-[#212B36]"} style={{textDecoration: "unset"}}>Báo cáo thống kê khách hàng viếng thăm lần đầu</a>
         ),
         key: "report-checkin-first",
       }

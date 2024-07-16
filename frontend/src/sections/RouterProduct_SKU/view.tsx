@@ -1364,7 +1364,6 @@ export default function Product_SKU() {
     newSelectedRowKeys: React.Key[],
     selectedRow: TypeProductFromERP[]
   ) => {
-    console.log(newSelectedRowKeys);
     setProductFromERPSelected(selectedRow);
   };
 

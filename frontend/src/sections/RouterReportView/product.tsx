@@ -148,7 +148,6 @@ export default function Product(props) {
           index_category: index
         }));
       });
-      console.log(newData);
       setExpandedRowData(newData);
     }
   }, [props.recordData]);

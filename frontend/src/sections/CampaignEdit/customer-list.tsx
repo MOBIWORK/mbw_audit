@@ -71,7 +71,6 @@ import paths from "../AppConst/path.js";
     }, [searchCustomer]);
   
     const initDataCustomer = async () => {
-      console.log(customerEdit);
       //setSelectedRowKeys(customerEdit);
       let urlCustomer = apiUrl + ".api.get_list_customers";
       let res = await AxiosService.get(urlCustomer);
